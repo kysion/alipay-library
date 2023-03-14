@@ -1,0 +1,100 @@
+server:
+  address: ":80"
+  serverRoot: "/resources"
+  dumpRouterMap: true
+  routeOverWrite: true
+  accessLogEnabled: false
+  SessionIdName: "KysionAlipayLibrarySessionId"
+  sessionPath: "temp/sessions/alipay-library_sessions"    # Session文件存储目录
+  openapiPath: "/openapi/alipay-library.json"
+  swaggerPath: "/docs/alipay-library"
+  # TLS/HTTPS配置，同时需要配置证书和密钥
+  httpsAddr: ":443"
+  # TLS/HTTPS证书文件路径
+  httpsCertPath: "/data/kysion_files/ssl/alipay.kuaimk.com/9427929_alipay.kuaimk.com.pem"
+  # TLS/HTTPS密钥文件路径
+  httpsKeyPath: "/data/kysion_files/ssl/alipay.kuaimk.com/9427929_alipay.kuaimk.com.key"
+
+service:
+  # 用户表ID生成器，分布式终端标识，取值范围 1 ~ 63，解决分布式多服务横向扩展时保证生成的ID不重复
+  idGeneratorWorkerId: 1
+  # 接口前缀
+  apiPrefix: "/kysion/alipay-library"
+  # Token Sign Key
+  tokenSignKey: "KysionAlipayLibraryProTokenSignKey"
+  # 用户默认类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营商；独立调用创建用户、查询用户信息等相关接口时强制过滤类型
+  # 新增用户默认类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营中心、-1超级管理员
+  # -1超级管理员，不支持注册为超级管理员
+  # 业务层有自定义类型时将忽略这里的设置
+  userDefaultType: 32
+  # 新增用户默认状态：0未激活，1正常，-1封号，-2异常，-3已注销
+  userDefaultState: 0
+  # 是否运行注册用户，false时用户注册接口将强制返回失败
+  userAllowRegister: true
+  # 不允许登录的用户类型，多个用半角逗号隔开，支持扩展自定义类型
+  notAllowLoginUserType: [ 0 ]
+  # 需要存储到数据库中的日志，支持：all,error,warn,info
+  logLevelToDatabase: [ "all" ]
+  # 业务审核服务时限，超过时限需要重新申请审核，相关业务有自定义设置时，将自动忽略这里的设置
+  auditExpireDay:
+    default: 15
+  # Session上下文缓存Key
+  sessionContextKey: "KysionAlipayLibraryBizCtxContextKye"
+  # 交易Hook失效时间 时间单位秒
+  tradeHookExpireAt: "7200"
+
+  # 阿里平台相关
+  RSA2: "RSA2"
+  # 私钥文件路径
+  priPath: "/data/kysion_files/alipay-keys-crt/private_key.txt"
+  # 公钥文件路径
+  publicCrtPath: "/data/kysion_files/alipay-keys-crt/public_key_RSA2048.txt"
+  # 应用证书公钥
+  appCertPublicKeyPath: "/data/kysion_files/alipay-keys-crt/appCertPublicKey_2021003179681073.crt"
+  # 阿里根证书公钥
+  alipayRootCertPath: "/data/kysion_files/alipay-keys-crt/alipayRootCert.crt"
+  # 阿里证书公钥
+  alipayCertPublicKeyPath: "/data/kysion_files/alipay-keys-crt/alipayCertPublicKey_RSA2.crt"
+  # 第三方应用APPID - 服务商
+  AppId: "2021003179681073"
+  # 商家应用ID - 小程序、公众号...
+  appCode: "P1369fcb6a2ed42e0914d3b767f7a895"
+  # AES接口内容加密方式
+  AES: "R66jdQUpRk8crazUH4GMMQ=="
+  # 回调地址
+  callbackUrl: "https://alipay.kuaimk.com/alipay/1975251903f95826/gateway.callback"
+  # 消息事件接收地址
+  returnUrl: "https://alipay.kuaimk.com/alipay/1975251903f95826/gateway.services"
+
+
+# 日志配置
+logger:
+  path: "temp/logs/default"
+  level: "all"
+  stdout: true
+  ctxKeys: [ "RequestId" ]
+
+# 文件上传设置
+upload:
+  # 用戶1分钟内限制上传最大文件数量
+  fileMaxUploadCountMinute: 10
+  # 文件上传的默认保存路径
+  path: "resources/upload"
+  temp: "temp/upload"
+
+# 数据库连接配置
+database:
+  logger:
+    path: "temp/logs/sql"
+    level: "all"
+    stdout: true
+    ctxKeys: ["RequestId"]
+
+  default:
+    link: "pgsql:user=dbUsername password=dbPassword host=127.0.0.1 port=5432 dbname=dbName sslmode=disable"
+    debug: true
+
+redis:
+  # 单实例配置示例1
+  default:
+    address: 127.0.0.1:6379
