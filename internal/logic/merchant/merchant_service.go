@@ -82,7 +82,7 @@ func (s *sMerchantService) TradeAppPay(ctx context.Context, info alipay_model.Tr
 }
 
 // TradeWapPay 手机网站支付
-func (s *sMerchantService) TradeWapPay(ctx context.Context, info alipay_model.TradeWapPay) {
+func (s *sMerchantService) TradeWapPay(ctx context.Context, info alipay_model.TradeOrder) {
 	//client, _ := NewClient(ctx)
 	//
 	//bm := make(gopay.BodyMap)
@@ -92,7 +92,7 @@ func (s *sMerchantService) TradeWapPay(ctx context.Context, info alipay_model.Tr
 	//bm.Set("total_amount", "100.00")
 	//bm.Set("product_code", "QUICK_WAP_WAY")
 	////手机网站支付请求
-	//payUrl, err := client.TradeWapPay(ctx, bm)
+	//payUrl, err := client.TradeOrder(ctx, bm)
 	//if err != nil {
 	//	xlog.Error("err:", err)
 	//	return

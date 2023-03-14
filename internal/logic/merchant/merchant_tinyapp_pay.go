@@ -1,4 +1,4 @@
-package tinyapp_pay
+package merchant
 
 import (
     "context"
@@ -50,7 +50,7 @@ func (s *sMerchantTinyappPay) TradeCreate(ctx context.Context, info *alipay_mode
         Set("total_amount", "0.01")
 
     // 创建订单
-    // alipay.trade.create(统一收单交易创建接口)
+    // alipay.alipay_trade.create(统一收单交易创建接口)
     client.TradeCreate(ctx, bm)
     if err != nil {
         if bizErr, ok := alipay.IsBizError(err); ok {
