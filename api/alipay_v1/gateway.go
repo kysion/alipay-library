@@ -16,8 +16,3 @@ type AliPayCallbackReq struct {
 //type AlipayAuthUserInfoReq struct {
 //	g.Meta `path:"/gateway.auth" method:"get" summary:"获取用户授权" tags:"阿里云"`
 //}
-
-// GetAlipayUserInfoReq 获取支付宝会员信息，相当于静默登录
-type GetAlipayUserInfoReq struct {
-	g.Meta `path:"/:appId/gateway.call" method:"get" summary:"获取支付宝会员信息" tags:"阿里云"`
-}

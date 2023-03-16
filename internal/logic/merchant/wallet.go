@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-pay/gopay"
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/os/gcache"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kuaimk/kmk-share-library/share_consts"
 	"github.com/kuaimk/kmk-share-library/share_model"
@@ -13,48 +13,55 @@ import (
 	"github.com/kuaimk/kmk-share-library/share_service"
 	"github.com/kysion/alipay-test/alipay_model"
 	dao "github.com/kysion/alipay-test/alipay_model/alipay_dao"
+	enum "github.com/kysion/alipay-test/alipay_model/alipay_enum"
 	service "github.com/kysion/alipay-test/alipay_service"
 	"github.com/kysion/alipay-test/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/yitter/idgenerator-go/idgen"
-	"time"
 )
 
 /*
-	商户相关API服务
+	获取支付宝会员信息等
 */
 
-type sMerchantService struct {
-	redisCache *gcache.Cache
-	Duration   time.Duration
+type sWallet struct {
 }
 
-func NewMerchantService() *sMerchantService {
-	return &sMerchantService{
-		redisCache: gcache.New(),
-	}
+func NewWallet() *sWallet {
+	// 初始化文件内容
+
+	result := &sWallet{}
+
+	result.injectHook()
+	return result
 }
 
-// UserInfoAuth 获取会员信息 （需要传递code，和appID）
-func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, appId string) (res *alipay_model.UserInfoShare, err error) {
-	client, err := aliyun.NewClient(ctx, appId)
+func (s *sWallet) injectHook() {
+	service.Gateway().InstallHook(enum.Info.Type.AlipayWallet, s.Wallet)
+}
 
-	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+// Wallet 具体服务
+func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
+	client, _ := aliyun.NewClient(ctx, "")
 
+	data := gopay.BodyMap{}
+	gconv.Struct(info, &data)
+
+	err := dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 根据AppId获取商家相关配置，包括AppAuthToken
-		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
+		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, gconv.String(info["app_id"]))
 		if err != nil || merchantApp == nil {
 			return err
 		}
 
-		client.SetAppAuthToken(merchantApp.AppAuthToken)
+		// data.Set("code", data.Get("auth_code"))                            // 用户授权code
+
+		// 这个token是动态的，哪个商家需要获取，appId和appAuthToken就传递对应的
+		client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
 
 		// 1.auth_code换Token
-		token, _ := client.SystemOauthToken(ctx, gopay.BodyMap{
-			"code":       authCode,
-			"grant_type": "authorization_code",
-		})
+		token, _ := client.SystemOauthToken(ctx, data)
 
 		fmt.Println("平台用户id：", token.Response.UserId)
 
@@ -65,8 +72,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 
 		userInfo := alipay_model.UserInfoShareResponse{}
 		gconv.Struct(aliRsp, &userInfo)
-
-		// 3.存储消费者数据并创建用户  kmk-consumer
 
 		// 根据sys_user_id查询商户信息
 		employee, err := share_consts.Global.Merchant.Employee().GetEmployeeById(ctx, merchantApp.SysUserId)
@@ -97,7 +102,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 			//}
 		}
 
-		// 4.存储阿里消费者记录 alipay-consumer-config
 		// 4.存储阿里消费者记录 alipay-consumer-config
 		alipayConsumer, err := service.Consumer().GetConsumerByUserId(ctx, userInfo.Response.UserId)
 
@@ -161,12 +165,13 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 			}
 
 		}
+
 		return nil
 	})
 
 	if err != nil {
-		return nil, err
+		return false
 	}
 
-	return res, err
+	return true
 }
