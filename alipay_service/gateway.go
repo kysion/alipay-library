@@ -15,8 +15,20 @@ import (
 )
 
 type (
+	IThirdAppConfig interface {
+		GetThirdAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayThirdAppConfig, error)
+		GetThirdAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayThirdAppConfig, error)
+		GetThirdAppConfigBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayThirdAppConfig, error)
+		CreateThirdAppConfig(ctx context.Context, info *alipay_model.AlipayThirdAppConfig) (*alipay_model.AlipayThirdAppConfig, error)
+		UpdateThirdAppConfig(ctx context.Context, info *alipay_model.UpdateThirdAppConfig) (bool, error)
+		UpdateState(ctx context.Context, id int64, state int) (bool, error)
+		UpdateAppAuthToken(ctx context.Context, info *alipay_model.UpdateThirdAppAuthToken) (bool, error)
+		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateThirdAppConfigHttpsReq) (bool, error)
+		UpdateThirdKeyCert(ctx context.Context, info *alipay_model.UpdateThirdKeyCertReq) (bool, error)
+	}
 	IConsumer interface {
 		GetConsumerById(ctx context.Context, id int64) (*alipay_model.AlipayConsumerConfig, error)
+		GetConsumerByUserId(ctx context.Context, userId string) (*alipay_model.AlipayConsumerConfig, error)
 		GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error)
 		CreateConsumer(ctx context.Context, info alipay_model.AlipayConsumerConfig) (*alipay_model.AlipayConsumerConfig, error)
 		UpdateConsumer(ctx context.Context, id int64, info alipay_model.UpdateConsumerReq) (bool, error)
@@ -39,24 +51,13 @@ type (
 		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateMerchantAppConfigHttpsReq) (bool, error)
 		UpdateMerchantKeyCert(ctx context.Context, info *alipay_model.UpdateMerchantKeyCertReq) (bool, error)
 	}
-	IThirdAppConfig interface {
-		GetThirdAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayThirdAppConfig, error)
-		GetThirdAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayThirdAppConfig, error)
-		GetThirdAppConfigBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayThirdAppConfig, error)
-		CreateThirdAppConfig(ctx context.Context, info *alipay_model.AlipayThirdAppConfig) (*alipay_model.AlipayThirdAppConfig, error)
-		UpdateThirdAppConfig(ctx context.Context, info *alipay_model.UpdateThirdAppConfig) (bool, error)
-		UpdateState(ctx context.Context, id int64, state int) (bool, error)
-		UpdateAppAuthToken(ctx context.Context, info *alipay_model.UpdateThirdAppAuthToken) (bool, error)
-		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateThirdAppConfigHttpsReq) (bool, error)
-		UpdateThirdKeyCert(ctx context.Context, info *alipay_model.UpdateThirdKeyCertReq) (bool, error)
-	}
 )
 
 var (
-	localConsumer          IConsumer
 	localGateway           IGateway
 	localMerchantAppConfig IMerchantAppConfig
 	localThirdAppConfig    IThirdAppConfig
+	localConsumer          IConsumer
 )
 
 func Consumer() IConsumer {

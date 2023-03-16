@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kuaimk/kmk-share-library/share_consts"
 	"github.com/kuaimk/kmk-share-library/share_model"
+	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
 	"github.com/kuaimk/kmk-share-library/share_service"
 	"github.com/kysion/alipay-test/alipay_model"
 	dao "github.com/kysion/alipay-test/alipay_model/alipay_dao"
@@ -98,7 +99,6 @@ func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) bool {
 				return err
 			}
 		} else if app == nil { // 如果没有的，添加一条第三方和用户关系记录???????????????
-			// 如果暂时
 			//config := alipay_model.AlipayMerchantAppConfig{}
 			//gconv.Struct(authInfos, &config)
 			//_, err := service.MerchantAppConfig().CreateMerchantAppConfig(ctx, &config)
@@ -142,6 +142,7 @@ func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) bool {
 				ThirdAppId:    gconv.String(data.Get("app_id")),
 				MerchantAppId: gconv.String(authInfos["auth_app_id"]),
 				UserId:        platformUserId,
+				Type:          share_enum.User.Type.Merchant.Code(), // 用户类型商户
 			}
 
 			if employee != nil {

@@ -2,7 +2,7 @@ package alipay_model
 
 type AlipayConsumerConfig struct {
 	Id                 int64  `json:"id"                 dc:"id"`
-	UserId             int64  `json:"userId"             dc:"用户账号id"`
+	UserId             string `json:"userId"             dc:"用户账号id"`
 	SysUserId          int64  `json:"sysUserId"          dc:"用户id"`
 	Avatar             string `json:"avatar"             dc:"头像"`
 	Province           string `json:"province"           dc:"省份"`

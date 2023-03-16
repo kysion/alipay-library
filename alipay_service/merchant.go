@@ -16,6 +16,9 @@ import (
 )
 
 type (
+	IWallet interface {
+		Wallet(ctx context.Context, info g.Map) bool
+	}
 	IAppAuth interface {
 		AppAuth(ctx context.Context, info g.Map) bool
 	}
@@ -29,27 +32,44 @@ type (
 		MerchantNotifyServices(ctx context.Context) (string, error)
 	}
 	IMerchantService interface {
-		UserInfoAuth(ctx context.Context) (string, error)
-		TradeAppPay(ctx context.Context, info alipay_model.TradeAppPay)
-		TradeWapPay(ctx context.Context, info alipay_model.TradeOrder)
+		UserInfoAuth(ctx context.Context, authCode string, appId string) (res *alipay_model.UserInfoShare, err error)
 	}
 	IMerchantTinyappPay interface {
 		OrderSend(ctx context.Context)
 		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
 	}
-	IWallet interface {
-		Wallet(ctx context.Context, info g.Map) bool
-	}
 )
 
 var (
+	localWallet             IWallet
+	localAppAuth            IAppAuth
 	localMerchantH5Pay      IMerchantH5Pay
 	localMerchantNotify     IMerchantNotify
 	localMerchantService    IMerchantService
 	localMerchantTinyappPay IMerchantTinyappPay
-	localWallet             IWallet
-	localAppAuth            IAppAuth
 )
+
+func MerchantH5Pay() IMerchantH5Pay {
+	if localMerchantH5Pay == nil {
+		panic("implement not found for interface IMerchantH5Pay, forgot register?")
+	}
+	return localMerchantH5Pay
+}
+
+func RegisterMerchantH5Pay(i IMerchantH5Pay) {
+	localMerchantH5Pay = i
+}
+
+func MerchantNotify() IMerchantNotify {
+	if localMerchantNotify == nil {
+		panic("implement not found for interface IMerchantNotify, forgot register?")
+	}
+	return localMerchantNotify
+}
+
+func RegisterMerchantNotify(i IMerchantNotify) {
+	localMerchantNotify = i
+}
 
 func MerchantService() IMerchantService {
 	if localMerchantService == nil {
@@ -93,26 +113,4 @@ func AppAuth() IAppAuth {
 
 func RegisterAppAuth(i IAppAuth) {
 	localAppAuth = i
-}
-
-func MerchantH5Pay() IMerchantH5Pay {
-	if localMerchantH5Pay == nil {
-		panic("implement not found for interface IMerchantH5Pay, forgot register?")
-	}
-	return localMerchantH5Pay
-}
-
-func RegisterMerchantH5Pay(i IMerchantH5Pay) {
-	localMerchantH5Pay = i
-}
-
-func MerchantNotify() IMerchantNotify {
-	if localMerchantNotify == nil {
-		panic("implement not found for interface IMerchantNotify, forgot register?")
-	}
-	return localMerchantNotify
-}
-
-func RegisterMerchantNotify(i IMerchantNotify) {
-	localMerchantNotify = i
 }

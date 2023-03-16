@@ -7,6 +7,7 @@ import (
 	"github.com/go-pay/gopay/pkg/util"
 	"github.com/go-pay/gopay/pkg/xlog"
 	"github.com/kysion/alipay-test/alipay_model"
+	service "github.com/kysion/alipay-test/alipay_service"
 	"github.com/kysion/alipay-test/internal/logic/internal/aliyun"
 )
 
@@ -25,6 +26,9 @@ import (
 type sMerchantTinyappPay struct {
 }
 
+func init() {
+	service.RegisterMerchantTinyappPay(NewMerchantTinyappPay())
+}
 func NewMerchantTinyappPay() *sMerchantTinyappPay {
 
 	result := &sMerchantTinyappPay{}

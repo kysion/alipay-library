@@ -110,9 +110,11 @@ func (s *sMerchantAppConfig) UpdateMerchantAppConfig(ctx context.Context, info *
 	}
 	data := do.AlipayMerchantAppConfig{}
 	gconv.Struct(info, &data)
-
+	if info.ExtJson == "" {
+		data.ExtJson = nil
+	}
 	model := dao.AlipayMerchantAppConfig.Ctx(ctx)
-	affected, err := daoctl.UpdateWithError(model.Data(model).OmitNilData().Where(do.AlipayMerchantAppConfig{Id: info.Id}))
+	affected, err := daoctl.UpdateWithError(model.Data(data).OmitNilData().Where(do.AlipayMerchantAppConfig{Id: info.Id}))
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "商家应用配置信息更新失败", dao.AlipayMerchantAppConfig.Table())
