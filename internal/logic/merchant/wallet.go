@@ -54,9 +54,9 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
 	// 1.auth_code换Token
 	token, _ := client.SystemOauthToken(ctx, data)
 
+	fmt.Println("平台用户id：", token.Response.UserId)
 	// token获取支付宝会员授权信息查询接口
 	aliRsp, _ := client.UserInfoShare(ctx, token.Response.AccessToken)
-
 	fmt.Println(token)
 	fmt.Println(aliRsp)
 

@@ -90,8 +90,8 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
         // 1. 将交易元数据存储起来 kmk_order
         info := share_model.UpdateOrderTradeInfo{
             Id:              gconv.Int64(bm["out_trade_no"]),
-            PlatformOrderId: gconv.Int64(bm["trade_no"]), //支付宝交易凭证号。支付宝交易凭证号。
-            ConsumerId:      order.ConsumerId,            // 买家支付宝账号对应的支付宝唯一用户号。 gconv.Int64(bm["buyer_id"])
+            PlatformOrderId: gconv.String(bm["trade_no"]), //支付宝交易凭证号。支付宝交易凭证号。
+            ConsumerId:      order.ConsumerId,             // 买家支付宝账号对应的支付宝唯一用户号。 gconv.Int64(bm["buyer_id"])
             TradeSource:     gconv.String(bmJson),
         }
         _, err = share_service.Order().UpdateOrderTradeSource(ctx, &info)
@@ -121,6 +121,10 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
             panic(err)
         }
         return nil
+
+        // 3. 添加账单account_bill  商家 消费者  业务层Hook
+
+        // 积分转移属于账单,,,
     })
 
     if err != nil {
