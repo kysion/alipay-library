@@ -80,8 +80,6 @@ func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
 	switch bm.Get("source") {
 	// 商家应用授权
 	case "alipay_app_auth": // 应用授权
-		data.Set("merchant_name", bm.Get("merchant_name"))
-
 		data.Set("code", bm.Get("app_auth_code")) // 商家授权code
 	case "alipay_wallet": // 获取用户信息
 		data.Set("code", bm.Get("auth_code")) // 用户授权code

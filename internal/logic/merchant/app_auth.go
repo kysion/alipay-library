@@ -57,6 +57,8 @@ func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) bool {
 	fmt.Println(aliRsp)
 
 	// 2.存起来
+	sysUserId := gconv.Int64(data.Get("sys_user_id")) // 授权码的附带数据sys_user_id
+
 	authInfos := g.Map{}
 
 	if len(aliRsp.Response.Tokens) != 0 {
@@ -110,7 +112,6 @@ func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) bool {
 		// 3.记录第三方应用和用户关系
 		platformUser, err := share_service.PlatformUser().GetPlatformUserByUserId(ctx, gconv.String(authInfos["user_id"]))
 
-		sysUserId := gconv.Int64(data.Get("sys_user_id")) // 授权码的附带数据sys_user_id
 		platformUserId := gconv.String(authInfos["user_id"])
 
 		if err == nil && platformUser != nil { // 说明存在
