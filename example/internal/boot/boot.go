@@ -57,25 +57,31 @@ var (
 				})
 
 				group.Bind(
-					alipay_controller.Gateway.AliPayServices,
-					alipay_controller.Gateway.AliPayCallback,
-					// 后端获取阿里用户信息
+					alipay_controller.Gateway.AliPayServices, // 消息接收
+					alipay_controller.Gateway.AliPayCallback, // 网关回调
+
+					// 异步通知
+					alipay_controller.MerchantNotify.NotifyServices,
+
+					// 商家授权 回调中接收
+					merchant_controller.MerchantService.AuthMerchantApp,
+
+					// 后端获取阿里用户信息 回调中接收
 					merchant_controller.MerchantService.GetAlipayUserInfo,
 
 					// 前端传递auth_code和appId获取用户信息
 					merchant_controller.MerchantService.GetUserInfoByAuthCode,
 
-					// 异步通知
-					alipay_controller.MerchantNotify.NotifyServices,
 				)
 
-				// 直接通过回调获取用户信息
-				//group.GET("/gateway.invite", func(r *ghttp.Request) {
-				//	// 将URL拼接上unionMainID，然后进行URL编码  写一个conterrller  不建议在回调地址上面加自定义参数，实在需要可以写在state字段里面
-				//	// alipays://platformapi/startapp?appId=2021003130652097&page=pages%2Fauthorize%2Findex%3FbizData%3D%7B%22platformCode%22%3A%22O%22%2C%22taskType%22%3A%22INTERFACE_AUTH%22%2C%22agentOpParam%22%3A%7B%22redirectUri%22%3A%22https%3A%2F%2Falipay.jditco.com%2Falipay%2Fgateway.callback%22%2C%22appTypes%22%3A%5B%22TINYAPP%22%2C%22WEBAPP%22%2C%22PUBLICAPP%22%2C%22MOBILEAPP%22%5D%2C%22isvAppId%22%3A%222021003179681073%22%7D%7D
-				//	r.Response.RedirectTo("alipays://platformapi/startapp?appId=2021003130652097&page=pages/authorize/index?bizData=%7B%22platformCode%22%3A%22O%22%2C%22taskType%22%3A%22INTERFACE_AUTH%22%2C%22agentOpParam%22%3A%7B%22redirectUri%22%3A%22https%3A%2F%2Falipay.jditco.com%2Falipay%2Fgateway.callback%3FunionMainId%3D123123123%22%2C%22appTypes%22%3A%5B%22TINYAPP%22%2C%22WEBAPP%22%2C%22PUBLICAPP%22%2C%22MOBILEAPP%22%5D%2C%22isvAppId%22%3A%222021003179681073%22%7D%7D")
-				//
-				//})
+				// 支付
+				group.Group("/pay", func(group *ghttp.RouterGroup) {
+					// h5支付
+					group.Bind(merchant_controller.MerchantH5Pay)
+					// 小程序支付
+					//group.Bind(merchant_controller.MerchantH5Pay)
+
+				})
 
 				// 阿里商户应用配置表
 				group.Group("/alipay_merchant", func(group *ghttp.RouterGroup) {

@@ -36,6 +36,42 @@ func NewMerchantService() *sMerchantService {
 	}
 }
 
+// GetUserId 用于检查是否注册,如果已经注册，返会userId
+func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId string) (res string, err error) {
+	client, err := aliyun.NewClient(ctx, appId)
+	userId := ""
+	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+
+		// 根据AppId获取商家相关配置，包括AppAuthToken
+		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
+		if err != nil || merchantApp == nil {
+			return err
+		}
+
+		client.SetAppAuthToken(merchantApp.AppAuthToken)
+
+		// 1.auth_code换Token
+		token, err := client.SystemOauthToken(ctx, gopay.BodyMap{
+			"code":       authCode,
+			"grant_type": "authorization_code",
+		})
+
+		if err != nil {
+			return err
+		}
+		fmt.Println("平台用户id：", token.Response.UserId)
+		userId = token.Response.UserId
+
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return userId, nil
+}
+
 // UserInfoAuth 获取会员信息 （需要传递code，和appID）
 func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, appId string) (res *alipay_model.UserInfoShare, err error) {
 	client, err := aliyun.NewClient(ctx, appId)
@@ -65,8 +101,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 
 		userInfo := alipay_model.UserInfoShareResponse{}
 		gconv.Struct(aliRsp, &userInfo)
-
-		// 3.存储消费者数据并创建用户  kmk-consumer
 
 		// 根据sys_user_id查询商户信息
 		employee, err := share_consts.Global.Merchant.Employee().GetEmployeeById(ctx, merchantApp.SysUserId)
@@ -98,7 +132,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 		}
 
 		// 4.存储阿里消费者记录 alipay-consumer-config
-		// 4.存储阿里消费者记录 alipay-consumer-config
 		alipayConsumer, err := service.Consumer().GetConsumerByUserId(ctx, userInfo.Response.UserId)
 
 		if err != nil && alipayConsumer == nil { // 消费者不存在，则创建
@@ -129,7 +162,7 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 			}
 		}
 
-		// 5.存储第三方应用和用户关系记录
+		// 5.存储第三方应用和用户关系记录 platformUser  （不同平台userId可能存在变化，例如微信） Where加上AppID
 		platUser, err := share_service.PlatformUser().GetPlatformUserByUserId(ctx, userInfo.Response.UserId)
 
 		if err != nil && platUser == nil { // 不存在创建
