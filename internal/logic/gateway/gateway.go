@@ -7,9 +7,9 @@ import (
 	"github.com/go-pay/gopay/alipay"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	enum "github.com/kysion/alipay-test/alipay_model/alipay_enum"
-	hook "github.com/kysion/alipay-test/alipay_model/alipay_hook"
-	"github.com/kysion/alipay-test/internal/logic/internal/aliyun"
+	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
+	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
+	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 )
 

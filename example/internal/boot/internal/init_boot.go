@@ -4,10 +4,10 @@ import (
     "context"
     "fmt"
     "github.com/gogf/gf/v2/frame/g"
-    "github.com/kysion/alipay-test/alipay_consts"
-    "github.com/kysion/alipay-test/alipay_model"
-    "github.com/kysion/alipay-test/alipay_service"
-    "github.com/kysion/alipay-test/utility/file"
+    "github.com/kysion/alipay-library/alipay_consts"
+    "github.com/kysion/alipay-library/alipay_model"
+    "github.com/kysion/alipay-library/alipay_service"
+    "github.com/kysion/alipay-library/utility/file"
 )
 
 func init() {

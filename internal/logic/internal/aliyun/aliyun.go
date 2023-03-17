@@ -5,7 +5,7 @@ import (
     "github.com/go-pay/gopay"
     "github.com/go-pay/gopay/alipay"
     "github.com/go-pay/gopay/pkg/xlog"
-    "github.com/kysion/alipay-test/alipay_service"
+    "github.com/kysion/alipay-library/alipay_service"
 )
 
 /*

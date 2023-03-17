@@ -3,8 +3,8 @@ package alipay_controller
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/kysion/alipay-test/alipay_service"
-	v1 "github.com/kysion/alipay-test/api/alipay_v1"
+	"github.com/kysion/alipay-library/alipay_service"
+	v1 "github.com/kysion/alipay-library/api/alipay_v1"
 )
 
 // Gateway 网关

@@ -4,8 +4,8 @@ import (
     "context"
     "github.com/SupenBysz/gf-admin-community/api_v1"
     "github.com/SupenBysz/gf-admin-community/utility/funs"
-    "github.com/kysion/alipay-test/alipay_service"
-    alipay_merchant_v1 "github.com/kysion/alipay-test/api/alipay_v1/alipay_merchant_v1"
+    "github.com/kysion/alipay-library/alipay_service"
+    alipay_merchant_v1 "github.com/kysion/alipay-library/api/alipay_v1/alipay_merchant_v1"
 )
 
 var AlipayMerchantAppConfig = cAlipayMerchantAppConfig{}

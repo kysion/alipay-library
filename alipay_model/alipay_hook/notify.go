@@ -4,7 +4,7 @@ import (
     "context"
     "github.com/gogf/gf/v2/container/gmap"
     "github.com/gogf/gf/v2/os/gtime"
-    "github.com/kysion/alipay-test/alipay_model/alipay_enum"
+    "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 )
 
 // 异步通知Hook

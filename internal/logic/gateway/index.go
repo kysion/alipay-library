@@ -1,6 +1,6 @@
 package gateway
 
-import "github.com/kysion/alipay-test/alipay_service"
+import "github.com/kysion/alipay-library/alipay_service"
 
 func init() {
     alipay_service.RegisterGateway(NewGateway())
