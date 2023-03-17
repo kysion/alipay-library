@@ -2,7 +2,7 @@ package alipay_merchant_v1
 
 import (
     "github.com/gogf/gf/v2/frame/g"
-    "github.com/kysion/alipay-test/alipay_model"
+    "github.com/kysion/alipay-library/alipay_model"
 )
 
 type UpdateStateReq struct {

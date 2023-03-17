@@ -11,8 +11,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
 	"github.com/kuaimk/kmk-share-library/share_model/share_hook"
-	"github.com/kysion/alipay-test/alipay_model"
-	hook "github.com/kysion/alipay-test/alipay_model/alipay_hook"
+    "github.com/kysion/alipay-library/alipay_model"
+    hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 )
 
 type (

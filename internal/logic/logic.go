@@ -5,6 +5,6 @@
 package logic
 
 import (
-	_ "github.com/kysion/alipay-test/internal/logic/gateway"
-	_ "github.com/kysion/alipay-test/internal/logic/merchant"
+    _ "github.com/kysion/alipay-library/internal/logic/gateway"
+    _ "github.com/kysion/alipay-library/internal/logic/merchant"
 )

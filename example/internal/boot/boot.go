@@ -7,9 +7,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
-	"github.com/kysion/alipay-test/alipay_controller"
-	merchant_controller "github.com/kysion/alipay-test/alipay_controller/merchant"
-	_ "github.com/kysion/alipay-test/example/internal/boot/internal"
+	"github.com/kysion/alipay-library/alipay_controller"
+	merchant_controller "github.com/kysion/alipay-library/alipay_controller/merchant"
+	_ "github.com/kysion/alipay-library/example/internal/boot/internal"
 )
 
 // 需要让所有的配置从数据库加载
@@ -71,7 +71,6 @@ var (
 
 					// 前端传递auth_code和appId获取用户信息
 					merchant_controller.MerchantService.GetUserInfoByAuthCode,
-
 				)
 
 				// 支付

@@ -6,9 +6,9 @@ import (
 	"github.com/go-pay/gopay/alipay"
 	"github.com/go-pay/gopay/pkg/util"
 	"github.com/go-pay/gopay/pkg/xlog"
-	"github.com/kysion/alipay-test/alipay_model"
-	service "github.com/kysion/alipay-test/alipay_service"
-	"github.com/kysion/alipay-test/internal/logic/internal/aliyun"
+    "github.com/kysion/alipay-library/alipay_model"
+    service "github.com/kysion/alipay-library/alipay_service"
+    "github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 )
 
 /*

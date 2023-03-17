@@ -1,7 +1,7 @@
 package merchant
 
 import (
-	service "github.com/kysion/alipay-test/alipay_service"
+    service "github.com/kysion/alipay-library/alipay_service"
 )
 
 func init() {

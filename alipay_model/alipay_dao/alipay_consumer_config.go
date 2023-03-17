@@ -5,7 +5,7 @@
 package share_dao
 
 import (
-	"github.com/kysion/alipay-test/alipay_model/alipay_dao/internal"
+    "github.com/kysion/alipay-library/alipay_model/alipay_dao/internal"
 	"github.com/kysion/base-library/utility/daoctl/dao_interface"
 )
 

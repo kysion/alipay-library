@@ -1,4 +1,4 @@
-module github.com/kysion/alipay-test
+module github.com/kysion/alipay-library
 
 go 1.19
 
@@ -61,6 +61,6 @@ require (
 //
 //)
 
-replace github.com/kysion/pay-share-library => ../pay-share-library
+//replace github.com/kysion/pay-share-library => ../pay-share-library
 
 // replace github.com/kysion/kmk-share-library => ../../kuaimk/kmk-share-library

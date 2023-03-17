@@ -8,9 +8,9 @@ package alipay_service
 import (
 	"context"
 
-	"github.com/kysion/alipay-test/alipay_model"
-	enum "github.com/kysion/alipay-test/alipay_model/alipay_enum"
-	hook "github.com/kysion/alipay-test/alipay_model/alipay_hook"
+    "github.com/kysion/alipay-library/alipay_model"
+    enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
+    hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	"github.com/kysion/base-library/base_hook"
 )
 

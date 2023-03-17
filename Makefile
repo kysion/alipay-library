@@ -1,5 +1,5 @@
 ROOT_DIR    = $(shell pwd)
-NAMESPACE   = "github.com/kysion/alipay-test"
+NAMESPACE   = "github.com/kysion/alipay-library"
 
 # Install/Update to the latest CLI tool.
 .PHONY: cli

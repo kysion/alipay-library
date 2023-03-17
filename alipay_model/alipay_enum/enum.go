@@ -1,10 +1,10 @@
 package alipay_enum
 
 import (
-    "github.com/kysion/alipay-test/alipay_model/alipay_enum/internal/alipay_trade"
-    "github.com/kysion/alipay-test/alipay_model/alipay_enum/internal/consumer"
-    "github.com/kysion/alipay-test/alipay_model/alipay_enum/internal/info_type"
-    "github.com/kysion/alipay-test/alipay_model/alipay_enum/internal/notify"
+    "github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/alipay_trade"
+    "github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/consumer"
+    "github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/info_type"
+    "github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/notify"
 )
 
 type (

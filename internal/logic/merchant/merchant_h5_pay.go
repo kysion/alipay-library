@@ -12,11 +12,11 @@ import (
 	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
 	"github.com/kuaimk/kmk-share-library/share_model/share_hook"
 	"github.com/kuaimk/kmk-share-library/share_service"
-	"github.com/kysion/alipay-test/alipay_model"
-	enum "github.com/kysion/alipay-test/alipay_model/alipay_enum"
-	hook "github.com/kysion/alipay-test/alipay_model/alipay_hook"
-	service "github.com/kysion/alipay-test/alipay_service"
-	"github.com/kysion/alipay-test/internal/logic/internal/aliyun"
+    "github.com/kysion/alipay-library/alipay_model"
+    enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
+    hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
+    service "github.com/kysion/alipay-library/alipay_service"
+    "github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 )
 
