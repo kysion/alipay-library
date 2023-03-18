@@ -35,11 +35,12 @@ type sMerchantNotify struct {
 func init() {
 	service.RegisterMerchantNotify(NewMerchantNotify())
 }
+
 func NewMerchantNotify() *sMerchantNotify {
 	return &sMerchantNotify{}
 }
 
-func (s *sMerchantNotify) InstallHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc) {
+func (s *sMerchantNotify) InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc) {
 	hookKey.HookCreatedAt = *gtime.Now()
 
 	secondAt := gtime.New(alipay_consts.Global.TradeHookExpireAt * gconv.Int64(time.Second))
@@ -48,6 +49,12 @@ func (s *sMerchantNotify) InstallHook(hookKey hook.NotifyKey, hookFunc hook.Noti
 }
 
 func (s *sMerchantNotify) InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc) {
+	hookKey.HookCreatedAt = *gtime.Now()
+
+	secondAt := gtime.New(alipay_consts.Global.TradeHookExpireAt * gconv.Int64(time.Second))
+
+	hookKey.HookExpireAt = *gtime.New(hookKey.HookCreatedAt.Second() + secondAt.Second())
+
 	s.TradeHook.InstallHook(hookKey, hookFunc)
 }
 
