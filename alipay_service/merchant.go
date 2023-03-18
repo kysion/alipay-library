@@ -16,17 +16,6 @@ import (
 )
 
 type (
-	IMerchantService interface {
-		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
-		UserInfoAuth(ctx context.Context, authCode string, appId string, sysUserId int64) (res *alipay_model.UserInfoShare, err error)
-	}
-	IMerchantTinyappPay interface {
-		OrderSend(ctx context.Context)
-		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
-	}
-	IWallet interface {
-		Wallet(ctx context.Context, info g.Map) bool
-	}
 	IAppAuth interface {
 		AppAuth(ctx context.Context, info g.Map) bool
 	}
@@ -40,27 +29,27 @@ type (
 		InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc)
 		MerchantNotifyServices(ctx context.Context) (string, error)
 	}
+	IMerchantService interface {
+		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
+		UserInfoAuth(ctx context.Context, authCode string, appId string, sysUserId ...int64) (res *alipay_model.UserInfoShare, err error)
+	}
+	IMerchantTinyappPay interface {
+		OrderSend(ctx context.Context)
+		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
+	}
+	IWallet interface {
+		Wallet(ctx context.Context, info g.Map) bool
+	}
 )
 
 var (
-	localMerchantH5Pay      IMerchantH5Pay
-	localMerchantNotify     IMerchantNotify
-	localMerchantService    IMerchantService
 	localMerchantTinyappPay IMerchantTinyappPay
 	localWallet             IWallet
 	localAppAuth            IAppAuth
+	localMerchantH5Pay      IMerchantH5Pay
+	localMerchantNotify     IMerchantNotify
+	localMerchantService    IMerchantService
 )
-
-func Wallet() IWallet {
-	if localWallet == nil {
-		panic("implement not found for interface IWallet, forgot register?")
-	}
-	return localWallet
-}
-
-func RegisterWallet(i IWallet) {
-	localWallet = i
-}
 
 func AppAuth() IAppAuth {
 	if localAppAuth == nil {
@@ -115,4 +104,15 @@ func MerchantTinyappPay() IMerchantTinyappPay {
 
 func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
 	localMerchantTinyappPay = i
+}
+
+func Wallet() IWallet {
+	if localWallet == nil {
+		panic("implement not found for interface IWallet, forgot register?")
+	}
+	return localWallet
+}
+
+func RegisterWallet(i IWallet) {
+	localWallet = i
 }
