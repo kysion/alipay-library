@@ -70,7 +70,7 @@ var (
 					merchant_controller.MerchantService.GetAlipayUserInfo,
 
 					// 前端传递auth_code和appId获取用户信息
-					merchant_controller.MerchantService.GetUserInfoByAuthCode,
+					//merchant_controller.MerchantService.GetUserInfoByAuthCode,
 				)
 
 				// 支付

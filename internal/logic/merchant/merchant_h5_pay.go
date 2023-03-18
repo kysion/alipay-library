@@ -130,7 +130,7 @@ func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.T
 	// 如果设置了异步通知地址
 	if len(notifyFunc) > 0 {
 		// 将异步通知中的APPId拿出来，
-		service.MerchantNotify().InstallHook(hook.NotifyKey{
+		service.MerchantNotify().InstallNotifyHook(hook.NotifyKey{
 			NotifyType: enum.Notify.NotifyType.PayCallBack,
 			OrderId:    gconv.String(orderId),
 		}, notifyFunc[0])
