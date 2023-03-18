@@ -53,14 +53,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/kysion/base-library v0.0.5 => ../base-library
-//
-//replace (
-//	github.com/SupenBysz/gf-admin-community => ../../kysion/gf-admin-community
-//	github.com/kuaimk/kmk-share-library => ../../kuaimk/kmk-share-library
-//
-//)
-
 //replace github.com/kysion/pay-share-library => ../pay-share-library
-
-// replace github.com/kysion/kmk-share-library => ../../kuaimk/kmk-share-library
