@@ -7,9 +7,9 @@ require (
 	github.com/SupenBysz/gf-admin-company-modules v0.3.4
 	github.com/go-pay/gopay v1.5.91
 	github.com/gogf/gf/v2 v2.3.2
-	github.com/kuaimk/kmk-share-library v0.0.25
+	github.com/kuaimk/kmk-share-library v0.0.26
 	github.com/kysion/base-library v0.0.7
-	github.com/kysion/pay-share-library v0.0.1
+	github.com/kysion/pay-share-library v0.0.2
 	github.com/yitter/idgenerator-go v1.3.2
 )
 

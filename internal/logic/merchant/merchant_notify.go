@@ -10,9 +10,6 @@ import (
     "github.com/gogf/gf/v2/os/gtime"
     "github.com/gogf/gf/v2/os/gtimer"
     "github.com/gogf/gf/v2/util/gconv"
-    "github.com/kuaimk/kmk-share-library/share_model"
-    "github.com/kuaimk/kmk-share-library/share_model/share_enum"
-    "github.com/kuaimk/kmk-share-library/share_service"
     "github.com/kysion/alipay-library/alipay_consts"
     dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
     enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
@@ -20,6 +17,9 @@ import (
     service "github.com/kysion/alipay-library/alipay_service"
     "github.com/kysion/base-library/base_hook"
     "github.com/kysion/base-library/utility/kconv"
+    "github.com/kysion/pay-share-library/pay_model"
+    "github.com/kysion/pay-share-library/pay_model/pay_enum"
+    "github.com/kysion/pay-share-library/pay_service"
     "time"
 )
 
@@ -28,7 +28,8 @@ import (
 */
 
 type sMerchantNotify struct {
-    base_hook.BaseHook[hook.NotifyKey, hook.NotifyHookFunc]
+    NotifyHook base_hook.BaseHook[hook.NotifyKey, hook.NotifyHookFunc]
+    TradeHook  base_hook.BaseHook[hook.TradeHookKey, hook.TradeHookFunc]
 }
 
 func init() {
@@ -43,7 +44,7 @@ func (s *sMerchantNotify) InstallHook(hookKey hook.NotifyKey, hookFunc hook.Noti
 
     secondAt := gtime.New(alipay_consts.Global.TradeHookExpireAt * gconv.Int64(time.Second))
     hookKey.HookExpireAt = *gtime.New(hookKey.HookCreatedAt.Second() + secondAt.Second())
-    s.BaseHook.InstallHook(hookKey, hookFunc)
+    s.NotifyHook.InstallHook(hookKey, hookFunc)
 }
 
 // MerchantNotifyServices 异步通知地址  用于接收支付宝推送给商户的支付/退款成功的消息。
@@ -70,7 +71,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
             }
         }
 
-        s.Iterator(func(key hook.NotifyKey, value hook.NotifyHookFunc) {
+        s.NotifyHook.Iterator(func(key hook.NotifyKey, value hook.NotifyHookFunc) {
             isClean := false
             if key.NotifyType == notifyKey.NotifyType && key.OrderId == notifyKey.OrderId {
                 g.Try(ctx, func(ctx context.Context) {
@@ -78,7 +79,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
                 })
             }
 
-            s.BaseHook.UnInstallHook(key, func(filter hook.NotifyKey, conditionKey hook.NotifyKey) bool {
+            s.NotifyHook.UnInstallHook(key, func(filter hook.NotifyKey, conditionKey hook.NotifyKey) bool {
                 if key.HookExpireAt.Before(gtime.Now()) {
                     return filter == conditionKey
                 }
@@ -87,36 +88,43 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
         })
 
         // 根据订单id找出订单
-        order, err := share_service.Order().GetOrderById(ctx, gconv.Int64(bm["out_trade_no"]))
+        order, err := pay_service.Order().GetOrderById(ctx, gconv.Int64(bm["out_trade_no"]))
 
         bmJson, _ := gjson.Encode(bm)
 
         // 1. 将交易元数据存储起来 kmk_order
-        info := share_model.UpdateOrderTradeInfo{
+        info := pay_model.UpdateOrderTradeInfo{
             Id:              gconv.Int64(bm["out_trade_no"]),
             PlatformOrderId: gconv.String(bm["trade_no"]), //支付宝交易凭证号。支付宝交易凭证号。
             ConsumerId:      order.ConsumerId,             // 买家支付宝账号对应的支付宝唯一用户号。 gconv.Int64(bm["buyer_id"])
             TradeSource:     gconv.String(bmJson),
         }
-        _, err = share_service.Order().UpdateOrderTradeSource(ctx, &info)
+        _, err = pay_service.Order().UpdateOrderTradeSource(ctx, &info)
         if err != nil {
             return err
         }
+
+        orderInfo, err := pay_service.Order().GetOrderById(ctx, gconv.Int64(bm["out_trade_no"]))
 
         // 2.添加定时任务
         gtimer.SetTimeout(ctx, time.Minute*30, func(ctx context.Context) {
             //  判断交易状态，然后修改对应的状态
             var orderState int
             switch bm["trade_status"] {
-            case enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code():
-                orderState = share_enum.Order.StateType.HavePaid.Code() // 成功 --> 订单状态为已支付
-            case bm["trade_status"] == enum.AlipayTrade.TradeStatus.TRADE_CLOSED.Code():
-                orderState = share_enum.Order.StateType.PaymentTimeOut.Code() // 交易超时 --> 订单状态为交易超时
+            case pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code():
+                // 成功 --> 订单状态为已支付
+                orderState = pay_enum.Order.StateType.HavePaid.Code()
 
-            case bm["trade_status"] == enum.AlipayTrade.TradeStatus.TRADE_FINISHED.Code():
-                orderState = share_enum.Order.StateType.DealClose.Code() // 交易结束，不可退款 --> 订单状态为已完成
+            case bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_CLOSED.Code():
+                // 交易超时 --> 订单状态为交易超时
+                orderState = pay_enum.Order.StateType.PaymentTimeOut.Code()
+
+            case bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_FINISHED.Code():
+                // 交易结束，不可退款 --> 订单状态为已完成
+                orderState = pay_enum.Order.StateType.DealClose.Code()
             }
-            _, err := share_service.Order().UpdateOrderState(ctx, gconv.Int64(bm["out_trade_no"]), orderState)
+
+            _, err := pay_service.Order().UpdateOrderState(ctx, gconv.Int64(bm["out_trade_no"]), orderState)
             if err != nil {
                 return
             }
@@ -124,10 +132,21 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
         if err != nil {
             panic(err)
         }
+
+        // 3. 添加账单account_bill  商家 消费者的账单  业务层Hook
+        if bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code() {
+            // Trade发布者
+            s.TradeHook.Iterator(func(key hook.TradeHookKey, value hook.TradeHookFunc) {
+                if key.AlipayTradeStatus.Code() == pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code() {
+                    su := value(ctx, orderInfo)
+                    if su == false {
+                        return
+                    }
+                }
+            })
+        }
+
         return nil
-
-        // 3. 添加账单account_bill  商家 消费者  业务层Hook
-
         // 积分转移属于账单,,,
     })
 
