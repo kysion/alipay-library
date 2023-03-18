@@ -11,20 +11,11 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
 	"github.com/kuaimk/kmk-share-library/share_model/share_hook"
-    "github.com/kysion/alipay-library/alipay_model"
-    hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
+	"github.com/kysion/alipay-library/alipay_model"
+	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 )
 
 type (
-	IMerchantH5Pay interface {
-		InstallHook(actionType share_enum.OrderStateType, hookFunc share_hook.OrderHookFunc)
-		H5TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, notifyFunc ...hook.NotifyHookFunc)
-		QueryOrderInfo(ctx context.Context, outTradeNo string, merchantAppId string, thirdAppId string, appAuthToken string)
-	}
-	IMerchantNotify interface {
-		InstallHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc)
-		MerchantNotifyServices(ctx context.Context) (string, error)
-	}
 	IMerchantService interface {
 		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
 		UserInfoAuth(ctx context.Context, authCode string, appId string) (res *alipay_model.UserInfoShare, err error)
@@ -39,15 +30,25 @@ type (
 	IAppAuth interface {
 		AppAuth(ctx context.Context, info g.Map) bool
 	}
+	IMerchantH5Pay interface {
+		InstallHook(actionType share_enum.OrderStateType, hookFunc share_hook.OrderHookFunc)
+		H5TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, notifyFunc ...hook.NotifyHookFunc)
+		QueryOrderInfo(ctx context.Context, outTradeNo string, merchantAppId string, thirdAppId string, appAuthToken string)
+	}
+	IMerchantNotify interface {
+		InstallHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc)
+		InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc)
+		MerchantNotifyServices(ctx context.Context) (string, error)
+	}
 )
 
 var (
+	localWallet             IWallet
 	localAppAuth            IAppAuth
 	localMerchantH5Pay      IMerchantH5Pay
 	localMerchantNotify     IMerchantNotify
 	localMerchantService    IMerchantService
 	localMerchantTinyappPay IMerchantTinyappPay
-	localWallet             IWallet
 )
 
 func MerchantNotify() IMerchantNotify {
