@@ -9,7 +9,7 @@ require (
 	github.com/gogf/gf/v2 v2.3.2
 	github.com/kuaimk/kmk-share-library v0.0.26
 	github.com/kysion/base-library v0.0.7
-	github.com/kysion/pay-share-library v0.0.1
+	github.com/kysion/pay-share-library v0.0.2
 	github.com/yitter/idgenerator-go v1.3.2
 )
 
