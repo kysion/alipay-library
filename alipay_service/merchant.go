@@ -9,10 +9,10 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
-	"github.com/kuaimk/kmk-share-library/share_model/share_hook"
 	"github.com/kysion/alipay-library/alipay_model"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
+	"github.com/kysion/pay-share-library/pay_model/pay_enum"
+	"github.com/kysion/pay-share-library/pay_model/pay_hook"
 )
 
 type (
@@ -20,7 +20,7 @@ type (
 		AppAuth(ctx context.Context, info g.Map) bool
 	}
 	IMerchantH5Pay interface {
-		InstallHook(actionType share_enum.OrderStateType, hookFunc share_hook.OrderHookFunc)
+		InstallHook(actionType pay_enum.OrderStateType, hookFunc pay_hook.OrderHookFunc)
 		H5TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, notifyFunc ...hook.NotifyHookFunc)
 		QueryOrderInfo(ctx context.Context, outTradeNo string, merchantAppId string, thirdAppId string, appAuthToken string)
 	}
@@ -43,12 +43,12 @@ type (
 )
 
 var (
-	localMerchantTinyappPay IMerchantTinyappPay
 	localWallet             IWallet
 	localAppAuth            IAppAuth
 	localMerchantH5Pay      IMerchantH5Pay
 	localMerchantNotify     IMerchantNotify
 	localMerchantService    IMerchantService
+	localMerchantTinyappPay IMerchantTinyappPay
 )
 
 func AppAuth() IAppAuth {

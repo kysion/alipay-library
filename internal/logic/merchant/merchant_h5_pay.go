@@ -8,20 +8,21 @@ import (
 	"github.com/go-pay/gopay/pkg/xlog"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/kuaimk/kmk-share-library/share_model"
-	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
-	"github.com/kuaimk/kmk-share-library/share_model/share_hook"
-	"github.com/kuaimk/kmk-share-library/share_service"
+
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/pay-share-library/pay_model"
+	"github.com/kysion/pay-share-library/pay_model/pay_enum"
+	"github.com/kysion/pay-share-library/pay_model/pay_hook"
+	"github.com/kysion/pay-share-library/pay_service"
 )
 
 type sMerchantH5Pay struct {
-	base_hook.BaseHook[share_enum.OrderStateType, share_hook.OrderHookFunc]
+	base_hook.BaseHook[pay_enum.OrderStateType, pay_hook.OrderHookFunc]
 }
 
 func init() {
@@ -36,7 +37,7 @@ func NewMerchantH5Pay() *sMerchantH5Pay {
 }
 
 // InstallHook 安装Hook的时候，如果状态类型为退款中，需要做响应的退款操作，谨防多模块订阅退款状态，产生重复退款
-func (s *sMerchantH5Pay) InstallHook(actionType share_enum.OrderStateType, hookFunc share_hook.OrderHookFunc) {
+func (s *sMerchantH5Pay) InstallHook(actionType pay_enum.OrderStateType, hookFunc pay_hook.OrderHookFunc) {
 	s.BaseHook.InstallHook(actionType, hookFunc)
 }
 
@@ -72,24 +73,25 @@ func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.T
 
 	// 查询消费者财务账号
 
-	order := share_model.Order{
-		ConsumerId:      user.Id,                                        // 消费者ID
-		InOutType:       info.InOutType,                                 // 支出
-		TradeSourceType: share_enum.Order.TradeSourceType.Alipay.Code(), // 交易源类型
-		Amount:          amount,                                         // 实际成交的交易金额，分为单位 1*100 = 100分 0.01*100 = 1分
-		CouponAmount:    0,                                              // 优惠金额
-		CouponConfig:    "",                                             // 优惠减免金额
-		OrderAmount:     info.Order.OrderAmount,                         // 订单金额
-		BeforeBalance:   0,                                              // 交易前的余额
-		AfterBalance:    0,                                              // 交易后的金额
-		ProductName:     info.ProductName,                               // 产品名称
-		TradeScene:      info.TradeScene,                                // 交易场景
-		ProductNumber:   info.ProductNumber,                             // 产品编号
-		UnionMainId:     user.UnionMainId,                               // 关联主体
+	order := pay_model.Order{
+		Id:              info.Id,                                      // 订单id需要保持一致，因为这是Hook的关联字段
+		ConsumerId:      user.Id,                                      // 消费者ID
+		InOutType:       info.InOutType,                               // 支出
+		TradeSourceType: pay_enum.Order.TradeSourceType.Alipay.Code(), // 交易源类型
+		Amount:          amount,                                       // 实际成交的交易金额，分为单位 1*100 = 100分 0.01*100 = 1分
+		CouponAmount:    0,                                            // 优惠金额
+		CouponConfig:    "",                                           // 优惠减免金额
+		OrderAmount:     info.Order.OrderAmount,                       // 订单金额
+		BeforeBalance:   0,                                            // 交易前的余额
+		AfterBalance:    0,                                            // 交易后的金额
+		ProductName:     info.ProductName,                             // 产品名称
+		TradeScene:      info.TradeScene,                              // 交易场景
+		ProductNumber:   info.ProductNumber,                           // 产品编号
+		UnionMainId:     user.UnionMainId,                             // 关联主体
 	}
 
 	// 支付前创建交易订单，支付后修改交易订单元数据
-	orderInfo, err := share_service.Order().CreateOrder(ctx, &order)
+	orderInfo, err := pay_service.Order().CreateOrder(ctx, &order)
 	if err != nil || orderInfo == nil {
 		return
 	}
