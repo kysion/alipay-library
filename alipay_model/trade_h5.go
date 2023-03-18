@@ -1,6 +1,6 @@
 package alipay_model
 
-import "github.com/kuaimk/kmk-share-library/share_model"
+import "github.com/kysion/pay-share-library/pay_model"
 
 // 订单相关  -- 但是我们自己有创建我们的订单表  kmk_order
 
@@ -16,7 +16,7 @@ type TradeOrder struct {
 	// OutTradeNo  string  `json:"outTradeNo" dc:"商户网站唯一订单号"`
 
 	// 订单数据
-	share_model.Order
+	pay_model.Order
 }
 
 // NotifyRequest 异步通知返回参数
