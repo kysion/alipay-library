@@ -1,9 +1,11 @@
 package consumer
 
 type consumer struct {
-	SexEnum sex
+	SexEnum    sex
+	ActionEnum action
 }
 
 var Consumer = consumer{
-	SexEnum: SexType,
+	SexEnum:    SexType,
+	ActionEnum: ActionType,
 }
