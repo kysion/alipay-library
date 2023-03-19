@@ -1,19 +1,20 @@
 package alipay_enum
 
 import (
-    "github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/consumer"
-    "github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/info_type"
-    "github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/notify"
+	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/consumer"
+	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/info_type"
+	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/notify"
 )
 
 type (
-    SexType    consumer.SexEnum
-    InfoType   info_type.InfoTypeEnum
-    NotifyType notify.NotifyTypeEnum
+	SexType        consumer.SexEnum
+	InfoType       info_type.InfoTypeEnum
+	NotifyType     notify.NotifyTypeEnum
+	ConsumerAction consumer.ActionEnum
 )
 
 var (
-    Consumer = consumer.Consumer
-    Info     = info_type.Info
-    Notify   = notify.Notify
+	Consumer = consumer.Consumer
+	Info     = info_type.Info
+	Notify   = notify.Notify
 )
