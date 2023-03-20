@@ -84,18 +84,24 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 
 		s.NotifyHook.Iterator(func(key hook.NotifyKey, value hook.NotifyHookFunc) {
 			isClean := false
-			if key.NotifyType == notifyKey.NotifyType && key.OrderId == notifyKey.OrderId {
-				g.Try(ctx, func(ctx context.Context) {
+			if key.NotifyType == notifyKey.NotifyType {
+				if key.OrderId != "" && key.OrderId != notifyKey.OrderId { // 指定id订阅的情况
+					return
+				}
+
+				g.Try(ctx, func(ctx context.Context) { // 满足条件，Hook调用
 					isClean = value(ctx, kconv.Struct(bm, gmap.Map{}), key)
 				})
 			}
 
-			s.NotifyHook.UnInstallHook(key, func(filter hook.NotifyKey, conditionKey hook.NotifyKey) bool {
-				if key.HookExpireAt.Before(gtime.Now()) {
-					return filter == conditionKey
-				}
-				return isClean && filter == conditionKey
-			})
+			if key.OrderId != "" {
+				s.NotifyHook.UnInstallHook(key, func(filter hook.NotifyKey, conditionKey hook.NotifyKey) bool {
+					if key.HookExpireAt.Before(gtime.Now()) {
+						return filter == conditionKey
+					}
+					return isClean && filter == conditionKey
+				})
+			}
 		})
 
 		// 根据订单id找出订单
