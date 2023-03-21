@@ -3,11 +3,12 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/go-pay/gopay"
+	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/kuaimk/kmk-share-library/share_consts"
 	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
@@ -33,11 +34,22 @@ type sMerchantService struct {
 }
 
 func NewMerchantService() *sMerchantService {
-	return &sMerchantService{}
+	result := &sMerchantService{}
+
+	result.injectHook()
+
+	return result
+}
+
+func (s *sMerchantService) injectHook() {
+	hook := service.Gateway().GetCallbackMsgHook()
+
+	hook.InstallHook(alipay_enum.Info.CallbackType.AlipayWallet, s.UserInfo)
 }
 
 func (s *sMerchantService) InstallConsumerHook(infoType alipay_enum.ConsumerAction, hookFunc hook.ConsumerHookFunc) {
 	s.ConsumerHook.InstallHook(infoType, hookFunc)
+	fmt.Println(s.ConsumerHook)
 }
 
 func (s *sMerchantService) GetHook() base_hook.BaseHook[alipay_enum.ConsumerAction, hook.ConsumerHookFunc] {
@@ -77,25 +89,36 @@ func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId
 	return userId, nil
 }
 
-// UserInfoAuth 获取会员信息 （需要传递code，和appID）消费者
-func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, appId string, sysUserId ...int64) (res *alipay_model.UserInfoShare, err error) {
+// UserInfoAuth 具体服务 用户授权 + 小程序和H5都兼容
+func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) bool { // code string, appId string, sysUserId ...int64
+	from := gmap.NewStrAnyMapFrom(info)
+
+	//code := from.Get("code") //
+	appId := gconv.String(from.Get("app_id"))
+	sysUserId := gconv.Int64(from.Get("sys_user_id"))
+	merchantId := gconv.Int64(from.Get("merchant_id"))
+
+	res := alipay_model.UserInfoShare{}
+
 	client, err := aliyun.NewClient(ctx, appId)
 
-	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	data := gopay.BodyMap{}
+	gconv.Struct(info, &data)
 
+	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 根据AppId获取商家相关配置，包括AppAuthToken
 		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
 		if err != nil || merchantApp == nil {
 			return err
 		}
 
-		client.SetAppAuthToken(merchantApp.AppAuthToken)
+		// data.Set("code", data.Get("auth_code"))                            // 用户授权code
+
+		// 这个token是动态的，哪个商家需要获取，appId和appAuthToken就传递对应的
+		client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
 
 		// 1.auth_code换Token
-		token, _ := client.SystemOauthToken(ctx, gopay.BodyMap{
-			"code":       authCode,
-			"grant_type": "authorization_code",
-		})
+		token, _ := client.SystemOauthToken(ctx, data)
 
 		fmt.Println("平台用户id：", token.Response.UserId)
 
@@ -111,11 +134,17 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 		res.UserId = token.Response.UserId
 		userInfo.Response.UserId = token.Response.UserId
 
-		// 根据sys_user_id查询商户员工信息
+		// 根据sys_user_id查询商户信息
+		sys_service.SysUser().MakeSession(ctx, sysUserId)
 
-		employee, err := share_consts.Global.Merchant.Employee().GetEmployeeById(ctx, sysUserId[0])
+		user, err := sys_service.SysUser().GetSysUserById(ctx, sysUserId)
+		if err != nil {
+			return err
+		}
 
-		// 3.存储消费者数据  kmk-consumer (Hook创建)
+		//employee, err := share_consts.Global.Merchant.Employee().GetEmployeeById(ctx,sysUserId)
+
+		// 3.存储消费者数据并创建用户  kmk-consumer
 		var consumerId int64 // 消费者Id
 
 		if token.Response.UserId != "" { // 发布授权广播
@@ -123,8 +152,8 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 				if key.Code() == alipay_enum.Consumer.ActionEnum.Auth.Code() { // 如果订阅者是订阅授权
 					g.Try(ctx, func(ctx context.Context) {
 						data := hook.UserInfo{
-							SysUserId:     sysUserId[0],
-							UserInfoShare: userInfo.Response,
+							SysUserId:     user.Id,
+							UserInfoShare: *userInfo.Response,
 						}
 						consumerId = value(ctx, data)
 					})
@@ -132,23 +161,44 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 			})
 		}
 
+		//getConsumer, err := share_service.Consumer().GetConsumerByAlipayUnionId(ctx, userInfo.Response.UserId)
+		//consumerRes := &share_model.ConsumerRes{}
+		//if err != nil && getConsumer == nil {
+		//    shareConsumer := kconv.Struct(userInfo.Response, &share_model.Consumer{})
+		//    shareConsumer.AlipayUnionId = gconv.String(userInfo.Response.UserId)
+		//
+		//    if employee != nil {
+		//        shareConsumer.SysUserId = gconv.String(employee.Id)
+		//    }
+		//
+		//    consumerRes, err = share_service.Consumer().CreateConsumer(ctx, shareConsumer)
+		//    if err != nil {
+		//        return err
+		//    }
+		//} else {
+		//    //consumerInfo := share_model.UpdateConsumer{}
+		//    //gconv.Struct(userInfo.Response, &consumerInfo)
+		//    //consumerInfo.Id = merchantApp.SysUserId
+		//    //
+		//    //_, err = share_service.Consumer().UpdateConsumer(ctx, &consumerInfo)
+		//    //if err != nil {
+		//    //	return err
+		//    //}
+		//}
+
 		// 4.存储阿里消费者记录 alipay-consumer-config
-		alipayConsumer, err := service.Consumer().GetConsumerByUserId(ctx, token.Response.UserId)
+		alipayConsumer, err := service.Consumer().GetConsumerByUserId(ctx, userInfo.Response.UserId)
 
 		if err != nil && alipayConsumer == nil { // 消费者不存在，则创建
 			consumerInfo := alipay_model.AlipayConsumerConfig{}
 			gconv.Struct(userInfo.Response, &consumerInfo)
-			consumerInfo.UserId = gconv.String(token.Response.UserId)
-
-			if employee != nil {
-				consumerInfo.SysUserId = employee.Id
-			}
+			consumerInfo.UserId = gconv.String(userInfo.Response.UserId)
 
 			if consumerId != 0 {
 				consumerInfo.SysUserId = consumerId
 			}
 
-			_, err := service.Consumer().CreateConsumer(ctx, consumerInfo)
+			_, err = service.Consumer().CreateConsumer(ctx, consumerInfo)
 			if err != nil {
 				return err
 			}
@@ -163,8 +213,7 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 			}
 		}
 
-		// 5.存储第三方应用和用户关系记录platformUser Where加上AppID  (Hook)
-		// 发布授权广播
+		// 5.存储第三方应用和用户关系记录
 		s.ConsumerHook.Iterator(func(key alipay_enum.ConsumerAction, value hook.ConsumerHookFunc) {
 			if key.Code() == alipay_enum.Consumer.ActionEnum.Auth.Code() { // 如果订阅者是订阅授权
 				g.Try(ctx, func(ctx context.Context) {
@@ -181,10 +230,11 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 						Type:          share_enum.User.Type.Anonymous.Code(), // 用户类型匿名消费者
 					}
 
-					if employee != nil {
-						data.EmployeeId = employee.Id
-						data.MerchantId = employee.UnionMainId
+					if user != nil {
+						data.EmployeeId = user.Id
 					}
+
+					data.MerchantId = merchantId
 
 					if consumerId != 0 { // 适用于消费者没有员工的情况下
 						data.EmployeeId = consumerId
@@ -194,13 +244,44 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, authCode string, ap
 				})
 			}
 		})
+		//platUser, err := share_service.PlatformUser().GetPlatformUserByUserId(ctx, userInfo.Response.UserId)
+		//
+		//if err != nil && platUser == nil { // 不存在创建
+		//    platform := share_model.PlatformUser{
+		//        Id:            idgen.NextId(),
+		//        FacilitatorId: 0,
+		//        OperatorId:    0,
+		//        EmployeeId:    consumerRes.Id,
+		//        MerchantId:    0,
+		//        Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 来源
+		//        ThirdAppId:    merchantApp.ThirdAppId,
+		//        MerchantAppId: merchantApp.AppId,
+		//        UserId:        userInfo.Response.UserId,              // 平台账户唯一标识
+		//        Type:          share_enum.User.Type.Anonymous.Code(), // 用户类型匿名消费者
+		//    }
+		//
+		//    if employee != nil {
+		//        platform.EmployeeId = employee.Id
+		//        platform.MerchantId = employee.UnionMainId
+		//    }
+		//
+		//    if consumerRes != nil && consumerRes.Id != 0 { // 适用于消费者没有员工的情况下
+		//        platform.EmployeeId = consumerRes.Id
+		//    }
+		//
+		//    _, err = share_service.PlatformUser().CreatePlatformUser(ctx, &platform)
+		//    if err != nil {
+		//        return err
+		//    }
+		//
+		//}
 
 		return nil
 	})
 
 	if err != nil {
-		return nil, err
+		return false
 	}
 
-	return res, nil
+	return true
 }

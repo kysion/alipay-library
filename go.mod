@@ -56,3 +56,5 @@ require (
 //replace github.com/kysion/pay-share-library => ../pay-share-library
 
 //replace github.com/kuaimk/kmk-share-library => ../../kuaimk/kmk-share-library
+
+replace github.com/SupenBysz/gf-admin-community => ../../kysion/gf-admin-community

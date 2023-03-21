@@ -6,9 +6,10 @@ import (
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum"
 )
 
+// 应用通知 - 由某人产生
 type ServiceMsgHookFunc func(ctx context.Context, info g.Map) bool
 
 type ServiceMsgHookInfo struct {
-	Key   alipay_enum.InfoType
+	Key   alipay_enum.CallbackMsgType
 	Value ServiceMsgHookFunc
 }

@@ -5,13 +5,13 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/util/gconv"
-    "github.com/kysion/alipay-library/alipay_model"
-    dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
-    do "github.com/kysion/alipay-library/alipay_model/alipay_do"
-    entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
-    "github.com/kysion/alipay-library/utility"
+	"github.com/kysion/alipay-library/alipay_model"
+	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
+	do "github.com/kysion/alipay-library/alipay_model/alipay_do"
+	entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/yitter/idgenerator-go/idgen"
+	"strconv"
 	"time"
 )
 
@@ -33,11 +33,11 @@ func (s *sMerchantAppConfig) GetMerchantAppConfigById(ctx context.Context, id in
 
 // GetMerchantAppConfigByAppId 根据AppId查找商家应用配置信息
 func (s *sMerchantAppConfig) GetMerchantAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayMerchantAppConfig, error) {
-	data := alipay_model.AlipayMerchantAppConfig{}
+	var data *alipay_model.AlipayMerchantAppConfig
 
 	err := dao.AlipayMerchantAppConfig.Ctx(ctx).Where(do.AlipayMerchantAppConfig{AppId: id}).Scan(&data)
 
-	return &data, err
+	return data, err
 }
 
 // GetMerchantAppConfigBySysUserId  根据商家id查询商家应用配置信息
@@ -57,19 +57,20 @@ func (s *sMerchantAppConfig) GetMerchantAppConfigBySysUserId(ctx context.Context
 // CreateMerchantAppConfig  创建商家应用配置信息
 func (s *sMerchantAppConfig) CreateMerchantAppConfig(ctx context.Context, info *alipay_model.AlipayMerchantAppConfig) (*alipay_model.AlipayMerchantAppConfig, error) {
 	// 创建的时候可指定域名，没指定就是用使用当前域名
+	// appId的32进制编码
+	appId := strconv.FormatInt(gconv.Int64(info.AppId), 36)
+
 	if info.ServerDomain != "" {
-		appIdHash := utility.Md5Hash(info.AppId)
-		// 取其appId Md5加密后的前16位  //https://alipay.jditco.com/alipay/appIdMd5-16/gateway.services
-		info.AppGatewayUrl = info.ServerDomain + "/merchant/" + appIdHash[0:16] + "/gateway.services"
-		info.AppCallbackUrl = info.ServerDomain + "/merchant/" + appIdHash[0:16] + "/gateway.callback"
-		info.AppIdMd5 = appIdHash
+		//appIdHash := utility.Md5Hash(info.AppId)
+		//// 取其appId Md5加密后的前16位  //https://alipay.jditco.com/alipay/appIdMd5-16/gateway.services
+		info.AppGatewayUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.services"
+		info.AppCallbackUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.callback"
+		//info.AppIdMd5 = appIdHash
 	} else if info.ServerDomain == "" {
-		appIdHash := utility.Md5Hash(info.AppId)
 		// 没指定服务器域名，默认使用当前服务器域名
 		info.ServerDomain = "https://alipay.kuaimk.com"
-		info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appIdHash[0:16] + "/gateway.services"
-		info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appIdHash[0:16] + "/gateway.callback"
-		info.AppIdMd5 = appIdHash
+		info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.services"
+		info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.callback"
 	}
 
 	// 用户id默认是当前登录用户

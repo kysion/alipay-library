@@ -7,8 +7,13 @@ import (
 )
 
 type (
-	SexType        consumer.SexEnum
-	InfoType       info_type.InfoTypeEnum
+	SexType consumer.SexEnum
+	// CallbackMsgType 回调消息
+	CallbackMsgType info_type.CallBackMsgTypeEnum
+
+	// ServiceNotifyType 应用通知
+	ServiceNotifyType info_type.ServiceNotifyTypeEnum
+
 	NotifyType     notify.NotifyTypeEnum
 	ConsumerAction consumer.ActionEnum
 )

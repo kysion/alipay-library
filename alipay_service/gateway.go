@@ -15,6 +15,17 @@ import (
 )
 
 type (
+	IMerchantAppConfig interface {
+		GetMerchantAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayMerchantAppConfig, error)
+		GetMerchantAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayMerchantAppConfig, error)
+		GetMerchantAppConfigBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayMerchantAppConfig, error)
+		CreateMerchantAppConfig(ctx context.Context, info *alipay_model.AlipayMerchantAppConfig) (*alipay_model.AlipayMerchantAppConfig, error)
+		UpdateMerchantAppConfig(ctx context.Context, info *alipay_model.UpdateMerchantAppConfigReq) (bool, error)
+		UpdateState(ctx context.Context, id int64, state int) (bool, error)
+		UpdateAppAuthToken(ctx context.Context, info *alipay_model.UpdateMerchantAppAuthToken) (bool, error)
+		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateMerchantAppConfigHttpsReq) (bool, error)
+		UpdateMerchantKeyCert(ctx context.Context, info *alipay_model.UpdateMerchantKeyCertReq) (bool, error)
+	}
 	IThirdAppConfig interface {
 		GetThirdAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayThirdAppConfig, error)
 		GetThirdAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayThirdAppConfig, error)
@@ -35,21 +46,10 @@ type (
 		UpdateConsumerState(ctx context.Context, id int64, state int) (bool, error)
 	}
 	IGateway interface {
-		InstallHook(infoType enum.InfoType, hookFunc hook.ServiceMsgHookFunc)
-		GetHook() base_hook.BaseHook[enum.InfoType, hook.ServiceMsgHookFunc]
+		GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType, hook.ServiceMsgHookFunc]
+		GetServiceNotifyTypeHook() base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc]
 		GatewayServices(ctx context.Context) (string, error)
 		GatewayCallback(ctx context.Context) (string, error)
-	}
-	IMerchantAppConfig interface {
-		GetMerchantAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayMerchantAppConfig, error)
-		GetMerchantAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayMerchantAppConfig, error)
-		GetMerchantAppConfigBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayMerchantAppConfig, error)
-		CreateMerchantAppConfig(ctx context.Context, info *alipay_model.AlipayMerchantAppConfig) (*alipay_model.AlipayMerchantAppConfig, error)
-		UpdateMerchantAppConfig(ctx context.Context, info *alipay_model.UpdateMerchantAppConfigReq) (bool, error)
-		UpdateState(ctx context.Context, id int64, state int) (bool, error)
-		UpdateAppAuthToken(ctx context.Context, info *alipay_model.UpdateMerchantAppAuthToken) (bool, error)
-		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateMerchantAppConfigHttpsReq) (bool, error)
-		UpdateMerchantKeyCert(ctx context.Context, info *alipay_model.UpdateMerchantKeyCertReq) (bool, error)
 	}
 )
 

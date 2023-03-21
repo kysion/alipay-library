@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/go-pay/gopay"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -34,18 +35,22 @@ func NewWallet() *sWallet {
 	result := &sWallet{}
 
 	result.injectHook()
+	fmt.Println(result)
 	return result
 }
 
 func (s *sWallet) injectHook() {
-	service.Gateway().InstallHook(enum.Info.Type.AlipayWallet, s.Wallet)
+	hook := service.Gateway().GetCallbackMsgHook()
+
+	hook.InstallHook(enum.Info.CallbackType.AlipayWallet, s.Wallet)
 }
 
 func (s *sWallet) InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc) {
 	s.ConsumerHook.InstallHook(infoType, hookFunc)
+	fmt.Println(s.ConsumerHook)
 }
 
-// Wallet 具体服务 H5用户授权
+// Wallet 具体服务 H5用户授权 + 小程序
 func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
 	res := alipay_model.UserInfoShare{}
 
@@ -84,6 +89,8 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
 		userInfo.Response.UserId = token.Response.UserId
 
 		// 根据sys_user_id查询商户信息
+		sys_service.SysUser().MakeSession(ctx, merchantApp.SysUserId)
+
 		employee, err := share_consts.Global.Merchant.Employee().GetEmployeeById(ctx, merchantApp.SysUserId)
 
 		// 3.存储消费者数据并创建用户  kmk-consumer
@@ -95,7 +102,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
 					g.Try(ctx, func(ctx context.Context) {
 						data := hook.UserInfo{
 							SysUserId:     employee.Id,
-							UserInfoShare: userInfo.Response,
+							UserInfoShare: *userInfo.Response,
 						}
 						consumerId = value(ctx, data)
 					})

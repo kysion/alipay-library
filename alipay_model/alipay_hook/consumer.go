@@ -15,5 +15,5 @@ type ConsumerHookInfo struct {
 
 type UserInfo struct {
 	SysUserId int64
-	*alipay_model.UserInfoShare
+	alipay_model.UserInfoShare
 }

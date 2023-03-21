@@ -1,7 +1,7 @@
 package merchant
 
 import (
-    service "github.com/kysion/alipay-library/alipay_service"
+	service "github.com/kysion/alipay-library/alipay_service"
 )
 
 func init() {
@@ -13,7 +13,7 @@ func init() {
 	service.RegisterMerchantH5Pay(NewMerchantH5Pay())
 	service.RegisterMerchantTinyappPay(NewMerchantTinyappPay())
 
-	service.RegisterWallet(NewWallet())
+	//service.RegisterWallet(NewWallet())
 
 	service.RegisterMerchantService(NewMerchantService())
 }

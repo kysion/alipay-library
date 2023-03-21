@@ -6,9 +6,11 @@ import (
 	"github.com/go-pay/gopay/alipay"
 	"github.com/go-pay/gopay/pkg/util"
 	"github.com/go-pay/gopay/pkg/xlog"
-    "github.com/kysion/alipay-library/alipay_model"
-    service "github.com/kysion/alipay-library/alipay_service"
-    "github.com/kysion/alipay-library/internal/logic/internal/aliyun"
+	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/alipay-library/alipay_model"
+	service "github.com/kysion/alipay-library/alipay_service"
+	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
+	"strconv"
 )
 
 /*
@@ -43,7 +45,9 @@ func (s *sMerchantTinyappPay) OrderSend(ctx context.Context) {
 
 // TradeCreate  2、创建交易订单
 func (s *sMerchantTinyappPay) TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error) {
-	client, _ := aliyun.NewClient(ctx, "")
+	appId, _ := strconv.ParseInt(info.AppId, 32, 0)
+
+	client, _ := aliyun.NewClient(ctx, gconv.String(appId))
 
 	// 请求参数  需要传递
 
