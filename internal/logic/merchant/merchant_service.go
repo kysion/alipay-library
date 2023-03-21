@@ -44,7 +44,7 @@ func NewMerchantService() *sMerchantService {
 func (s *sMerchantService) injectHook() {
 	hook := service.Gateway().GetCallbackMsgHook()
 
-	hook.InstallHook(alipay_enum.Info.CallbackType.AlipayWallet, s.UserInfo)
+	hook.InstallHook(alipay_enum.Info.CallbackType.AlipayWallet, s.UserInfoAuth)
 }
 
 func (s *sMerchantService) InstallConsumerHook(infoType alipay_enum.ConsumerAction, hookFunc hook.ConsumerHookFunc) {
