@@ -7,6 +7,7 @@ type CreateTrade struct {
 	OutTradeNo  string  `json:"out_trade_no" dc:"商户订单号。"`
 	TotalAmount float32 `json:"total_amount" dc:"订单总金额。"`
 	ProductCode string  `json:"product_code" dc:"商家和支付宝签约的产品码。"`
+	AppId       string  `json:"app_id" dc:"请提供商家应用AppId的32进制编码数据"`
 }
 
 // ===================================================

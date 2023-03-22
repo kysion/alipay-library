@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/go-pay/gopay"
 	"github.com/go-pay/gopay/alipay"
+	"github.com/gogf/gf/v2/container/gmap"
+	"github.com/gogf/gf/v2/encoding/gxml"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
+	"strconv"
 )
 
 var (
@@ -31,15 +34,17 @@ var (
 */
 
 type sGateway struct {
-	base_hook.BaseHook[enum.InfoType, hook.ServiceMsgHookFunc]
+	CallbackMsgHook base_hook.BaseHook[enum.CallbackMsgType, hook.ServiceMsgHookFunc]
+
+	ServiceNotifyTypeHook base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc]
 }
 
-func (s *sGateway) InstallHook(infoType enum.InfoType, hookFunc hook.ServiceMsgHookFunc) {
-	s.BaseHook.InstallHook(infoType, hookFunc)
+func (s *sGateway) GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType, hook.ServiceMsgHookFunc] {
+	return &s.CallbackMsgHook
 }
 
-func (s *sGateway) GetHook() base_hook.BaseHook[enum.InfoType, hook.ServiceMsgHookFunc] {
-	return s.BaseHook
+func (s *sGateway) GetServiceNotifyTypeHook() base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc] {
+	return s.ServiceNotifyTypeHook
 }
 
 func NewGateway() *sGateway {
@@ -50,15 +55,68 @@ func NewGateway() *sGateway {
 // GatewayServices 接收消息通知  B端消息
 func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 
-	client, err := aliyun.NewClient(ctx, "")
-	bm, err := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
+	// 拿到路径的AppId进行搜索、
+	urlAppId := g.RequestFromCtx(ctx).Get("appId").String()
+	var pathAppId int64
+	if urlAppId != "" {
+		// 解析AppId
+		pathAppId, _ = strconv.ParseInt(urlAppId, 32, 0)
 
-	aliRsp, err := client.OpenAuthTokenAppInviteCreate(ctx, bm)
+		if pathAppId == 0 {
+			g.RequestFromCtx(ctx).Response.Write("")
+			return "参数错误！", nil
+		}
+	}
 
-	fmt.Println(aliRsp)
+	client, _ := aliyun.NewClient(ctx, gconv.String(pathAppId))
 
-	g.RequestFromCtx(ctx).Response.Write(aliRsp)
-	return aliRsp.Response.TaskPageUrl, err
+	bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
+	fmt.Println(bm)
+
+	if bm.Get("service") == enum.Info.ServiceType.ServiceCheck.Code() {
+		s.checkGateway(ctx, client, bm)
+	}
+
+	// 通过Hook解决不同的回调类型
+	s.ServiceNotifyTypeHook.Iterator(func(key enum.ServiceNotifyType, value hook.ServiceNotifyHookFunc) {
+		if key.Code() == gconv.String(bm.Get("service")) {
+			g.Try(ctx, func(ctx context.Context) {
+				value(ctx, bm)
+			})
+		}
+	})
+
+	return "", nil
+}
+
+func (s *sGateway) checkGateway(ctx context.Context, client *aliyun.AliPay, info gopay.BodyMap) {
+	sign, err := client.GetRsaSign(gopay.BodyMap{
+		"success": "true",
+	}, "RSA2", "", "xml")
+	if err != nil {
+		return
+	}
+
+	data := gmap.New()
+
+	data.Set("alipay", map[string]interface{}{
+		"response": g.Map{
+			"success": "true",
+		},
+		"app_cert_sn": client.AppCertSN,
+		"sign":        sign,
+		"sign_type":   "RSA2",
+	})
+
+	encode, err := gxml.Encode(data.MapStrAny())
+
+	ret := g.RequestFromCtx(ctx).Response
+
+	fmt.Println(string(encode))
+	ret.Write("<?xml version=\"1.0\" encoding=\"GBK\"?>")
+	ret.Write(string(encode))
+
+	return
 }
 
 // GatewayCallback 接收消息回调  C端消息
@@ -67,6 +125,9 @@ func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
 
 	// 用户的话，直接登录，然后通过code获得token，然后存起来
 
+	request := g.RequestFromCtx(ctx).Request
+	fmt.Println(request)
+
 	// 授权之前输入商家信息name -->  签名 -->  --> 签名后存储商家部分数据， --> 自定义授权URL,包含sys_user_id --> 授权，成功的话，根据data找出商家初始数据，然后更新app_auth_token --> 添加第三方平台和用户记录
 	bm, err := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 
@@ -74,6 +135,7 @@ func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
 		"grant_type":  "authorization_code",
 		"app_id":      bm.Get("app_id"),
 		"sys_user_id": bm.Get("sys_user_id"),
+		"merchant_id": bm.Get("merchant_id"),
 	}
 
 	// 判断回调的源目标source  HOOK解决switch
@@ -86,7 +148,7 @@ func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
 	}
 
 	// 通过Hook解决不同的回调类型
-	s.Iterator(func(key enum.InfoType, value hook.ServiceMsgHookFunc) {
+	s.CallbackMsgHook.Iterator(func(key enum.CallbackMsgType, value hook.ServiceMsgHookFunc) {
 		if key.Code() == gconv.String(bm.Get("source")) {
 			g.Try(ctx, func(ctx context.Context) {
 				value(ctx, data)

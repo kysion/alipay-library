@@ -19,20 +19,6 @@ import (
 )
 
 type (
-	IMerchantService interface {
-		InstallConsumerHook(infoType alipay_enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
-		GetHook() base_hook.BaseHook[alipay_enum.ConsumerAction, hook.ConsumerHookFunc]
-		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
-		UserInfoAuth(ctx context.Context, authCode string, appId string, sysUserId ...int64) (res *alipay_model.UserInfoShare, err error)
-	}
-	IMerchantTinyappPay interface {
-		OrderSend(ctx context.Context)
-		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
-	}
-	IWallet interface {
-		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
-		Wallet(ctx context.Context, info g.Map) bool
-	}
 	IAppAuth interface {
 		AppAuth(ctx context.Context, info g.Map) bool
 	}
@@ -46,38 +32,30 @@ type (
 		InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc)
 		MerchantNotifyServices(ctx context.Context) (string, error)
 	}
+	IMerchantService interface {
+		InstallConsumerHook(infoType alipay_enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
+		GetHook() base_hook.BaseHook[alipay_enum.ConsumerAction, hook.ConsumerHookFunc]
+		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
+		UserInfoAuth(ctx context.Context, info g.Map) bool
+	}
+	IMerchantTinyappPay interface {
+		OrderSend(ctx context.Context)
+		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
+	}
+	IWallet interface {
+		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
+		Wallet(ctx context.Context, info g.Map) bool
+	}
 )
 
 var (
+	localMerchantService    IMerchantService
+	localMerchantTinyappPay IMerchantTinyappPay
 	localWallet             IWallet
 	localAppAuth            IAppAuth
 	localMerchantH5Pay      IMerchantH5Pay
 	localMerchantNotify     IMerchantNotify
-	localMerchantService    IMerchantService
-	localMerchantTinyappPay IMerchantTinyappPay
 )
-
-func MerchantTinyappPay() IMerchantTinyappPay {
-	if localMerchantTinyappPay == nil {
-		panic("implement not found for interface IMerchantTinyappPay, forgot register?")
-	}
-	return localMerchantTinyappPay
-}
-
-func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
-	localMerchantTinyappPay = i
-}
-
-func Wallet() IWallet {
-	if localWallet == nil {
-		panic("implement not found for interface IWallet, forgot register?")
-	}
-	return localWallet
-}
-
-func RegisterWallet(i IWallet) {
-	localWallet = i
-}
 
 func AppAuth() IAppAuth {
 	if localAppAuth == nil {
@@ -121,4 +99,26 @@ func MerchantService() IMerchantService {
 
 func RegisterMerchantService(i IMerchantService) {
 	localMerchantService = i
+}
+
+func MerchantTinyappPay() IMerchantTinyappPay {
+	if localMerchantTinyappPay == nil {
+		panic("implement not found for interface IMerchantTinyappPay, forgot register?")
+	}
+	return localMerchantTinyappPay
+}
+
+func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
+	localMerchantTinyappPay = i
+}
+
+func Wallet() IWallet {
+	if localWallet == nil {
+		panic("implement not found for interface IWallet, forgot register?")
+	}
+	return localWallet
+}
+
+func RegisterWallet(i IWallet) {
+	localWallet = i
 }

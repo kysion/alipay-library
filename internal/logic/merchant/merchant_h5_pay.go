@@ -8,6 +8,7 @@ import (
 	"github.com/go-pay/gopay/pkg/xlog"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
+	"strconv"
 
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
@@ -97,23 +98,24 @@ func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.T
 	}
 
 	// 商家AppId
-	appId := g.RequestFromCtx(ctx).Get("appId").String()
-	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
+
+	appId, _ := strconv.ParseInt(g.RequestFromCtx(ctx).Get("appId").String(), 32, 0)
+	appIdStr := gconv.String(appId)
+	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
 		return
 	}
 
 	// 通过商家中的第三方应用的AppId创建客户端
-	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
+	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
 
-	notifyUrl := "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.notify"
+	notifyUrl := "https://alipay.kuaimk.com/alipay/" + appIdStr + "/gateway.notify"
 
 	//配置公共参数
 	client.SetCharset("utf-8").
 		SetSignType(alipay.RSA2).
 		SetReturnUrl(info.ReturnUrl).
-		SetNotifyUrl(notifyUrl).
-		SetAppAuthToken(merchantApp.AppAuthToken)
+		SetNotifyUrl(notifyUrl)
 
 	orderId := orderInfo.Id // 提交给支付宝的订单Id就是写我们平台数据库中的订单id
 
