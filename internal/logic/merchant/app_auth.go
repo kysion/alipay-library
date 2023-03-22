@@ -38,14 +38,14 @@ func (s *sAppAuth) injectHook() {
 }
 
 // AppAuth 具体服务
-func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) bool {
+func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) string { // 返回商户userId
 	fmt.Println("hello authApp")
 
 	data := gopay.BodyMap{}
 	gconv.Struct(info, &data)
 
 	if data.Get("app_id") == "" {
-		return false
+		return ""
 	}
 
 	client, _ := aliyun.NewClient(ctx, data.Get("app_id"))
@@ -163,11 +163,12 @@ func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) bool {
 	})
 
 	if err != nil {
-		return false
+		return ""
 	}
 
 	// 4.写接口，根据平台用户id获取JwtToken
 	//g.RequestFromCtx(ctx).Response.RedirectTo("")
 
-	return true
+	// 返回商户userId
+	return gconv.String(authInfos["user_id"])
 }

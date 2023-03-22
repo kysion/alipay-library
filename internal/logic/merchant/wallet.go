@@ -47,11 +47,10 @@ func (s *sWallet) injectHook() {
 
 func (s *sWallet) InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc) {
 	s.ConsumerHook.InstallHook(infoType, hookFunc)
-	fmt.Println(s.ConsumerHook)
 }
 
 // Wallet 具体服务 H5用户授权 + 小程序
-func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
+func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 	res := alipay_model.UserInfoShare{}
 
 	client, err := aliyun.NewClient(ctx, gconv.String(info["app_id"]))
@@ -104,6 +103,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
 							SysUserId:     employee.Id,
 							UserInfoShare: *userInfo.Response,
 						}
+						// 返回消费者id
 						consumerId = value(ctx, data)
 					})
 				}
@@ -232,8 +232,9 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) bool {
 	})
 
 	if err != nil {
-		return false
+		return ""
 	}
 
-	return true
+	// 返回用户在平台的唯一id
+	return res.UserId
 }
