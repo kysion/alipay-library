@@ -112,8 +112,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) bool { 
 			return err
 		}
 
-		// data.Set("code", data.Get("auth_code"))                            // 用户授权code
-
 		// 这个token是动态的，哪个商家需要获取，appId和appAuthToken就传递对应的
 		client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
 
@@ -230,9 +228,7 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) bool { 
 						Type:          share_enum.User.Type.Anonymous.Code(), // 用户类型匿名消费者
 					}
 
-					if user != nil {
-						data.EmployeeId = user.Id
-					}
+					data.EmployeeId = user.Id
 
 					data.MerchantId = merchantId
 
