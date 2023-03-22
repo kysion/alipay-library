@@ -65,12 +65,11 @@ func (c *cMerchantService) GetAlipayUserInfo(ctx context.Context, _ *alipay_merc
 	}
 	url := "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id=" + app.AppId + "&scope=auth_user&redirect_uri="
 
-	url += gurl.Encode(app.AppCallbackUrl + "?sys_user_id=" + gconv.String(app.SysUserId) + "&merchant_id=" + gconv.String(app.UnionMainId))
+	//	url += gurl.Encode(app.AppCallbackUrl + "?sys_user_id=" + gconv.String(app.SysUserId) + "&merchant_id=" + gconv.String(app.UnionMainId))
 
-	//url += gurl.Encode("https://alipay.kuaimk.com/alipay/1pe2ts9qp9h/gateway.services")
-	//
+	url += gurl.Encode(app.AppCallbackUrl)
 
-	//url += gurl.Encode("https://alipay.kuaimk.com/alipay/1pe2ts9qp9h/gateway.test")
+	//url += gurl.Encode("https://alipay.kuaimk.com/alipay/1pe2ts9qp9h/gateway.callback")
 
 	fmt.Println(url)
 
