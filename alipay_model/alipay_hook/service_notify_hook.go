@@ -6,8 +6,7 @@ import (
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum"
 )
 
-// 应用消息 - 平台主动发的
-
+// ServiceNotifyHookFunc 应用通知 - 平台主动发的 对应ServiceNotify
 type ServiceNotifyHookFunc func(ctx context.Context, info g.Map) bool
 
 type ServiceNotifyHookInfo struct {

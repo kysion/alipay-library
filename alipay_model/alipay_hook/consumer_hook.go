@@ -6,7 +6,7 @@ import (
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum"
 )
 
-type ConsumerHookFunc func(ctx context.Context, info interface{}) int64
+type ConsumerHookFunc func(ctx context.Context, info interface{}) int64 // 别人订阅我，通常需要返回sys_user_id
 
 type ConsumerHookInfo struct {
 	Key   alipay_enum.ConsumerAction

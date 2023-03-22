@@ -49,7 +49,6 @@ func (s *sMerchantService) injectHook() {
 
 func (s *sMerchantService) InstallConsumerHook(infoType alipay_enum.ConsumerAction, hookFunc hook.ConsumerHookFunc) {
 	s.ConsumerHook.InstallHook(infoType, hookFunc)
-	fmt.Println(s.ConsumerHook)
 }
 
 func (s *sMerchantService) GetHook() base_hook.BaseHook[alipay_enum.ConsumerAction, hook.ConsumerHookFunc] {
@@ -90,7 +89,7 @@ func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId
 }
 
 // UserInfoAuth 具体服务 用户授权 + 小程序和H5都兼容
-func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) bool { // code string, appId string, sysUserId ...int64
+func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string { // code string, appId string, sysUserId ...int64
 	from := gmap.NewStrAnyMapFrom(info)
 
 	//code := from.Get("code") //
@@ -276,8 +275,9 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) bool { 
 	})
 
 	if err != nil {
-		return false
+		return ""
 	}
 
-	return true
+	// 返回用户在阿里的唯一标识userId
+	return res.UserId
 }
