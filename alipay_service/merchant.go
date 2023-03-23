@@ -19,20 +19,6 @@ import (
 )
 
 type (
-	IMerchantService interface {
-		InstallConsumerHook(infoType alipay_enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
-		GetHook() base_hook.BaseHook[alipay_enum.ConsumerAction, hook.ConsumerHookFunc]
-		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
-		UserInfoAuth(ctx context.Context, info g.Map) string
-	}
-	IMerchantTinyappPay interface {
-		OrderSend(ctx context.Context)
-		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
-	}
-	IWallet interface {
-		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
-		Wallet(ctx context.Context, info g.Map) string
-	}
 	IAppAuth interface {
 		AppAuth(ctx context.Context, info g.Map) string
 	}
@@ -46,27 +32,37 @@ type (
 		InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc)
 		MerchantNotifyServices(ctx context.Context) (string, error)
 	}
+	IMerchantService interface {
+		InstallConsumerHook(infoType alipay_enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
+		GetHook() base_hook.BaseHook[alipay_enum.ConsumerAction, hook.ConsumerHookFunc]
+		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
+		UserInfoAuth(ctx context.Context, info g.Map) string
+	}
+	IMerchantTinyappPay interface {
+		OrderSend(ctx context.Context)
+		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
+	}
+	ISubAccount interface {
+		TradeRelationBind(ctx context.Context, appId int64, info *alipay_model.TradeRelationBindReq) (bool, error)
+		TradeRelationBatchQuery(ctx context.Context, appId string, outRequestNo string) (*alipay_model.TradeRelationBatchQuery, error)
+		TradeOrderSettleQuery(ctx context.Context, appId string, settleNo string, outRequestNo string, tradeNo string) (*alipay_model.TradeOrderSettleQueryRes, error)
+		TradeOrderSettle(ctx context.Context, appId string, info alipay_model.TradeOrderSettleReq) (*alipay_model.TradeOrderSettleResponse, error)
+	}
+	IWallet interface {
+		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
+		Wallet(ctx context.Context, info g.Map) string
+	}
 )
 
 var (
-	localMerchantH5Pay      IMerchantH5Pay
-	localMerchantNotify     IMerchantNotify
 	localMerchantService    IMerchantService
 	localMerchantTinyappPay IMerchantTinyappPay
+	localSubAccount         ISubAccount
 	localWallet             IWallet
 	localAppAuth            IAppAuth
+	localMerchantH5Pay      IMerchantH5Pay
+	localMerchantNotify     IMerchantNotify
 )
-
-func AppAuth() IAppAuth {
-	if localAppAuth == nil {
-		panic("implement not found for interface IAppAuth, forgot register?")
-	}
-	return localAppAuth
-}
-
-func RegisterAppAuth(i IAppAuth) {
-	localAppAuth = i
-}
 
 func MerchantH5Pay() IMerchantH5Pay {
 	if localMerchantH5Pay == nil {
@@ -112,6 +108,17 @@ func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
 	localMerchantTinyappPay = i
 }
 
+func SubAccount() ISubAccount {
+	if localSubAccount == nil {
+		panic("implement not found for interface ISubAccount, forgot register?")
+	}
+	return localSubAccount
+}
+
+func RegisterSubAccount(i ISubAccount) {
+	localSubAccount = i
+}
+
 func Wallet() IWallet {
 	if localWallet == nil {
 		panic("implement not found for interface IWallet, forgot register?")
@@ -121,4 +128,15 @@ func Wallet() IWallet {
 
 func RegisterWallet(i IWallet) {
 	localWallet = i
+}
+
+func AppAuth() IAppAuth {
+	if localAppAuth == nil {
+		panic("implement not found for interface IAppAuth, forgot register?")
+	}
+	return localAppAuth
+}
+
+func RegisterAppAuth(i IAppAuth) {
+	localAppAuth = i
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtimer"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_consts"
+	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
@@ -28,8 +29,14 @@ import (
 */
 
 type sMerchantNotify struct {
+	// 异步通知Hook
 	NotifyHook base_hook.BaseHook[hook.NotifyKey, hook.NotifyHookFunc]
-	TradeHook  base_hook.BaseHook[hook.TradeHookKey, hook.TradeHookFunc]
+
+	// 交易Hook
+	TradeHook base_hook.BaseHook[hook.TradeHookKey, hook.TradeHookFunc]
+
+	// 分账Hook
+	SubAccountHook base_hook.BaseHook[hook.SubAccountHookKey, hook.SubAccountHookFunc]
 }
 
 func init() {
@@ -40,14 +47,17 @@ func NewMerchantNotify() *sMerchantNotify {
 	return &sMerchantNotify{}
 }
 
+// InstallNotifyHook 订阅异步通知Hook
 func (s *sMerchantNotify) InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc) {
 	hookKey.HookCreatedAt = *gtime.Now()
 
 	secondAt := gtime.New(alipay_consts.Global.TradeHookExpireAt * gconv.Int64(time.Second))
 	hookKey.HookExpireAt = *gtime.New(hookKey.HookCreatedAt.Second() + secondAt.Second())
+
 	s.NotifyHook.InstallHook(hookKey, hookFunc)
 }
 
+// InstallTradeHook 订阅支付Hook
 func (s *sMerchantNotify) InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc) {
 	hookKey.HookCreatedAt = *gtime.Now()
 
@@ -60,6 +70,7 @@ func (s *sMerchantNotify) InstallTradeHook(hookKey hook.TradeHookKey, hookFunc h
 
 // MerchantNotifyServices 异步通知地址  用于接收支付宝推送给商户的支付/退款成功的消息。
 func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, error) {
+
 	// 1、验签  （自动了）
 
 	// 2、解密 （自动了）
@@ -73,15 +84,18 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 
 		notifyKey := hook.NotifyKey{}
 
+		appId := bm.Get("app_id")
+
 		// 解析消息参数。。。。
 		if bm.GetInterface("passback_params") != nil {
-			data, has := bm.GetInterface("passback_params").(gmap.Map)
-			if has {
-				data.GetVar("order_id").String()
-				notifyKey.NotifyType = enum.Notify.NotifyType.New(data.GetVar("notify_type").String())
-			}
+			data := kconv.Struct(bm.GetInterface("passback_params"), &gmap.Map{})
+
+			data.GetVar("order_id").String()
+
+			notifyKey.NotifyType = enum.Notify.NotifyType.New(data.GetVar("notify_type").String())
 		}
 
+		// 广播异步通知Hook
 		s.NotifyHook.Iterator(func(key hook.NotifyKey, value hook.NotifyHookFunc) {
 			isClean := false
 			if key.NotifyType == notifyKey.NotifyType {
@@ -122,7 +136,6 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 		}
 
 		orderInfo, err := pay_service.Order().GetOrderById(ctx, gconv.Int64(bm["out_trade_no"]))
-
 		// 2.添加定时任务
 		gtimer.SetTimeout(ctx, time.Minute*30, func(ctx context.Context) {
 			//  判断交易状态，然后修改对应的状态
@@ -152,6 +165,55 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 
 		// 3. 添加账单account_bill  商家 消费者的账单  业务层Hook
 		if bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code() {
+
+			// 4. 分账交易下单结算 Hook  需要支付状态为Success的订单
+
+			// a.查询分账关系
+			relationBatch, _ := service.SubAccount().TradeRelationBatchQuery(ctx, gconv.String(appId), gconv.String(bm["out_trade_no"]))
+			if relationBatch.ResultCode == enum.SubAccount.SubAccountBindRes.Fail.Code() {
+				return nil
+			}
+			// b.找到分账支出方账户  可选
+
+			// c.组装分账明细信息 +分账拓展参数
+			royaltyParameterList := make([]alipay_model.RoyaltyParameters, 0)
+			settleExtendParams := make([]alipay_model.SettleExtendParams, 0)
+			for _, list := range relationBatch.ReceiverList {
+				// 分账明细信息
+				royaltyParameterList = append(royaltyParameterList, alipay_model.RoyaltyParameters{
+					RoyaltyType:  enum.SubAccount.OperationType.Transfer.Code(), // 分账类型
+					TransOut:     "",                                            // 支出方账户。  可选
+					TransOutType: "",                                            // 支出方账户类型。 可选
+					TransInType:  list.Type,                                     // 收入方账户类型。
+					TransIn:      list.Account,                                  // 收入方账户
+					Amount:       gconv.Float32(list.Account),                   // 分账的金额，单位为元
+					Desc:         list.Memo,                                     // 分账描述
+					RoyaltyScene: order.TradeScene,                              // 可选值：达人佣金、平台服务费、技术服务费、其他
+					TransInName:  list.Name,                                     // 分账收款方姓名
+				})
+
+				// 代表该交易分账是否完结
+				settleExtendParams = append(settleExtendParams, alipay_model.SettleExtendParams{"true"})
+			}
+			settleReq := alipay_model.TradeOrderSettleReq{ // 分账所需数据
+				OutRequestNo:      gconv.String(bm["out_trade_no"]), // 订单号orderId = 交易单号out_trade_no = 分账请求号out_request_no
+				TradeNo:           gconv.String(bm["trade_no"]),     // 支付宝交易订单号 trade_no
+				RoyaltyParameters: royaltyParameterList,
+				OperatorId:        "",                                  //操作员id，由商家自定义
+				ExtendParams:      []alipay_model.SettleExtendParams{}, // 分账结算业务扩展参数，冻结分账场景下生效,代表该交易分账是否完结,true/false
+				RoyaltyMode:       "",                                  // 分账模式： async异步、同步sync
+			}
+			//  是否需要使用Hook进行分账下单呢？
+
+			// d.分账交易下单，会返回 trade_no 和 settle_no，settle_no用来区分分账交易
+			settleRes, _ := service.SubAccount().TradeOrderSettle(ctx, appId, settleReq)
+			if settleRes.Response.SettleNo == "" {
+				return nil
+			}
+
+			// e.分账通知会发送到应用网关，然后我们判断分账结果，从而创建财务账单
+			// alipay.trade.order.settle.notify(交易分账结果通知)  这是我们自己定义的接口吗，不，是应用网关
+
 			isClean := false
 
 			// Trade发布者
@@ -183,6 +245,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 	if err != nil {
 		return "success", err
 	}
+	g.RequestFromCtx(ctx).Response.Write("success")
 
 	return "success", nil
 }

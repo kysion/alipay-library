@@ -4,6 +4,7 @@ import (
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/consumer"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/info_type"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/notify"
+	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/sub_account"
 )
 
 type (
@@ -16,10 +17,17 @@ type (
 
 	NotifyType     notify.NotifyTypeEnum
 	ConsumerAction consumer.ActionEnum
+
+	// SubAccountBindRes 分账绑定
+	SubAccountBindRes sub_account.SubAccountBindResEnum
+	// SubAccountAction 分账行为
+	SubAccountAction sub_account.ActionEnum
 )
 
 var (
 	Consumer = consumer.Consumer
 	Info     = info_type.Info
 	Notify   = notify.Notify
+
+	SubAccount = sub_account.SubAccount
 )

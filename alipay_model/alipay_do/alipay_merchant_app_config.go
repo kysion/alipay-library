@@ -43,4 +43,5 @@ type AlipayMerchantAppConfig struct {
 	UpdatedAt               *gtime.Time //
 	AppIdMd5                interface{} // 应用id加密md5后的结果
 	ThirdAppId              interface{} // 服务商appId
+	NotifyUrl               interface{} // 异步通知地址，允许业务层追加相关参数
 }

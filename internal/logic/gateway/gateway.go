@@ -89,6 +89,7 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 	return "", nil
 }
 
+// 验证应用网关
 func (s *sGateway) checkGateway(ctx context.Context, client *aliyun.AliPay, info gopay.BodyMap) {
 	sign, err := client.GetRsaSign(gopay.BodyMap{
 		"success": "true",

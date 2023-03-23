@@ -16,11 +16,11 @@ type TradeHookInfo struct {
 }
 
 type TradeHookKey struct {
-	// 类型
-	pay_enum.AlipayTradeStatus
 	TradeNo string `json:"tradeNo" dc:"订单交易号"`
 
 	HookCreatedAt gtime.Time `json:"hook_created_at" dc:"Hook创建时间"`
 	HookExpireAt  gtime.Time `json:"hook_expire_at" dc:"Hook有效期"`
 	Count         int        `json:"count" dc:"Hook执行次数"`
+	// 类型
+	pay_enum.AlipayTradeStatus
 }
