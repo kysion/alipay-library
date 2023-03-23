@@ -41,4 +41,5 @@ type AlipayMerchantAppConfig struct {
 	UpdatedAt               *gtime.Time `json:"updatedAt"               description:""`
 	AppIdMd5                string      `json:"appIdMd5"                description:"应用id加密md5后的结果"`
 	ThirdAppId              string      `json:"thirdAppId"              description:"服务商appId"`
+	NotifyUrl               string      `json:"notifyUrl"               description:"异步通知地址，允许业务层追加相关参数"`
 }

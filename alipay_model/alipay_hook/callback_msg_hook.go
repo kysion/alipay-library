@@ -6,7 +6,7 @@ import (
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum"
 )
 
-// ServiceMsgHookFunc 应用消息 - 由某人产生  对应回调CallBack
+// ServiceMsgHookFunc 回调消息 - 由某人产生  对应回调CallBack
 type ServiceMsgHookFunc func(ctx context.Context, info g.Map) string // 通常需要返回用户userId
 
 type ServiceMsgHookInfo struct {
