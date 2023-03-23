@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/SupenBysz/gf-admin-community v0.3.14
-	github.com/SupenBysz/gf-admin-company-modules v0.3.7
+	github.com/SupenBysz/gf-admin-company-modules v0.3.11
 	github.com/go-pay/gopay v1.5.91
 	github.com/gogf/gf/v2 v2.3.2
 	github.com/kuaimk/kmk-share-library v0.0.39

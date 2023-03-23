@@ -6,8 +6,8 @@ github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible h1
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/SupenBysz/gf-admin-community v0.3.14 h1:xquOQtAwqE4lVdX/AxBcRv/qGsbuFvMamUV64uN9aWk=
 github.com/SupenBysz/gf-admin-community v0.3.14/go.mod h1:7FP5w4Z7U0Cf+jf6b8+XMoh3MR39+bH4QV4aDj8tG88=
-github.com/SupenBysz/gf-admin-company-modules v0.3.7 h1:F3FDHR2LrnMfWVozcviUiYglnFfU3bH2Mo+yeyWXY8E=
-github.com/SupenBysz/gf-admin-company-modules v0.3.7/go.mod h1:wDj77GoyVXs0ulVlhbfmrL63678lH2Sjg2XgiFUKl6s=
+github.com/SupenBysz/gf-admin-company-modules v0.3.11 h1:9pthVHIJxYykVYWl1MW4fOp+r2K6WDmNRV9V1SA0aM4=
+github.com/SupenBysz/gf-admin-company-modules v0.3.11/go.mod h1:wDj77GoyVXs0ulVlhbfmrL63678lH2Sjg2XgiFUKl6s=
 github.com/casbin/casbin/v2 v2.60.0 h1:ZmC0/t4wolfEsDpDxTEsu2z6dfbMNpc11F52ceLs2Eo=
 github.com/casbin/casbin/v2 v2.60.0/go.mod h1:vByNa/Fchek0KZUgG5wEsl7iFsiviAYKRtgrQfcJqHg=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
