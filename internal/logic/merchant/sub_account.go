@@ -3,7 +3,6 @@ package merchant
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/go-pay/gopay"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
@@ -11,6 +10,7 @@ import (
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/utility/kconv"
+	"github.com/kysion/gopay"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_model/pay_hook"
 )
@@ -62,32 +62,34 @@ func (s *sSubAccount) TradeRelationBind(ctx context.Context, appId int64, info *
 // TradeRelationBatchQuery  分账关系查询
 
 // TradeRelationBatchQuery 分账关系查询
-func (s *sSubAccount) TradeRelationBatchQuery(ctx context.Context, appId string, outRequestNo string) (*alipay_model.TradeRelationBatchQuery, error) {
+func (s *sSubAccount) TradeRelationBatchQuery(ctx context.Context, appId string, outRequestNo string) (*alipay_model.TradeRoyaltyRelationQueryRes, error) {
 	// 商家AppId解析，获取商家应用，创建阿里支付客户端
-	// appId, _ := strconv.ParseInt(g.RequestFromCtx(ctx).Get("appId").String(), 32, 0)
+	//appId, _ := strconv.ParseInt(g.RequestFromCtx(ctx).Get("appId").String(), 32, 0)
 
-	appIdStr := gconv.String(appId)
+	appIdStr := gconv.String(appId) // 这里是第三方的APPID
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
 		return nil, err
 	}
 
-	// 通过商家中的第三方应用的AppId创建客户端
-	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	// 通过商家中的第三方应用的AppId创建客户端,，但是认证Token需要是商家的
+	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
 
 	// bindReq := alipay_model.TradeRelationBindReq{}
 	// bindReq.outRequestNo = gconv.String(orderId) // 外部请求号  == 单号
 
-	// 1.绑定分账关系 （商户与分账方）
-	res, err := client.TradeRelationBatchQuery(ctx, gopay.BodyMap{
+	// 1.查询绑定分账关系 （商户与分账方）
+	res, _ := client.TradeRelationBatchQuery(ctx, gopay.BodyMap{
 		"out_request_no": outRequestNo,
 	})
+	// 6391922844237893    6391922844237893  out_request_no -> 6391981705789509
 
-	if err != nil || res.Response.ResultCode != enum.SubAccount.SubAccountBindRes.Success.Code() {
+	if res.AlipayTradeRoyaltyRelationBatchqueryResponse.ResultCode != enum.SubAccount.SubAccountBindRes.Success.Code() {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "根据外部请求号查询分账方案失败", "分账方案")
 	}
-	var ret alipay_model.TradeRelationBatchQuery
-	gconv.Struct(&res.Response, &ret)
+	ret := alipay_model.TradeRoyaltyRelationQueryRes{}
+	gconv.Struct(res, &ret)
 
 	return &ret, nil
 }
@@ -126,14 +128,15 @@ func (s *sSubAccount) TradeOrderSettle(ctx context.Context, appId string, info a
 
 	// 通过商家中的第三方应用的AppId创建客户端
 	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
 
 	// bindReq.outRequestNo = gconv.String(orderId) // 外部请求号  == 单号
-	data := kconv.Struct(info, gopay.BodyMap{})
+	data := kconv.Struct(info, &gopay.BodyMap{})
 
-	// 1.绑定分账关系 （商户与分账方）
-	res, err := client.TradeOrderSettle(ctx, data)
+	// 1.分账下单 （商户与分账方）
+	res, err := client.TradeOrderSettle(ctx, *data)
 
-	if err != nil || res.Response.TradeNo != enum.SubAccount.SubAccountBindRes.Success.Code() {
+	if res.Response.SubMsg != enum.SubAccount.SubAccountBindRes.Success.Code() {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "分账统一下单交易结算失败", "分账方案")
 	}
 

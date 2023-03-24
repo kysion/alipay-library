@@ -13,6 +13,8 @@ type ReceiverList struct {
 	Memo          string `json:"memo" dc:"分账关系描述"`                      // 硬编码：充电佣金收入
 	LoginName     string `json:"login_name" dc:"当前userId对应的支付宝登录号"`     // 邮箱或者phone手机号
 	BindLoginName string `json:"bind_login_name" dc:"分账收款方绑定时的支付宝登录号。"` // 同上 可选
+
+	//Amount float32 `json:"amount" dc:"分账金额"` // 分账金额
 }
 
 /*
@@ -35,21 +37,46 @@ type TradeRelationBind struct {
 }
 
 // ====================分账关系查询Res===============================
-type TradeRelationBatchQueryResponse struct {
-	Response     *TradeRelationBatchQuery `json:"alipay_trade_order_settle_response"`
-	AlipayCertSn string                   `json:"alipay_cert_sn,omitempty" dc:"证书"`
-	SignData     string                   `json:"-" dc:"签名"`
-	Sign         string                   `json:"sign" dc:"签名"`
+//type TradeRelationBatchQueryResponse struct {
+//	Response     *TradeRelationBatchQuery `json:"alipay_trade_order_settle_response"`
+//	AlipayCertSn string                   `json:"alipay_cert_sn,omitempty" dc:"证书"`
+//	SignData     string                   `json:"-" dc:"签名"`
+//	Sign         string                   `json:"sign" dc:"签名"`
+//}
+//
+//type TradeRelationBatchQuery struct {
+//	ErrorResponse
+//	ResultCode      string          `json:"result_code" dc:"状态码：SUCCESS和FAIL"`
+//	ReceiverList    []*ReceiverList `json:"receiver_list" dc:"分账收款方列表详情"`
+//	TotalPageNum    int             `json:"total_page_num" dc:"总页数"`
+//	TotalRecordNum  int             `json:"total_record_num" dc:"分账关系记录总数"`
+//	CurrentPageNum  int             `json:"current_page_num" dc:"当前页数"`
+//	CurrentPageSize int             `json:"current_page_size" dc:"当前页面大小"`
+//}
+
+// TradeRoyaltyRelationQueryRes 查询分账关系返回值
+type TradeRoyaltyRelationQueryRes struct {
+	AlipayTradeRoyaltyRelationBatchqueryResponse AlipayTradeRoyaltyRelationBatchqueryResponse `json:"alipay_trade_royalty_relation_batchquery_response"`
+	AlipayCertSn                                 string                                       `json:"alipay_cert_sn"`
+	Sign                                         string                                       `json:"sign"`
 }
 
-type TradeRelationBatchQuery struct {
-	ErrorResponse
-	ResultCode      string          `json:"result_code" dc:"状态码：SUCCESS和FAIL"`
-	ReceiverList    []*ReceiverList `json:"receiver_list" dc:"分账收款方列表详情"`
-	TotalPageNum    int             `json:"total_page_num" dc:"总页数"`
-	TotalRecordNum  int             `json:"total_record_num" dc:"分账关系记录总数"`
-	CurrentPageNum  int             `json:"current_page_num" dc:"当前页数"`
-	CurrentPageSize int             `json:"current_page_size" dc:"当前页面大小"`
+//	type ReceiverList struct {
+//		Account       string `json:"account"`
+//		BindLoginName string `json:"bind_login_name"`
+//		LoginName     string `json:"login_name"`
+//		Memo          string `json:"memo"`
+//		Type          string `json:"type"`
+//	}
+type AlipayTradeRoyaltyRelationBatchqueryResponse struct {
+	Code            string         `json:"code"`
+	Msg             string         `json:"msg"`
+	CurrentPageNum  int            `json:"current_page_num"`
+	CurrentPageSize int            `json:"current_page_size"`
+	ReceiverList    []ReceiverList `json:"receiver_list"`
+	ResultCode      string         `json:"result_code"`
+	TotalPageNum    int            `json:"total_page_num"`
+	TotalRecordNum  int            `json:"total_record_num"`
 }
 
 // ==================分账关系解绑Res=================================

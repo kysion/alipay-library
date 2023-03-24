@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/go-pay/gopay"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -17,6 +16,7 @@ import (
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/gopay"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/yitter/idgenerator-go/idgen"
 )

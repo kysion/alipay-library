@@ -3,8 +3,6 @@ package gateway
 import (
 	"context"
 	"fmt"
-	"github.com/go-pay/gopay"
-	"github.com/go-pay/gopay/alipay"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/encoding/gxml"
 	"github.com/gogf/gf/v2/frame/g"
@@ -13,6 +11,8 @@ import (
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/gopay"
+	"github.com/kysion/gopay/alipay"
 	"strconv"
 )
 
