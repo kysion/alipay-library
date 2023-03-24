@@ -2,7 +2,6 @@ package merchant
 
 import (
 	"context"
-	"github.com/go-pay/gopay/alipay"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"
@@ -17,7 +16,9 @@ import (
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/base-library/utility/json"
 	"github.com/kysion/base-library/utility/kconv"
+	"github.com/kysion/gopay/alipay"
 	"github.com/kysion/pay-share-library/pay_model"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_service"
@@ -84,7 +85,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 
 		notifyKey := hook.NotifyKey{}
 
-		appId := bm.Get("app_id")
+		// appId := bm.Get("app_id")  // 因为是异步通知，所以这里的APPID是第三方应用的
 
 		// 解析消息参数。。。。
 		if bm.GetInterface("passback_params") != nil {
@@ -169,44 +170,36 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			// 4. 分账交易下单结算 Hook  需要支付状态为Success的订单
 
 			// a.查询分账关系
-			relationBatch, _ := service.SubAccount().TradeRelationBatchQuery(ctx, gconv.String(appId), gconv.String(bm["out_trade_no"]))
-			if relationBatch.ResultCode == enum.SubAccount.SubAccountBindRes.Fail.Code() {
+			relationBatch, _ := service.SubAccount().TradeRelationBatchQuery(ctx, gconv.String(bm["auth_app_id"]), gconv.String(bm["out_trade_no"]))
+			if relationBatch.AlipayTradeRoyaltyRelationBatchqueryResponse.ResultCode == enum.SubAccount.SubAccountBindRes.Fail.Code() {
 				return nil
 			}
 			// b.找到分账支出方账户  可选
 
-			// c.组装分账明细信息 +分账拓展参数
+			// c.组装分账明细信息 + 分账拓展参数
 			royaltyParameterList := make([]alipay_model.RoyaltyParameters, 0)
 			settleExtendParams := make([]alipay_model.SettleExtendParams, 0)
-			for _, list := range relationBatch.ReceiverList {
-				// 分账明细信息
-				royaltyParameterList = append(royaltyParameterList, alipay_model.RoyaltyParameters{
-					RoyaltyType:  enum.SubAccount.OperationType.Transfer.Code(), // 分账类型
-					TransOut:     "",                                            // 支出方账户。  可选
-					TransOutType: "",                                            // 支出方账户类型。 可选
-					TransInType:  list.Type,                                     // 收入方账户类型。
-					TransIn:      list.Account,                                  // 收入方账户
-					Amount:       gconv.Float32(list.Account),                   // 分账的金额，单位为元
-					Desc:         list.Memo,                                     // 分账描述
-					RoyaltyScene: order.TradeScene,                              // 可选值：达人佣金、平台服务费、技术服务费、其他
-					TransInName:  list.Name,                                     // 分账收款方姓名
-				})
+			for _, list := range relationBatch.AlipayTradeRoyaltyRelationBatchqueryResponse.ReceiverList {
+				// 分账明细信息  -- 存储在了分账关系的Memo字段中
+				royaltyParameters := alipay_model.RoyaltyParameters{}
+				json.Unmarshal([]byte(list.Memo), &royaltyParameters)
+				royaltyParameterList = append(royaltyParameterList, royaltyParameters)
 
 				// 代表该交易分账是否完结
-				settleExtendParams = append(settleExtendParams, alipay_model.SettleExtendParams{"true"})
+				settleExtendParams = append(settleExtendParams, alipay_model.SettleExtendParams{RoyaltyFinish: "true"})
 			}
 			settleReq := alipay_model.TradeOrderSettleReq{ // 分账所需数据
 				OutRequestNo:      gconv.String(bm["out_trade_no"]), // 订单号orderId = 交易单号out_trade_no = 分账请求号out_request_no
 				TradeNo:           gconv.String(bm["trade_no"]),     // 支付宝交易订单号 trade_no
 				RoyaltyParameters: royaltyParameterList,
-				OperatorId:        "",                                  //操作员id，由商家自定义
-				ExtendParams:      []alipay_model.SettleExtendParams{}, // 分账结算业务扩展参数，冻结分账场景下生效,代表该交易分账是否完结,true/false
-				RoyaltyMode:       "",                                  // 分账模式： async异步、同步sync
+				OperatorId:        "A0001",            //操作员id，由商家自定义
+				ExtendParams:      settleExtendParams, // 分账结算业务扩展参数，冻结分账场景下生效,代表该交易分账是否完结,true/false  为true，分账结束代表：到账VS解冻
+				RoyaltyMode:       "async",            // 分账模式： async异步、同步sync
 			}
 			//  是否需要使用Hook进行分账下单呢？
 
 			// d.分账交易下单，会返回 trade_no 和 settle_no，settle_no用来区分分账交易
-			settleRes, _ := service.SubAccount().TradeOrderSettle(ctx, appId, settleReq)
+			settleRes, _ := service.SubAccount().TradeOrderSettle(ctx, gconv.String(bm["auth_app_id"]), settleReq)
 			if settleRes.Response.SettleNo == "" {
 				return nil
 			}

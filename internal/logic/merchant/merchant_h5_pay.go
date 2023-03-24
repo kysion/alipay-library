@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	"github.com/go-pay/gopay"
-	"github.com/go-pay/gopay/alipay"
-	"github.com/go-pay/gopay/pkg/xlog"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/gopay"
+	"github.com/kysion/gopay/alipay"
+	"github.com/kysion/gopay/pkg/xlog"
 	"strconv"
 
 	"github.com/kysion/alipay-library/alipay_model"
@@ -80,8 +80,10 @@ func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.T
 	bm.Set("total_amount", totalAmount)
 	bm.Set("product_code", info.ProductNumber)
 	bm.Set("passback_params", g.Map{ // 可携带数据，在异步通知的的时候会一起回调回来
-		"notify_type":    enum.Notify.NotifyType.PayCallBack.Code(),
-		"order_id":       orderId,
+		"notify_type": enum.Notify.NotifyType.PayCallBack.Code(),
+		"order_id":    orderId,
+	})
+	bm.Set("extend_params", g.Map{ // 业务拓展参数
 		"royalty_freeze": true, // 资金冻结标识
 	})
 
