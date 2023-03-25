@@ -73,6 +73,7 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 	bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 	fmt.Println(bm)
 
+	// 验证应用网关我们直接处理
 	if bm.Get("service") == enum.Info.ServiceType.ServiceCheck.Code() {
 		s.checkGateway(ctx, client, bm)
 	}
