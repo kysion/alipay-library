@@ -21,6 +21,6 @@ type TradeHookKey struct {
 	HookCreatedAt gtime.Time `json:"hook_created_at" dc:"Hook创建时间"`
 	HookExpireAt  gtime.Time `json:"hook_expire_at" dc:"Hook有效期"`
 	Count         int        `json:"count" dc:"Hook执行次数"`
-	// 类型
+	// 交易类型
 	pay_enum.AlipayTradeStatus
 }

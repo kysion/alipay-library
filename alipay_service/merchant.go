@@ -19,19 +19,6 @@ import (
 )
 
 type (
-	IMerchantTinyappPay interface {
-		OrderSend(ctx context.Context)
-		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
-	}
-	IMerchantTransfer interface {
-		FundTransUniTransfer(ctx context.Context, appId string, info *alipay_model.FundTransUniTransferReq) (aliRsp *alipay_model.TransUniTransferRes, err error)
-	}
-	ISubAccount interface {
-		TradeRelationBind(ctx context.Context, appId int64, info *alipay_model.TradeRelationBindReq) (bool, error)
-		TradeRelationBatchQuery(ctx context.Context, appId string, outRequestNo string) (*alipay_model.TradeRoyaltyRelationQueryRes, error)
-		TradeOrderSettleQuery(ctx context.Context, appId string, settleNo string, outRequestNo string, tradeNo string) (*alipay_model.TradeOrderSettleQueryRes, error)
-		TradeOrderSettle(ctx context.Context, appId string, info alipay_model.TradeOrderSettleReq) (*alipay_model.TradeOrderSettleResponse, error)
-	}
 	IWallet interface {
 		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
 		Wallet(ctx context.Context, info g.Map) string
@@ -47,6 +34,7 @@ type (
 	IMerchantNotify interface {
 		InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc)
 		InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc)
+		InstallSubAccountHook(hookKey hook.SubAccountHookKey, hookFunc hook.SubAccountHookFunc)
 		MerchantNotifyServices(ctx context.Context) (string, error)
 	}
 	IMerchantService interface {
@@ -54,6 +42,20 @@ type (
 		GetHook() base_hook.BaseHook[alipay_enum.ConsumerAction, hook.ConsumerHookFunc]
 		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
 		UserInfoAuth(ctx context.Context, info g.Map) string
+	}
+	IMerchantTinyappPay interface {
+		OrderSend(ctx context.Context)
+		TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error)
+	}
+	IMerchantTransfer interface {
+		FundTransUniTransfer(ctx context.Context, appId string, info *alipay_model.FundTransUniTransferReq) (aliRsp *alipay_model.TransUniTransferRes, err error)
+	}
+	ISubAccount interface {
+		TradeRelationBind(ctx context.Context, appId int64, info *alipay_model.TradeRelationBindReq) (bool, error)
+		TradeRelationUnbind(ctx context.Context, appId string, info *alipay_model.TradeRelationBindReq) (*alipay_model.TradeRelationUnbindResponse, error)
+		TradeRelationBatchQuery(ctx context.Context, appId string, outRequestNo string) (*alipay_model.TradeRoyaltyRelationQueryRes, error)
+		TradeOrderSettleQuery(ctx context.Context, appId string, settleNo string, outRequestNo string, tradeNo string) (*alipay_model.TradeOrderSettleQueryRes, error)
+		TradeOrderSettle(ctx context.Context, appId string, info alipay_model.TradeOrderSettleReq) (*alipay_model.TradeOrderSettleResponse, error)
 	}
 )
 
@@ -67,6 +69,17 @@ var (
 	localMerchantTransfer   IMerchantTransfer
 	localSubAccount         ISubAccount
 )
+
+func MerchantService() IMerchantService {
+	if localMerchantService == nil {
+		panic("implement not found for interface IMerchantService, forgot register?")
+	}
+	return localMerchantService
+}
+
+func RegisterMerchantService(i IMerchantService) {
+	localMerchantService = i
+}
 
 func MerchantTinyappPay() IMerchantTinyappPay {
 	if localMerchantTinyappPay == nil {
@@ -143,15 +156,4 @@ func MerchantNotify() IMerchantNotify {
 
 func RegisterMerchantNotify(i IMerchantNotify) {
 	localMerchantNotify = i
-}
-
-func MerchantService() IMerchantService {
-	if localMerchantService == nil {
-		panic("implement not found for interface IMerchantService, forgot register?")
-	}
-	return localMerchantService
-}
-
-func RegisterMerchantService(i IMerchantService) {
-	localMerchantService = i
 }

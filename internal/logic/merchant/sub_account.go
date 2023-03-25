@@ -59,7 +59,25 @@ func (s *sSubAccount) TradeRelationBind(ctx context.Context, appId int64, info *
 	return true, nil
 }
 
-// TradeRelationBatchQuery  分账关系查询
+// TradeRelationUnbind  分账关系解绑
+func (s *sSubAccount) TradeRelationUnbind(ctx context.Context, appId string, info *alipay_model.TradeRelationBindReq) (*alipay_model.TradeRelationUnbindResponse, error) {
+	appIdStr := gconv.String(appId)
+	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
+	if err != nil {
+		return nil, err
+	}
+	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
+
+	res, err := client.TradeRelationUnbind(ctx, gopay.BodyMap{
+		"receiver_list":  info.ReceiverList,
+		"out_request_no": info.OutRequestNo,
+	})
+	var ret alipay_model.TradeRelationUnbindResponse
+	gconv.Struct(res, &ret)
+
+	return &ret, err
+}
 
 // TradeRelationBatchQuery 分账关系查询
 func (s *sSubAccount) TradeRelationBatchQuery(ctx context.Context, appId string, outRequestNo string) (*alipay_model.TradeRoyaltyRelationQueryRes, error) {
@@ -82,6 +100,7 @@ func (s *sSubAccount) TradeRelationBatchQuery(ctx context.Context, appId string,
 	// 1.查询绑定分账关系 （商户与分账方）
 	res, _ := client.TradeRelationBatchQuery(ctx, gopay.BodyMap{
 		"out_request_no": outRequestNo,
+		"app_auth_token": merchantApp.AppAuthToken,
 	})
 	// 6391922844237893    6391922844237893  out_request_no -> 6391981705789509
 
@@ -102,6 +121,8 @@ func (s *sSubAccount) TradeOrderSettleQuery(ctx context.Context, appId string, s
 		return nil, err
 	}
 	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
+
 	/*
 	   settle_no	    特殊可选	   支付宝分账请求单号，传入该字段，无需再传外部请求号和支付宝交易号
 	   out_request_no	特殊可选	   外部请求号，需要和支付宝交易号一起传入
@@ -113,7 +134,7 @@ func (s *sSubAccount) TradeOrderSettleQuery(ctx context.Context, appId string, s
 		"trade_no":       tradeNo,
 	})
 	var ret alipay_model.TradeOrderSettleQueryRes
-	gconv.Struct(&res.Response, &ret)
+	gconv.Struct(res.Response, &ret)
 
 	return &ret, err
 }
@@ -136,7 +157,7 @@ func (s *sSubAccount) TradeOrderSettle(ctx context.Context, appId string, info a
 	// 1.分账下单 （商户与分账方）
 	res, err := client.TradeOrderSettle(ctx, *data)
 
-	if res.Response.SubMsg != enum.SubAccount.SubAccountBindRes.Success.Code() {
+	if res.Response.ErrorResponse.Code != enum.SubAccount.TradeSubAccountRes.Success.Code() {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "分账统一下单交易结算失败", "分账方案")
 	}
 

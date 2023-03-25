@@ -36,24 +36,6 @@ type TradeRelationBind struct {
 	ResultCode string `json:"result_code" dc:"状态码：SUCCESS和FAIL"`
 }
 
-// ====================分账关系查询Res===============================
-//type TradeRelationBatchQueryResponse struct {
-//	Response     *TradeRelationBatchQuery `json:"alipay_trade_order_settle_response"`
-//	AlipayCertSn string                   `json:"alipay_cert_sn,omitempty" dc:"证书"`
-//	SignData     string                   `json:"-" dc:"签名"`
-//	Sign         string                   `json:"sign" dc:"签名"`
-//}
-//
-//type TradeRelationBatchQuery struct {
-//	ErrorResponse
-//	ResultCode      string          `json:"result_code" dc:"状态码：SUCCESS和FAIL"`
-//	ReceiverList    []*ReceiverList `json:"receiver_list" dc:"分账收款方列表详情"`
-//	TotalPageNum    int             `json:"total_page_num" dc:"总页数"`
-//	TotalRecordNum  int             `json:"total_record_num" dc:"分账关系记录总数"`
-//	CurrentPageNum  int             `json:"current_page_num" dc:"当前页数"`
-//	CurrentPageSize int             `json:"current_page_size" dc:"当前页面大小"`
-//}
-
 // TradeRoyaltyRelationQueryRes 查询分账关系返回值
 type TradeRoyaltyRelationQueryRes struct {
 	AlipayTradeRoyaltyRelationBatchqueryResponse AlipayTradeRoyaltyRelationBatchqueryResponse `json:"alipay_trade_royalty_relation_batchquery_response"`
@@ -89,24 +71,24 @@ type TradeRelationUnbindResponse struct {
 
 // ====================分账交易下单Req===============================
 type TradeOrderSettleReq struct {
-	OutRequestNo      string               `json:"out_request_no" dc:"结算请求流水号，由商家自定义"`
-	TradeNo           string               `json:"trade_no" dc:"支付宝订单号"`
-	RoyaltyParameters []RoyaltyParameters  `json:"royalty_parameters" dc:"分账明细信息。"`
-	OperatorId        string               `json:"operator_id" dc:"操作员 ID，商家自定义操作员编号。"`
-	ExtendParams      []SettleExtendParams `json:"extend_params" dc:"分账结算业务扩展参数"`
-	RoyaltyMode       string               `json:"royalty_mode" dc:"分账模式，目前有两种分账同步执行sync，分账异步执行async，不传默认同步执"`
+	OutRequestNo      string              `json:"out_request_no" dc:"结算请求流水号，由商家自定义"`
+	TradeNo           string              `json:"trade_no" dc:"支付宝订单号"`
+	RoyaltyParameters []RoyaltyParameters `json:"royalty_parameters" dc:"分账明细信息。"`
+	OperatorId        string              `json:"operator_id" dc:"操作员 ID，商家自定义操作员编号。"`
+	ExtendParams      SettleExtendParams  `json:"extend_params" dc:"分账结算业务扩展参数"`
+	RoyaltyMode       string              `json:"royalty_mode" dc:"分账模式，目前有两种分账同步执行sync，分账异步执行async，不传默认同步执"`
 }
 
 type RoyaltyParameters struct {
 	RoyaltyType  string  `json:"royalty_type" dc:"分账类型."`
-	TransOut     string  `json:"trans_out" dc:"支出方账户。"`
-	TransOutType string  `json:"trans_out_type" dc:"支出方账户类型。"`
+	TransOut     string  `json:"trans_out" dc:"支出方账户。可选"`
+	TransOutType string  `json:"trans_out_type" dc:"支出方账户类型。可选"`
 	TransInType  string  `json:"trans_in_type" dc:"收入方账户类型。"`
 	TransIn      string  `json:"trans_in" dc:"收入方账户。"`
 	Amount       float32 `json:"amount" dc:"分账的金额，单位为元"`
 	Desc         string  `json:"desc" dc:"分账描述"`
 	RoyaltyScene string  `json:"royalty_scene" dc:"可选值：达人佣金、平台服务费、技术服务费、其他"`
-	TransInName  string  `json:"trans_in_name" dc:"分账收款方姓名，"`
+	TransInName  string  `json:"trans_in_name" dc:"分账收款方姓名"`
 }
 
 type SettleExtendParams struct {
@@ -161,3 +143,21 @@ type RoyaltyDetail struct {
 	ErrorCode     string `json:"error_code" dc:"分账失败错误码"`
 	ErrorDesc     string `json:"error_desc" dc:"分账错误描述信息"`
 }
+
+// ====================分账关系查询Res===============================
+//type TradeRelationBatchQueryResponse struct {
+//	Response     *TradeRelationBatchQuery `json:"alipay_trade_order_settle_response"`
+//	AlipayCertSn string                   `json:"alipay_cert_sn,omitempty" dc:"证书"`
+//	SignData     string                   `json:"-" dc:"签名"`
+//	Sign         string                   `json:"sign" dc:"签名"`
+//}
+//
+//type TradeRelationBatchQuery struct {
+//	ErrorResponse
+//	ResultCode      string          `json:"result_code" dc:"状态码：SUCCESS和FAIL"`
+//	ReceiverList    []*ReceiverList `json:"receiver_list" dc:"分账收款方列表详情"`
+//	TotalPageNum    int             `json:"total_page_num" dc:"总页数"`
+//	TotalRecordNum  int             `json:"total_record_num" dc:"分账关系记录总数"`
+//	CurrentPageNum  int             `json:"current_page_num" dc:"当前页数"`
+//	CurrentPageSize int             `json:"current_page_size" dc:"当前页面大小"`
+//}
