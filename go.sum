@@ -4,8 +4,8 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible h1:1G1pk05UrOh0NlF1oeaaix1x8XzrfjIDK47TY0Zehcw=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/SupenBysz/gf-admin-community v0.3.14 h1:xquOQtAwqE4lVdX/AxBcRv/qGsbuFvMamUV64uN9aWk=
-github.com/SupenBysz/gf-admin-community v0.3.14/go.mod h1:7FP5w4Z7U0Cf+jf6b8+XMoh3MR39+bH4QV4aDj8tG88=
+github.com/SupenBysz/gf-admin-community v0.3.15 h1:rHBoUwlPQ6N3iqX9/i4OYAi88Zdu1nssNp2TvePoDoU=
+github.com/SupenBysz/gf-admin-community v0.3.15/go.mod h1:7FP5w4Z7U0Cf+jf6b8+XMoh3MR39+bH4QV4aDj8tG88=
 github.com/SupenBysz/gf-admin-company-modules v0.3.11 h1:9pthVHIJxYykVYWl1MW4fOp+r2K6WDmNRV9V1SA0aM4=
 github.com/SupenBysz/gf-admin-company-modules v0.3.11/go.mod h1:wDj77GoyVXs0ulVlhbfmrL63678lH2Sjg2XgiFUKl6s=
 github.com/casbin/casbin/v2 v2.60.0 h1:ZmC0/t4wolfEsDpDxTEsu2z6dfbMNpc11F52ceLs2Eo=
