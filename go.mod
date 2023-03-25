@@ -9,7 +9,7 @@ require (
 	github.com/kuaimk/kmk-share-library v0.0.39
 	github.com/kysion/base-library v0.0.7
 	github.com/kysion/gopay v0.0.2
-	github.com/kysion/pay-share-library v0.0.8
+	github.com/kysion/pay-share-library v0.0.9
 	github.com/yitter/idgenerator-go v1.3.2
 )
 
@@ -54,7 +54,7 @@ require (
 )
 
 // replace github.com/kysion/pay-share-library => ../pay-share-library
-
+//
 //replace github.com/kuaimk/kmk-share-library => ../../kuaimk/kmk-share-library
 
 //replace github.com/SupenBysz/gf-admin-community => ../../kysion/gf-admin-community
