@@ -6,8 +6,8 @@ import "github.com/kysion/pay-share-library/pay_model"
 
 type TradeAppPay struct {
 	Subject     string  `json:"subject" dc:"订单标题"`
-	OutTradeNo  string  `json:"outTradeNo" c:"商户网站唯一订单号"`
-	TotalAmount float32 `json:"totalAmount"  c:"订单总金额，单位为元"`
+	OutTradeNo  string  `json:"outTradeNo" dc:"商户网站唯一订单号"`
+	TotalAmount float32 `json:"totalAmount"  dc:"订单总金额，单位为元"`
 }
 
 // TradeOrder 交易订单

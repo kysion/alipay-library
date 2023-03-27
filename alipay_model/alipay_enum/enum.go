@@ -21,7 +21,7 @@ type (
 	// SubAccountBindRes 分账绑定
 	SubAccountBindRes sub_account.SubAccountBindResEnum
 	// SubAccountAction 分账行为
-	SubAccountAction sub_account.ActionEnum
+	SubAccountAction sub_account.OperationTypeEnum
 )
 
 var (

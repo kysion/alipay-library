@@ -4,7 +4,7 @@ import "github.com/kysion/base-library/utility/enum"
 
 type CallBackMsgTypeEnum enum.IEnumCode[string]
 
-// 各种消息类型
+// 各种回调消息类型  - 某人某行为产生
 type callBackMsgType struct {
 	AlipayAppAuth CallBackMsgTypeEnum
 	AlipayWallet  CallBackMsgTypeEnum

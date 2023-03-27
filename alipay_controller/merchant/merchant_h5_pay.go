@@ -14,6 +14,7 @@ var MerchantH5Pay = merchantH5Pay{}
 
 type merchantH5Pay struct{}
 
+// H5TradeCreate H5支付
 func (c *merchantH5Pay) H5TradeCreate(ctx context.Context, req *alipay_merchant_v1.H5TradeReq) (api_v1.StringRes, error) {
 
 	// 创建交易订单，生成二维码，根据二维码调起收银台
@@ -22,6 +23,7 @@ func (c *merchantH5Pay) H5TradeCreate(ctx context.Context, req *alipay_merchant_
 	return "", nil
 }
 
+// 自定义通知回调
 func (c *merchantH5Pay) notifyHookFunc(ctx context.Context, info gmap.Map, hookInfo hook.NotifyKey) bool {
 
 	// 在此进行订单支付相关判断和信息更新

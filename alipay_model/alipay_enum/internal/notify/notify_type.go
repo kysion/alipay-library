@@ -2,9 +2,9 @@ package notify
 
 import "github.com/kysion/base-library/utility/enum"
 
+// NotifyTypeEnum 各种异步消息类型
 type NotifyTypeEnum enum.IEnumCode[string]
 
-// 各种消息类型
 type notifyType struct {
 	PayCallBack NotifyTypeEnum
 }

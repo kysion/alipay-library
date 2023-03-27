@@ -39,6 +39,7 @@ type sGateway struct {
 	ServiceNotifyTypeHook base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc]
 }
 
+// GetCallbackMsgHook 返回回调消息Hook对象
 func (s *sGateway) GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType, hook.ServiceMsgHookFunc] {
 	return &s.CallbackMsgHook
 }
