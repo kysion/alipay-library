@@ -1,8 +1,9 @@
 package sub_account
 
 type subAccount struct {
-	SubAccountBindRes sub
-	OperationType     operationType
+	SubAccountBindRes  sub
+	OperationType      operationType
+	TradeSubAccountRes tradeSubAccount
 }
 
 var SubAccount = subAccount{
