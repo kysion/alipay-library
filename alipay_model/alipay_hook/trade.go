@@ -7,7 +7,7 @@ import (
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 )
 
-// TradeHookFunc 支付HookFunc （ctx, 参数是订单） 使用场景：当支付成功后，Hook传递订单数据，然后在业务层创建账单
+// TradeHookFunc 交易HookFunc （ctx, 参数是订单） 使用场景：当支付成功后，Hook传递订单数据，然后在业务层创建账单
 type TradeHookFunc func(ctx context.Context, info *pay_model.OrderRes) bool
 
 type TradeHookInfo struct {

@@ -4,7 +4,7 @@ import "github.com/kysion/base-library/utility/enum"
 
 type ServiceNotifyTypeEnum enum.IEnumCode[string]
 
-// 各种通知类型
+// 各种应用通知类型  - 平台主动发送
 type serviceNotifyType struct {
 	ServiceCheck ServiceNotifyTypeEnum
 }

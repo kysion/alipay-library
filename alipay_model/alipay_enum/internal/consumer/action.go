@@ -2,8 +2,7 @@ package consumer
 
 import "github.com/kysion/base-library/utility/enum"
 
-// 授权、取消授权
-
+// ActionEnum 行为：授权、取消授权
 type ActionEnum enum.IEnumCode[int]
 
 type action struct {

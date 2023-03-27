@@ -1,6 +1,6 @@
 package alipay_model
 
-// TradeRelationBindReq 分账绑定请求参数Req
+// TradeRelationBindReq ====================分账绑定请求参数Req===============================
 type TradeRelationBindReq struct { // List
 	OutRequestNo string         `json:"out_request_no" dc:"外部请求号" v:"required#外部请求号不能为空"` // 外部请求号 == 订单ID
 	ReceiverList []ReceiverList `json:"receiver_list" dc:"分账关系绑定参数"`
@@ -13,8 +13,6 @@ type ReceiverList struct {
 	Memo          string `json:"memo" dc:"分账关系描述"`                      // 硬编码：充电佣金收入
 	LoginName     string `json:"login_name" dc:"当前userId对应的支付宝登录号"`     // 邮箱或者phone手机号
 	BindLoginName string `json:"bind_login_name" dc:"分账收款方绑定时的支付宝登录号。"` // 同上 可选
-
-	//Amount float32 `json:"amount" dc:"分账金额"` // 分账金额
 }
 
 /*
@@ -23,7 +21,7 @@ type ReceiverList struct {
        FAIL：分账关系绑定失败。
 */
 
-// ====================分账关系绑定Res===============================
+// TradeRelationBindResponse ====================分账关系绑定Res===============================
 type TradeRelationBindResponse struct {
 	Response     *TradeRelationBind `json:"alipay_trade_royalty_relation_bind_response"`
 	AlipayCertSn string             `json:"alipay_cert_sn,omitempty"`
@@ -36,20 +34,13 @@ type TradeRelationBind struct {
 	ResultCode string `json:"result_code" dc:"状态码：SUCCESS和FAIL"`
 }
 
-// TradeRoyaltyRelationQueryRes 查询分账关系返回值
+// TradeRoyaltyRelationQueryRes ====================查询分账关系Res===============================
 type TradeRoyaltyRelationQueryRes struct {
 	AlipayTradeRoyaltyRelationBatchqueryResponse AlipayTradeRoyaltyRelationBatchqueryResponse `json:"alipay_trade_royalty_relation_batchquery_response"`
 	AlipayCertSn                                 string                                       `json:"alipay_cert_sn"`
 	Sign                                         string                                       `json:"sign"`
 }
 
-//	type ReceiverList struct {
-//		Account       string `json:"account"`
-//		BindLoginName string `json:"bind_login_name"`
-//		LoginName     string `json:"login_name"`
-//		Memo          string `json:"memo"`
-//		Type          string `json:"type"`
-//	}
 type AlipayTradeRoyaltyRelationBatchqueryResponse struct {
 	Code            string         `json:"code"`
 	Msg             string         `json:"msg"`
@@ -61,7 +52,7 @@ type AlipayTradeRoyaltyRelationBatchqueryResponse struct {
 	TotalRecordNum  int            `json:"total_record_num"`
 }
 
-// ==================分账关系解绑Res=================================
+// TradeRelationUnbindResponse ==================分账关系解绑Res=================================
 type TradeRelationUnbindResponse struct {
 	Response     *TradeRelationBind `json:"alipay_trade_royalty_relation_unbind_response"`
 	AlipayCertSn string             `json:"alipay_cert_sn,omitempty"`
@@ -69,7 +60,7 @@ type TradeRelationUnbindResponse struct {
 	Sign         string             `json:"sign"`
 }
 
-// ====================分账交易下单Req===============================
+// TradeOrderSettleReq ====================分账交易下单Req===============================
 type TradeOrderSettleReq struct {
 	OutRequestNo      string              `json:"out_request_no" dc:"结算请求流水号，由商家自定义"`
 	TradeNo           string              `json:"trade_no" dc:"支付宝订单号"`
@@ -95,7 +86,7 @@ type SettleExtendParams struct {
 	RoyaltyFinish string `json:"royalty_finish" dc:"代表该交易分账是否完结，可选值：true/false，默认值为false。true：代表分账完结，则本次分账处理完成后会把该笔交易的剩余冻结金额全额解冻。false：代表分账未完结"`
 }
 
-// ====================分账交易下单Res===============================
+// TradeOrderSettleResponse ====================分账交易下单Res===============================
 type TradeOrderSettleResponse struct {
 	Response     *TradeOrderSettle `json:"alipay_trade_order_settle_response"`
 	AlipayCertSn string            `json:"alipay_cert_sn,omitempty"`
@@ -109,14 +100,14 @@ type TradeOrderSettle struct {
 	SettleNo string `json:"settle_no" dc:"支付宝分账单号，可以根据该单号查询单次分账请求执行结果"`
 }
 
-// ===================分账交易查询Req================================
+// TradeOrderSettleQueryReq ===================分账交易查询Req================================
 type TradeOrderSettleQueryReq struct {
 	SettleNo     string `json:"settle_no" dc:"支付宝分账请求单号，传入了这个则无需传递下面两个参数"`
 	OutRequestNo string `json:"out_request_no" dc:"外部请求号，需要和支付宝交易号一起传入"`
 	TradeNo      string `json:"trade_no" dc:"支付宝交易号，需要和外部请求号一起传入"`
 }
 
-// ===================分账交易Res================================
+// TradeOrderSettleQueryRes ===================分账交易Res================================
 type TradeOrderSettleQueryRes struct {
 	Response     *TradeOrderSettleQuery `json:"alipay_trade_order_settle_response"`
 	AlipayCertSn string                 `json:"alipay_cert_sn,omitempty" dc:"证书"`
@@ -143,21 +134,3 @@ type RoyaltyDetail struct {
 	ErrorCode     string `json:"error_code" dc:"分账失败错误码"`
 	ErrorDesc     string `json:"error_desc" dc:"分账错误描述信息"`
 }
-
-// ====================分账关系查询Res===============================
-//type TradeRelationBatchQueryResponse struct {
-//	Response     *TradeRelationBatchQuery `json:"alipay_trade_order_settle_response"`
-//	AlipayCertSn string                   `json:"alipay_cert_sn,omitempty" dc:"证书"`
-//	SignData     string                   `json:"-" dc:"签名"`
-//	Sign         string                   `json:"sign" dc:"签名"`
-//}
-//
-//type TradeRelationBatchQuery struct {
-//	ErrorResponse
-//	ResultCode      string          `json:"result_code" dc:"状态码：SUCCESS和FAIL"`
-//	ReceiverList    []*ReceiverList `json:"receiver_list" dc:"分账收款方列表详情"`
-//	TotalPageNum    int             `json:"total_page_num" dc:"总页数"`
-//	TotalRecordNum  int             `json:"total_record_num" dc:"分账关系记录总数"`
-//	CurrentPageNum  int             `json:"current_page_num" dc:"当前页数"`
-//	CurrentPageSize int             `json:"current_page_size" dc:"当前页面大小"`
-//}

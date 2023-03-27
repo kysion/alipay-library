@@ -1,6 +1,6 @@
 package alipay_model
 
-// ====================单笔资金转账Req===============================
+// FundTransUniTransferReq ====================单笔资金转账Req===============================
 type FundTransUniTransferReq struct {
 	OutBizNo       string    `json:"out_biz_no" dc:"商家侧唯一订单号，由商家自定义。对于不同转账请求"`
 	TransAmount    float32   `json:"trans_amount" dc:"订单总金额，单位为元，"`
@@ -24,7 +24,7 @@ type PayeeInfo struct {
 	Name         string `json:"name" dc:"可选：参与方真实姓名。如果非空，将校验收款支付宝账号姓名一致性。"`
 }
 
-// ====================单笔转账Res===============================
+// FundTransUniTransferRes ====================单笔转账Res===============================
 type FundTransUniTransferRes struct {
 	Response     *TransUniTransferRes `json:"alipay_fund_trans_uni_transfer_response"`
 	AlipayCertSn string               `json:"alipay_cert_sn,omitempty"`
@@ -41,7 +41,7 @@ type TransUniTransferRes struct {
 	TransDate      string `json:"trans_date,omitempty" dc:"订单支付时间，格式为yyyy-MM-dd HH:mm:s"`
 }
 
-// ====================资金转账Res===============================
+// FundTransToaccountTransferRes ====================转账Res===============================
 type FundTransToaccountTransferRes struct {
 	Response     *TransToaccountTransfer `json:"alipay_fund_trans_toaccount_transfer_response"`
 	AlipayCertSn string                  `json:"alipay_cert_sn,omitempty"`

@@ -10,8 +10,7 @@ type CreateTrade struct {
 	AppId       string  `json:"app_id" dc:"请提供商家应用AppId的32进制编码数据"`
 }
 
-// ===================================================
-
+// TradeCreateResponse =====================创建小程序支付Res==============================
 type TradeCreateResponse struct {
 	Response     *TradeCreate `json:"alipay_trade_create_response"`
 	AlipayCertSn string       `json:"alipay_cert_sn,omitempty"`
