@@ -11,7 +11,7 @@ import (
 // AlipayConsumerConfig is the golang structure for table alipay_consumer_config.
 type AlipayConsumerConfig struct {
 	Id                 int64       `json:"id"                 description:"id"`
-	UserId             int64       `json:"userId"             description:"用户账号id"`
+	UserId             string      `json:"userId"             description:"用户账号id"`
 	SysUserId          int64       `json:"sysUserId"          description:"用户id"`
 	Avatar             string      `json:"avatar"             description:"头像"`
 	Province           string      `json:"province"           description:"省份"`

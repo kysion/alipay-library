@@ -7,10 +7,10 @@ type CreateTrade struct {
 	OutTradeNo  string  `json:"out_trade_no" dc:"商户订单号。"`
 	TotalAmount float32 `json:"total_amount" dc:"订单总金额。"`
 	ProductCode string  `json:"product_code" dc:"商家和支付宝签约的产品码。"`
+	AppId       string  `json:"app_id" dc:"请提供商家应用AppId的32进制编码数据"`
 }
 
-// ===================================================
-
+// TradeCreateResponse =====================创建小程序支付Res==============================
 type TradeCreateResponse struct {
 	Response     *TradeCreate `json:"alipay_trade_create_response"`
 	AlipayCertSn string       `json:"alipay_cert_sn,omitempty"`

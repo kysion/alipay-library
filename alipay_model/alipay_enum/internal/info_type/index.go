@@ -1,9 +1,12 @@
 package info_type
 
 type info struct {
-	Type infoType
+	CallbackType callBackMsgType
+
+	ServiceType serviceNotifyType
 }
 
 var Info = info{
-	Type: InfoType,
+	CallbackType: CallBackMsgType,
+	ServiceType:  ServiceNotifyType,
 }

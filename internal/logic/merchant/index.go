@@ -1,22 +1,19 @@
 package merchant
 
 import (
-    service "github.com/kysion/alipay-test/alipay_service"
-    "github.com/kysion/alipay-test/internal/logic/merchant/app_auth"
-    "github.com/kysion/alipay-test/internal/logic/merchant/h5_pay"
-    "github.com/kysion/alipay-test/internal/logic/merchant/tinyapp_pay"
-    "github.com/kysion/alipay-test/internal/logic/merchant/wallet"
+	service "github.com/kysion/alipay-library/alipay_service"
 )
 
 func init() {
 
-    service.RegisterAppAuth(app_auth.NewAppAuth())
+	service.RegisterAppAuth(NewAppAuth())
 
-    service.RegisterMerchantNotify(h5_pay.NewMerchantNotify())
+	service.RegisterMerchantNotify(NewMerchantNotify())
 
-    service.RegisterMerchantH5Pay(h5_pay.NewMerchantH5Pay())
-    service.RegisterMerchantPay(tinyapp_pay.NewMerchantTinyappPay())
-    service.RegisterWallet(wallet.NewWallet())
+	service.RegisterMerchantH5Pay(NewMerchantH5Pay())
+	service.RegisterMerchantTinyappPay(NewMerchantTinyappPay())
 
-    service.RegisterMerchantService(NewMerchantService())
+	//service.RegisterWallet(NewWallet())
+
+	service.RegisterMerchantService(NewMerchantService())
 }

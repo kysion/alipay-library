@@ -2,6 +2,7 @@ package consumer
 
 import "github.com/kysion/base-library/utility/enum"
 
+// SexEnum 性别：0女  1男
 type SexEnum enum.IEnumCode[int]
 
 type sex struct {

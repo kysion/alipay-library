@@ -8,26 +8,13 @@ package alipay_service
 import (
 	"context"
 
-	"github.com/kysion/alipay-test/alipay_model"
-	enum "github.com/kysion/alipay-test/alipay_model/alipay_enum"
-	hook "github.com/kysion/alipay-test/alipay_model/alipay_hook"
+	"github.com/kysion/alipay-library/alipay_model"
+	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
+	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	"github.com/kysion/base-library/base_hook"
 )
 
 type (
-	IConsumer interface {
-		GetConsumerById(ctx context.Context, id int64) (*alipay_model.AlipayConsumerConfig, error)
-		GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error)
-		CreateConsumer(ctx context.Context, info alipay_model.AlipayConsumerConfig) (*alipay_model.AlipayConsumerConfig, error)
-		UpdateConsumer(ctx context.Context, id int64, info alipay_model.UpdateConsumerReq) (bool, error)
-		UpdateConsumerState(ctx context.Context, id int64, state int) (bool, error)
-	}
-	IGateway interface {
-		InstallHook(infoType enum.InfoType, hookFunc hook.ServiceMsgHookFunc)
-		GetHook() base_hook.BaseHook[enum.InfoType, hook.ServiceMsgHookFunc]
-		GatewayServices(ctx context.Context) (string, error)
-		GatewayCallback(ctx context.Context) (string, error)
-	}
 	IMerchantAppConfig interface {
 		GetMerchantAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayMerchantAppConfig, error)
 		GetMerchantAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayMerchantAppConfig, error)
@@ -50,6 +37,20 @@ type (
 		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateThirdAppConfigHttpsReq) (bool, error)
 		UpdateThirdKeyCert(ctx context.Context, info *alipay_model.UpdateThirdKeyCertReq) (bool, error)
 	}
+	IConsumer interface {
+		GetConsumerById(ctx context.Context, id int64) (*alipay_model.AlipayConsumerConfig, error)
+		GetConsumerByUserId(ctx context.Context, userId string) (*alipay_model.AlipayConsumerConfig, error)
+		GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error)
+		CreateConsumer(ctx context.Context, info alipay_model.AlipayConsumerConfig) (*alipay_model.AlipayConsumerConfig, error)
+		UpdateConsumer(ctx context.Context, id int64, info alipay_model.UpdateConsumerReq) (bool, error)
+		UpdateConsumerState(ctx context.Context, id int64, state int) (bool, error)
+	}
+	IGateway interface {
+		GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType, hook.ServiceMsgHookFunc]
+		GetServiceNotifyTypeHook() base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc]
+		GatewayServices(ctx context.Context) (string, error)
+		GatewayCallback(ctx context.Context) (string, error)
+	}
 )
 
 var (
@@ -58,6 +59,17 @@ var (
 	localMerchantAppConfig IMerchantAppConfig
 	localThirdAppConfig    IThirdAppConfig
 )
+
+func ThirdAppConfig() IThirdAppConfig {
+	if localThirdAppConfig == nil {
+		panic("implement not found for interface IThirdAppConfig, forgot register?")
+	}
+	return localThirdAppConfig
+}
+
+func RegisterThirdAppConfig(i IThirdAppConfig) {
+	localThirdAppConfig = i
+}
 
 func Consumer() IConsumer {
 	if localConsumer == nil {
@@ -90,15 +102,4 @@ func MerchantAppConfig() IMerchantAppConfig {
 
 func RegisterMerchantAppConfig(i IMerchantAppConfig) {
 	localMerchantAppConfig = i
-}
-
-func ThirdAppConfig() IThirdAppConfig {
-	if localThirdAppConfig == nil {
-		panic("implement not found for interface IThirdAppConfig, forgot register?")
-	}
-	return localThirdAppConfig
-}
-
-func RegisterThirdAppConfig(i IThirdAppConfig) {
-	localThirdAppConfig = i
 }

@@ -1,5 +1,5 @@
 ROOT_DIR    = $(shell pwd)
-NAMESPACE   = "github.com/kysion/alipay-test"
+NAMESPACE   = "github.com/kysion/alipay-library"
 
 # Install/Update to the latest CLI tool.
 .PHONY: cli
@@ -30,4 +30,7 @@ dao: cli.install
 # Generate Go files for Service.
 .PHONY: service
 service: cli.install
-	@gf gen service -d ./alipay_service
+	@gf gen service -s internal/logic  -d ./alipay_service
+
+
+#	@gf gen service -s internal/alipay_logic/merchant  -d ./alipay_service

@@ -1,18 +1,18 @@
 package gateway
 
 import (
-    "context"
-    "github.com/SupenBysz/gf-admin-community/sys_service"
-    "github.com/gogf/gf/v2/os/gcache"
-    "github.com/gogf/gf/v2/util/gconv"
-    "github.com/kysion/alipay-test/alipay_model"
-    dao "github.com/kysion/alipay-test/alipay_model/alipay_dao"
-    do "github.com/kysion/alipay-test/alipay_model/alipay_do"
-    entity "github.com/kysion/alipay-test/alipay_model/alipay_entity"
-    "github.com/kysion/alipay-test/utility"
-    "github.com/kysion/base-library/utility/daoctl"
-    "github.com/yitter/idgenerator-go/idgen"
-    "time"
+	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/gogf/gf/v2/os/gcache"
+	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/alipay-library/alipay_model"
+	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
+	do "github.com/kysion/alipay-library/alipay_model/alipay_do"
+	entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
+	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/yitter/idgenerator-go/idgen"
+	"strconv"
+	"time"
 )
 
 type sThirdAppConfig struct {
@@ -57,19 +57,17 @@ func (s *sThirdAppConfig) GetThirdAppConfigBySysUserId(ctx context.Context, sysU
 // CreateThirdAppConfig  创建第三方应用配置信息
 func (s *sThirdAppConfig) CreateThirdAppConfig(ctx context.Context, info *alipay_model.AlipayThirdAppConfig) (*alipay_model.AlipayThirdAppConfig, error) {
     // 创建的时候可指定域名，没指定就是用使用当前域名
+    // appId的32进制编码
+    appId := strconv.FormatInt(gconv.Int64(info.AppId), 36)
+
     if info.ServerDomain != "" {
-        appIdHash := utility.Md5Hash(info.AppId)
-        // 取其appId Md5加密后的前16位  //https://alipay.jditco.com/alipay/appIdMd5-16/gateway.services
-        info.AppGatewayUrl = info.ServerDomain + "/merchant/" + appIdHash[0:16] + "/gateway.services"
-        info.AppCallbackUrl = info.ServerDomain + "/merchant/" + appIdHash[0:16] + "/gateway.callback"
-        info.AppIdMd5 = appIdHash
+        info.AppGatewayUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.services"
+        info.AppCallbackUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.callback"
     } else if info.ServerDomain == "" {
-        appIdHash := utility.Md5Hash(info.AppId)
         // 没指定服务器域名，默认使用当前服务器域名
         info.ServerDomain = "https://alipay.kuaimk.com"
-        info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appIdHash[0:16] + "/gateway.services"
-        info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appIdHash[0:16] + "/gateway.callback"
-        info.AppIdMd5 = appIdHash
+        info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.services"
+        info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.callback"
     }
 
     // 用户id默认是当前登录用户
@@ -111,9 +109,12 @@ func (s *sThirdAppConfig) UpdateThirdAppConfig(ctx context.Context, info *alipay
     }
     data := do.AlipayThirdAppConfig{}
     gconv.Struct(info, &data)
+    if info.ExtJson == "" {
+        data.ExtJson = nil
+    }
 
     model := dao.AlipayThirdAppConfig.Ctx(ctx)
-    affected, err := daoctl.UpdateWithError(model.Data(model).OmitNilData().Where(do.AlipayThirdAppConfig{Id: info.Id}))
+    affected, err := daoctl.UpdateWithError(model.Data(data).OmitNilData().Where(do.AlipayThirdAppConfig{Id: info.Id}))
 
     if err != nil {
         return false, sys_service.SysLogs().ErrorSimple(ctx, err, "第三方应用配置信息更新失败", dao.AlipayThirdAppConfig.Table())
