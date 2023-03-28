@@ -3,12 +3,12 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum"
@@ -158,31 +158,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 			})
 		}
 
-		//getConsumer, err := share_service.Consumer().GetConsumerByAlipayUnionId(ctx, userInfo.Response.UserId)
-		//consumerRes := &share_model.ConsumerRes{}
-		//if err != nil && getConsumer == nil {
-		//    shareConsumer := kconv.Struct(userInfo.Response, &share_model.Consumer{})
-		//    shareConsumer.AlipayUnionId = gconv.String(userInfo.Response.UserId)
-		//
-		//    if employee != nil {
-		//        shareConsumer.SysUserId = gconv.String(employee.Id)
-		//    }
-		//
-		//    consumerRes, err = share_service.Consumer().CreateConsumer(ctx, shareConsumer)
-		//    if err != nil {
-		//        return err
-		//    }
-		//} else {
-		//    //consumerInfo := share_model.UpdateConsumer{}
-		//    //gconv.Struct(userInfo.Response, &consumerInfo)
-		//    //consumerInfo.Id = merchantApp.SysUserId
-		//    //
-		//    //_, err = share_service.Consumer().UpdateConsumer(ctx, &consumerInfo)
-		//    //if err != nil {
-		//    //	return err
-		//    //}
-		//}
-
 		// 4.存储阿里消费者记录 alipay-consumer-config
 		alipayConsumer, err := service.Consumer().GetConsumerByUserId(ctx, userInfo.Response.UserId)
 
@@ -223,8 +198,8 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 						Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 来源
 						ThirdAppId:    merchantApp.ThirdAppId,
 						MerchantAppId: merchantApp.AppId,
-						UserId:        token.Response.UserId,                 // 平台账户唯一标识
-						Type:          share_enum.User.Type.Anonymous.Code(), // 用户类型匿名消费者
+						UserId:        token.Response.UserId,                // 平台账户唯一标识
+						Type:          sys_enum.User.Type.New(0, "").Code(), // 用户类型匿名消费者
 					}
 
 					data.EmployeeId = user.Id
@@ -239,37 +214,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 				})
 			}
 		})
-		//platUser, err := share_service.PlatformUser().GetPlatformUserByUserId(ctx, userInfo.Response.UserId)
-		//
-		//if err != nil && platUser == nil { // 不存在创建
-		//    platform := share_model.PlatformUser{
-		//        Id:            idgen.NextId(),
-		//        FacilitatorId: 0,
-		//        OperatorId:    0,
-		//        EmployeeId:    consumerRes.Id,
-		//        MerchantId:    0,
-		//        Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 来源
-		//        ThirdAppId:    merchantApp.ThirdAppId,
-		//        MerchantAppId: merchantApp.AppId,
-		//        UserId:        userInfo.Response.UserId,              // 平台账户唯一标识
-		//        Type:          share_enum.User.Type.Anonymous.Code(), // 用户类型匿名消费者
-		//    }
-		//
-		//    if employee != nil {
-		//        platform.EmployeeId = employee.Id
-		//        platform.MerchantId = employee.UnionMainId
-		//    }
-		//
-		//    if consumerRes != nil && consumerRes.Id != 0 { // 适用于消费者没有员工的情况下
-		//        platform.EmployeeId = consumerRes.Id
-		//    }
-		//
-		//    _, err = share_service.PlatformUser().CreatePlatformUser(ctx, &platform)
-		//    if err != nil {
-		//        return err
-		//    }
-		//
-		//}
 
 		return nil
 	})

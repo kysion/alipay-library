@@ -3,12 +3,11 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/kuaimk/kmk-share-library/share_consts"
-	"github.com/kuaimk/kmk-share-library/share_model/share_enum"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
@@ -90,7 +89,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 		// 根据sys_user_id查询商户信息
 		sys_service.SysUser().MakeSession(ctx, merchantApp.SysUserId)
 
-		employee, err := share_consts.Global.Merchant.Employee().GetEmployeeById(ctx, merchantApp.SysUserId)
+		//employee, err := share_consts.Global.Merchant.Employee().GetEmployeeById(ctx, merchantApp.SysUserId)
 
 		// 3.存储消费者数据并创建用户  kmk-consumer
 		var consumerId int64 // 消费者Id
@@ -100,7 +99,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 				if key.Code() == enum.Consumer.ActionEnum.Auth.Code() { // 如果订阅者是订阅授权
 					g.Try(ctx, func(ctx context.Context) {
 						data := hook.UserInfo{
-							SysUserId:     employee.Id,
+							SysUserId:     merchantApp.SysUserId,
 							UserInfoShare: *userInfo.Response,
 						}
 						// 返回消费者id
@@ -143,9 +142,9 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 			gconv.Struct(userInfo.Response, &consumerInfo)
 			consumerInfo.UserId = gconv.String(userInfo.Response.UserId)
 
-			if employee != nil {
-				consumerInfo.SysUserId = employee.Id
-			}
+			//if employee != nil {
+			//    consumerInfo.SysUserId = employee.Id
+			//}
 
 			if consumerId != 0 {
 				consumerInfo.SysUserId = consumerId
@@ -179,14 +178,14 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 						Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 来源
 						ThirdAppId:    merchantApp.ThirdAppId,
 						MerchantAppId: merchantApp.AppId,
-						UserId:        token.Response.UserId,                 // 平台账户唯一标识
-						Type:          share_enum.User.Type.Anonymous.Code(), // 用户类型匿名消费者
+						UserId:        token.Response.UserId,                // 平台账户唯一标识
+						Type:          sys_enum.User.Type.New(0, "").Code(), // 用户类型匿名消费者
 					}
-
-					if employee != nil {
-						data.EmployeeId = employee.Id
-						data.MerchantId = employee.UnionMainId
-					}
+					//
+					//if employee != nil {
+					//    data.EmployeeId = employee.Id
+					//    data.MerchantId = employee.UnionMainId
+					//}
 
 					if consumerId != 0 { // 适用于消费者没有员工的情况下
 						data.EmployeeId = consumerId
