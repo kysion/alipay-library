@@ -55,6 +55,8 @@ type AlipayMerchantAppConfigColumns struct {
 	AppIdMd5                string // 应用id加密md5后的结果
 	ThirdAppId              string // 服务商appId
 	NotifyUrl               string // 异步通知地址，允许业务层追加相关参数
+	ServerRate              string // 手续费比例，默认0.006%
+	UnionMainType           string // 应用关联主体类型，和user_type保持一致
 }
 
 // alipayMerchantAppConfigColumns holds the columns for table alipay_merchant_app_config.
@@ -91,6 +93,8 @@ var alipayMerchantAppConfigColumns = AlipayMerchantAppConfigColumns{
 	AppIdMd5:                "app_id_md5",
 	ThirdAppId:              "third_app_id",
 	NotifyUrl:               "notify_url",
+	ServerRate:              "server_rate",
+	UnionMainType:           "union_main_type",
 }
 
 // NewAlipayMerchantAppConfigDao creates and returns a new DAO object for table data access.

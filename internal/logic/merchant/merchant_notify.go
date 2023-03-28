@@ -134,7 +134,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			switch bm["trade_status"] {
 			case pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code():
 				// 成功 --> 订单状态为已支付
-				orderState = pay_enum.Order.StateType.HavePaid.Code()
+				orderState = pay_enum.Order.StateType.Paymented.Code()
 
 			case bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_CLOSED.Code():
 				// 交易超时 --> 订单状态为交易超时
@@ -142,7 +142,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 
 			case bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_FINISHED.Code():
 				// 交易结束，不可退款 --> 订单状态为已完成
-				orderState = pay_enum.Order.StateType.DealClose.Code()
+				orderState = pay_enum.Order.StateType.PaymentComplete.Code()
 			}
 
 			_, err := pay_service.Order().UpdateOrderState(ctx, gconv.Int64(bm["out_trade_no"]), orderState)

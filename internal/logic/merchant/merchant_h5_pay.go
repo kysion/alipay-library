@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/gopay"
@@ -45,19 +46,26 @@ func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.T
 	// 100分 / 100 = 1元  10 /100
 	totalAmount := gconv.Float32(info.Amount) / 100.0
 
-	info.Order.TradeSourceType = pay_enum.Order.TradeSourceType.Alipay.Code() // 交易源类型
-
-	// 支付前创建交易订单，支付后修改交易订单元数据
-	orderInfo, err := pay_service.Order().CreateOrder(ctx, &info.Order) // CreatedOrder不能修改订单id
-	if err != nil || orderInfo == nil {
-		return
-	}
-
 	// 商家AppId解析，获取商家应用，创建阿里支付客户端
 	appId, _ := strconv.ParseInt(g.RequestFromCtx(ctx).Get("appId").String(), 32, 0)
 	appIdStr := gconv.String(appId)
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
+		return
+	}
+
+	sysUser, err := sys_service.SysUser().GetSysUserById(ctx, merchantApp.SysUserId)
+	if err != nil {
+		return
+	}
+
+	info.Order.TradeSourceType = pay_enum.Order.TradeSourceType.Alipay.Code() // 交易源类型
+	info.Order.UnionMainId = merchantApp.UnionMainId
+	info.Order.UnionMainType = sysUser.Type
+
+	// 支付前创建交易订单，支付后修改交易订单元数据
+	orderInfo, err := pay_service.Order().CreateOrder(ctx, &info.Order) // CreatedOrder不能修改订单id
+	if err != nil || orderInfo == nil {
 		return
 	}
 
