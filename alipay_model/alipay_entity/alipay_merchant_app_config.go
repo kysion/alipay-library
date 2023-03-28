@@ -42,4 +42,6 @@ type AlipayMerchantAppConfig struct {
 	AppIdMd5                string      `json:"appIdMd5"                description:"应用id加密md5后的结果"`
 	ThirdAppId              string      `json:"thirdAppId"              description:"服务商appId"`
 	NotifyUrl               string      `json:"notifyUrl"               description:"异步通知地址，允许业务层追加相关参数"`
+	ServerRate              float64     `json:"serverRate"              description:"手续费比例，默认0.006%"`
+	UnionMainType           int         `json:"unionMainType"           description:"应用关联主体类型，和user_type保持一致"`
 }
