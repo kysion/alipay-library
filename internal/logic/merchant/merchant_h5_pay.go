@@ -8,6 +8,7 @@ import (
 	"github.com/kysion/gopay"
 	"github.com/kysion/gopay/alipay"
 	"github.com/kysion/gopay/pkg/xlog"
+	"github.com/kysion/pay-share-library/pay_model"
 	"strconv"
 
 	"github.com/kysion/alipay-library/alipay_model"
@@ -42,7 +43,7 @@ func (s *sMerchantH5Pay) InstallHook(actionType pay_enum.OrderStateType, hookFun
 }
 
 // H5TradeCreate  1、创建交易订单   （AppId的H5是没有的，需要写死，小程序有的 ）
-func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, notifyFunc ...hook.NotifyHookFunc) {
+func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, userId string, notifyFunc ...hook.NotifyHookFunc) (res string, err error) {
 	// 100分 / 100 = 1元  10 /100
 	totalAmount := gconv.Float32(info.Amount) / 100.0
 
@@ -69,6 +70,30 @@ func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.T
 		return
 	}
 
+	orderId := orderInfo.Id // 提交给支付宝的订单Id就是写我们平台数据库中的订单id
+
+	// 如果设置了异步通知地址
+	if len(notifyFunc) > 0 {
+		// 将异步通知中的APPId拿出来，先订阅，收到支付结果通知时，再广播
+		service.MerchantNotify().InstallNotifyHook(hook.NotifyKey{
+			NotifyType: enum.Notify.NotifyType.PayCallBack,
+			OrderId:    gconv.String(orderId),
+		}, notifyFunc[0])
+	}
+
+	// 判断是小程序还是H5
+	if merchantApp.AppType == 1 {
+		// 小程序
+		res, err = service.MerchantTinyappPay().TradeCreate(ctx, info, merchantApp, orderInfo, totalAmount, userId)
+	} else if merchantApp.AppType == 2 {
+		// H5
+		res, err = s.H5(ctx, info, merchantApp, orderInfo, totalAmount)
+	}
+
+	return res, err
+}
+
+func (s *sMerchantH5Pay) H5(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32) (string, error) {
 	// 通过商家中的第三方应用的AppId创建客户端
 	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
 	notifyUrl := merchantApp.NotifyUrl
@@ -95,46 +120,52 @@ func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.T
 		"royalty_freeze": true, // 资金冻结标识
 	})
 
-	// 如果设置了异步通知地址
-	if len(notifyFunc) > 0 {
-		// 将异步通知中的APPId拿出来，先订阅，收到支付结果通知时，再广播
-		service.MerchantNotify().InstallNotifyHook(hook.NotifyKey{
-			NotifyType: enum.Notify.NotifyType.PayCallBack,
-			OrderId:    gconv.String(orderId),
-		}, notifyFunc[0])
-	}
-
 	// 2.手机网站支付请求
 	payUrl, err := client.TradeWapPay(ctx, bm)
 	if err != nil {
 		xlog.Error("err:", err)
-		return
+		return "", err
 	}
 	xlog.Debug("payUrl:", payUrl)
 
+	// 请求重定向到收银台页面
 	g.RequestFromCtx(ctx).Response.RedirectTo(payUrl)
 
-	return
+	// 将url返回给前端
+	// g.RequestFromCtx(ctx).Response.WriteJson(payUrl)
+
+	// 查询订单并返回tradeNo给前端
+	//    rsp, err := s.QueryOrderInfo(ctx, gconv.String(orderId), merchantApp)
+
+	//return rsp.Response.TradeNo, err
+
+	return "", err
+
+	//g.RequestFromCtx(ctx).Response.Write(orderId)
 }
 
 // 2、异步通知 merchant_notify.go
 
 // QueryOrderInfo 查询订单
-func (s *sMerchantH5Pay) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantAppId string, thirdAppId string, appAuthToken string) {
+func (s *sMerchantH5Pay) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error) {
+	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
 
-	client, _ := aliyun.NewClient(ctx, thirdAppId)
-
-	client.SetAppAuthToken(appAuthToken)
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
 
 	//请求参数
 	bm := make(gopay.BodyMap)
 	bm.Set("out_trade_no", outTradeNo)
 
 	//查询订单
-	aliRsp, err := client.TradeQuery(ctx, bm)
-	if err != nil {
+	aliRsp, err = client.TradeQuery(ctx, bm)
+	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
 		xlog.Error("err:", err)
 		return
 	}
+
+	//g.RequestFromCtx(ctx).Response.Write(aliRsp.Response.TradeNo)
+
 	xlog.Debug("订单数据:", *aliRsp)
+
+	return aliRsp, err
 }
