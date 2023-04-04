@@ -36,6 +36,7 @@ type AlipayMerchantAppConfig struct {
 	NotifyUrl           string      `json:"notifyUrl"               description:"异步通知地址，允许业务层追加相关参数"`
 	ServerRate          float64     `json:"serverRate"              description:"手续费比例，默认0.006%"`
 	UnionMainType       int         `json:"unionMainType"           description:"应用关联主体类型，和user_type保持一致"`
+	Version             string      `json:"version"                 description:"应用版本"`
 }
 
 // UpdateMerchantAppConfigReq 修改商户基础信息
