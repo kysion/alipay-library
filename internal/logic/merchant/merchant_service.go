@@ -222,3 +222,111 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 	// 返回用户在阿里的唯一标识userId
 	return res.UserId
 }
+
+func (s *sMerchantService) SubmitAppVersionAudit(ctx context.Context) (string, error) {
+	info := g.RequestFromCtx(ctx).Get("appId").String()
+
+	appId, _ := strconv.ParseInt(info, 32, 0)
+
+	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, gconv.String(appId))
+	if err != nil {
+		return "", err
+	}
+
+	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+
+	// 发起请求
+	bm := make(gopay.BodyMap)
+
+	// 自定义公共参数
+	//bm.Set("app_id", merchantApp.ThirdAppId)
+	bm.Set("app_auth_token", merchantApp.AppAuthToken)
+	bm.Set("version_desc", "小程序首次提交审核") // 版本描述
+	bm.Set("app_version", "0.0.1")
+	bm.Set("region_type", "CHINA")
+
+	// 图片文件
+	//bm.Set("first_screen_shot", file_utils.GetFile("/data/WechatIMG10010.png"))
+	//bm.Set("second_screen_shot", file_utils.GetFile("/data/WechatIMG10011.png"))
+	//bm.Set("third_screen_shot", file_utils.GetFile("/data/WechatIMG10013.png"))
+	//bm.Set("fourth_screen_shot", file_utils.GetFile("/data/WechatIMG10016.png"))
+	//bm.Set("fifth_screen_shot", file_utils.GetFile("/data/WechatIMG10014.png"))
+
+	// 获取签名
+	//sign, err := client.GetRsaSign(bm, "RSA2", "", "json")
+	//bm.Set("sign", sign)
+
+	// biz_content
+	//bm.SetBodyMap("biz_content", func(bz gopay.BodyMap) {
+	//	bz.Set("first_screen_shot", file_utils.GetFile("/data/WechatIMG10010.png"))
+	//	bz.Set("second_screen_shot", file_utils.GetFile("/data/WechatIMG10011.png"))
+	//	bz.Set("third_screen_shot", file_utils.GetFile("/data/WechatIMG10013.png"))
+	//	bz.Set("fourth_screen_shot", file_utils.GetFile("/data/WechatIMG10016.png"))
+	//	bz.Set("fifth_screen_shot", file_utils.GetFile("/data/WechatIMG10014.png"))
+	//})
+
+	bm.Set("first_screen_shot", gbase64.Encode(gfile.GetBytes("/data/WechatIMG10010.png")))
+	bm.Set("second_screen_shot", gbase64.Encode(gfile.GetBytes("/data/WechatIMG10011.png")))
+
+	//bm.Set("third_screen_shot", gfile.GetBytes("/data/WechatIMG10013.png"))
+	//bm.Set("fourth_screen_shot", gfile.GetBytes("/data/WechatIMG10016.png"))
+	//bm.Set("fifth_screen_shot", gfile.GetBytes("/data/WechatIMG10014.png"))
+
+	bm.Set("first_license_pic", "")
+	bm.Set("second_license_shot", "")
+
+	bm.Set("first_special_license_pic", "")
+	bm.Set("second_special_license_shot", "")
+
+	aliRes := new(aliRep)
+
+	err = client.PostAliPayAPISelfV2(ctx, bm, "alipay.open.mini.version.audit.apply", aliRes)
+
+	if err != nil {
+		xlog.Error(err)
+		return "", err
+	}
+
+	xlog.Debug(aliRes)
+
+	return "", nil
+}
+
+// 得到响应
+type aliRep struct {
+	Code        string `json:"code"`
+	Msg         string `json:"msg"`
+	SubCode     string `json:"sub_code"`
+	SubMsg      string `json:"sub_msg"`
+	Sign        string `json:"sign"`
+	SpeedUp     string `json:"speed_up"`
+	SpeedUpMemo string `json:"speed_up_memo"`
+}
+
+//version := app.Version
+
+//version := "v0.0.1"
+
+// 发起请求
+//url := "https://openapi.alipay.com/gateway.do"
+
+//bm := gopay.BodyMap{
+//	"app_id":         app.ThirdAppId,
+//	"method":         "alipay.open.mini.version.audit.apply",
+//	"format":         "JSON",
+//	"charset":        "utf-8",
+//	"sign_type":      "RSA2",
+//	"timestamp":      gtime.Now(),
+//	"version":        "1.0",
+//	"app_auth_token": app.AppAuthToken,
+//}
+//
+//bm.Set("biz_content", g.Map{
+//	"version_desc": "", // 版本描述
+//})
+//
+//
+//if err != nil {
+//	return "", err
+//}
+//

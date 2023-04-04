@@ -43,3 +43,7 @@ type GetUserInfoByAuthCodeReq struct {
 
 	AppId string `json:"app_id" dc:"商户应用id"`
 }
+
+type SubmitAppVersionAuditReq struct {
+	g.Meta `path:"/:appId/submitAppVersionAudit" method:"get" summary:"提交应用版本审核" tags:"阿里商户服务"`
+}
