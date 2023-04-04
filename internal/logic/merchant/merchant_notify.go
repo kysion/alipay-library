@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"
@@ -182,6 +183,9 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			// Trade发布广播
 			s.TradeHook.Iterator(func(key hook.TradeHookKey, value hook.TradeHookFunc) {
 				if key.AlipayTradeStatus.Code() == pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code() {
+					fmt.Println()
+					fmt.Println("广播TradeHook", time.Now())
+
 					//var v interface{} = value
 					//{
 					//	h, ok  := v.(hook.TradeHookFunc[pay_model.OrderRes])
@@ -189,14 +193,13 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 					//		h(ctx, orderInfo)
 					//	}
 					//}
-					//
-					//
+
 					value(ctx, orderInfo)
 				}
 
 				s.TradeHook.UnInstallHook(key, func(filter hook.TradeHookKey, conditionKey hook.TradeHookKey) bool {
 					// 如果超时了，那么久返回true，代表可以删除
-					if key.HookExpireAt.Before(gtime.Now()) {
+					if key.HookExpireAt.Before(gtime.Now()) && key.TradeNo != "" {
 						// 底层的filter和conditionKey是一样的
 						return filter == conditionKey
 					}
@@ -212,6 +215,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 	if err != nil {
 		return "success", err
 	}
+
 	g.RequestFromCtx(ctx).Response.Write("success")
 
 	return "success", nil

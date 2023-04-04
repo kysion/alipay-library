@@ -74,6 +74,8 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 	bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 	fmt.Println(bm)
 
+	fmt.Println("应用通知类型----------------  ", bm.Get("service"))
+
 	// 验证应用网关我们直接处理
 	if bm.Get("service") == enum.Info.ServiceType.ServiceCheck.Code() {
 		s.checkGateway(ctx, client, bm)
@@ -96,6 +98,7 @@ func (s *sGateway) checkGateway(ctx context.Context, client *aliyun.AliPay, info
 	sign, err := client.GetRsaSign(gopay.BodyMap{
 		"success": "true",
 	}, "RSA2", "", "xml")
+
 	if err != nil {
 		return
 	}
@@ -133,6 +136,8 @@ func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
 
 	// 授权之前输入商家信息name -->  签名 -->  --> 签名后存储商家部分数据， --> 自定义授权URL,包含sys_user_id --> 授权，成功的话，根据data找出商家初始数据，然后更新app_auth_token --> 添加第三方平台和用户记录
 	bm, err := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
+
+	fmt.Println("消息回调类型----------------  ", bm.Get("source"))
 
 	data := gopay.BodyMap{
 		"grant_type":  "authorization_code",

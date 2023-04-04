@@ -6,7 +6,6 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/gogf/gf/v2/container/gmap"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
-	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/api/alipay_v1/alipay_merchant_v1"
 )
 
@@ -18,7 +17,7 @@ type merchantH5Pay struct{}
 func (c *merchantH5Pay) H5TradeCreate(ctx context.Context, req *alipay_merchant_v1.H5TradeReq) (api_v1.StringRes, error) {
 
 	// 创建交易订单，生成二维码，根据二维码调起收银台
-	service.MerchantH5Pay().H5TradeCreate(ctx, &req.TradeOrder, c.notifyHookFunc)
+	//service.MerchantH5Pay().PayTradeCreate(ctx, &req.TradeOrder, c.notifyHookFunc)
 
 	return "", nil
 }

@@ -10,7 +10,10 @@ func init() {
 
 	service.RegisterMerchantNotify(NewMerchantNotify())
 
+	service.RegisterPayTrade(NewPayTrade())
+
 	service.RegisterMerchantH5Pay(NewMerchantH5Pay())
+
 	service.RegisterMerchantTinyappPay(NewMerchantTinyappPay())
 
 	//service.RegisterWallet(NewWallet())
