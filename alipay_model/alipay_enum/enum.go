@@ -17,6 +17,7 @@ type (
 
 	NotifyType     notify.NotifyTypeEnum
 	ConsumerAction consumer.ActionEnum
+	Category       consumer.CategoryEnum
 
 	// SubAccountBindRes 分账绑定
 	SubAccountBindRes sub_account.SubAccountBindResEnum

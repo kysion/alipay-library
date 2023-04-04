@@ -15,6 +15,20 @@ import (
 )
 
 type (
+	IConsumerConfig interface {
+		GetConsumerById(ctx context.Context, id int64) (*alipay_model.AlipayConsumerConfig, error)
+		GetConsumerByUserId(ctx context.Context, userId string) (*alipay_model.AlipayConsumerConfig, error)
+		GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error)
+		CreateConsumer(ctx context.Context, info *alipay_model.AlipayConsumerConfig) (*alipay_model.AlipayConsumerConfig, error)
+		UpdateConsumer(ctx context.Context, id int64, info *alipay_model.UpdateConsumerReq) (bool, error)
+		UpdateConsumerState(ctx context.Context, id int64, state int) (bool, error)
+	}
+	IGateway interface {
+		GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType, hook.ServiceMsgHookFunc]
+		GetServiceNotifyTypeHook() base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc]
+		GatewayServices(ctx context.Context) (string, error)
+		GatewayCallback(ctx context.Context) (string, error)
+	}
 	IMerchantAppConfig interface {
 		GetMerchantAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayMerchantAppConfig, error)
 		GetMerchantAppConfigByAppId(ctx context.Context, id string) (*alipay_model.AlipayMerchantAppConfig, error)
@@ -37,28 +51,25 @@ type (
 		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateThirdAppConfigHttpsReq) (bool, error)
 		UpdateThirdKeyCert(ctx context.Context, info *alipay_model.UpdateThirdKeyCertReq) (bool, error)
 	}
-	IConsumer interface {
-		GetConsumerById(ctx context.Context, id int64) (*alipay_model.AlipayConsumerConfig, error)
-		GetConsumerByUserId(ctx context.Context, userId string) (*alipay_model.AlipayConsumerConfig, error)
-		GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error)
-		CreateConsumer(ctx context.Context, info alipay_model.AlipayConsumerConfig) (*alipay_model.AlipayConsumerConfig, error)
-		UpdateConsumer(ctx context.Context, id int64, info alipay_model.UpdateConsumerReq) (bool, error)
-		UpdateConsumerState(ctx context.Context, id int64, state int) (bool, error)
-	}
-	IGateway interface {
-		GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType, hook.ServiceMsgHookFunc]
-		GetServiceNotifyTypeHook() base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc]
-		GatewayServices(ctx context.Context) (string, error)
-		GatewayCallback(ctx context.Context) (string, error)
-	}
 )
 
 var (
-	localConsumer          IConsumer
+	localConsumerConfig    IConsumerConfig
 	localGateway           IGateway
 	localMerchantAppConfig IMerchantAppConfig
 	localThirdAppConfig    IThirdAppConfig
 )
+
+func MerchantAppConfig() IMerchantAppConfig {
+	if localMerchantAppConfig == nil {
+		panic("implement not found for interface IMerchantAppConfig, forgot register?")
+	}
+	return localMerchantAppConfig
+}
+
+func RegisterMerchantAppConfig(i IMerchantAppConfig) {
+	localMerchantAppConfig = i
+}
 
 func ThirdAppConfig() IThirdAppConfig {
 	if localThirdAppConfig == nil {
@@ -71,15 +82,15 @@ func RegisterThirdAppConfig(i IThirdAppConfig) {
 	localThirdAppConfig = i
 }
 
-func Consumer() IConsumer {
-	if localConsumer == nil {
-		panic("implement not found for interface IConsumer, forgot register?")
+func ConsumerConfig() IConsumerConfig {
+	if localConsumerConfig == nil {
+		panic("implement not found for interface IConsumerConfig, forgot register?")
 	}
-	return localConsumer
+	return localConsumerConfig
 }
 
-func RegisterConsumer(i IConsumer) {
-	localConsumer = i
+func RegisterConsumerConfig(i IConsumerConfig) {
+	localConsumerConfig = i
 }
 
 func Gateway() IGateway {
@@ -91,15 +102,4 @@ func Gateway() IGateway {
 
 func RegisterGateway(i IGateway) {
 	localGateway = i
-}
-
-func MerchantAppConfig() IMerchantAppConfig {
-	if localMerchantAppConfig == nil {
-		panic("implement not found for interface IMerchantAppConfig, forgot register?")
-	}
-	return localMerchantAppConfig
-}
-
-func RegisterMerchantAppConfig(i IMerchantAppConfig) {
-	localMerchantAppConfig = i
 }

@@ -109,7 +109,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 			})
 		}
 
-		//getConsumer, err := share_service.Consumer().GetConsumerByAlipayUnionId(ctx, userInfo.Response.UserId)
+		//getConsumer, err := share_service.ConsumerConfig().GetConsumerByAlipayUnionId(ctx, userInfo.Response.UserId)
 		//consumerRes := &share_model.ConsumerRes{}
 		//if err != nil && getConsumer == nil {
 		//    shareConsumer := kconv.Struct(userInfo.Response, &share_model.Consumer{})
@@ -119,7 +119,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 		//        shareConsumer.SysUserId = gconv.String(employee.Id)
 		//    }
 		//
-		//    consumerRes, err = share_service.Consumer().CreateConsumer(ctx, shareConsumer)
+		//    consumerRes, err = share_service.ConsumerConfig().CreateConsumer(ctx, shareConsumer)
 		//    if err != nil {
 		//        return err
 		//    }
@@ -128,14 +128,14 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 		//    //gconv.Struct(userInfo.Response, &consumerInfo)
 		//    //consumerInfo.Id = merchantApp.SysUserId
 		//    //
-		//    //_, err = share_service.Consumer().UpdateConsumer(ctx, &consumerInfo)
+		//    //_, err = share_service.ConsumerConfig().UpdateConsumer(ctx, &consumerInfo)
 		//    //if err != nil {
 		//    //	return err
 		//    //}
 		//}
 
 		// 4.存储阿里消费者记录 alipay-consumer-config
-		alipayConsumer, err := service.Consumer().GetConsumerByUserId(ctx, userInfo.Response.UserId)
+		alipayConsumer, err := service.ConsumerConfig().GetConsumerByUserId(ctx, userInfo.Response.UserId)
 
 		if err != nil && alipayConsumer == nil { // 消费者不存在，则创建
 			consumerInfo := alipay_model.AlipayConsumerConfig{}
@@ -150,7 +150,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 				consumerInfo.SysUserId = consumerId
 			}
 
-			_, err = service.Consumer().CreateConsumer(ctx, consumerInfo)
+			_, err = service.ConsumerConfig().CreateConsumer(ctx, &consumerInfo)
 			if err != nil {
 				return err
 			}
@@ -159,7 +159,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 			consumerInfo := alipay_model.UpdateConsumerReq{}
 			gconv.Struct(userInfo.Response, &consumerInfo)
 
-			_, err = service.Consumer().UpdateConsumer(ctx, alipayConsumer.Id, consumerInfo)
+			_, err = service.ConsumerConfig().UpdateConsumer(ctx, alipayConsumer.Id, &consumerInfo)
 			if err != nil {
 				return err
 			}
