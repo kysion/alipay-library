@@ -73,8 +73,8 @@ func (s *sPayTrade) PayTradeCreate(ctx context.Context, info *alipay_model.Trade
 		// 小程序
 		res, err = service.MerchantTinyappPay().TradeCreate(ctx, info, merchantApp, orderInfo, totalAmount, userId)
 	} else if merchantApp.AppType == 2 {
-		// H5
-		res, err = service.MerchantH5Pay().H5TradeCreate(ctx, info, merchantApp, orderInfo, totalAmount)
+		// H5 支付
+		res, err = service.MerchantH5Pay().TradeCreate(ctx, info, merchantApp, orderInfo, totalAmount, userId)
 	}
 
 	return res, err
