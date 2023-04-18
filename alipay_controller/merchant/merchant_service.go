@@ -91,14 +91,3 @@ func (c *cMerchantService) GetAlipayUserInfo(ctx context.Context, _ *alipay_merc
 //
 //    return (*alipay_model.UserInfoRes)(ret), err
 //}
-
-// SubmitAppVersionAudit 提交应用版本审核
-func (c *cMerchantService) SubmitAppVersionAudit(ctx context.Context, req *alipay_merchant_v1.SubmitAppVersionAuditReq) (api_v1.StringRes, error) {
-	ret, err := service.MerchantService().SubmitAppVersionAudit(ctx)
-
-	if err != nil {
-		return "", err
-	}
-
-	return (api_v1.StringRes)(ret), nil
-}

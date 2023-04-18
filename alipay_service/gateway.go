@@ -39,6 +39,8 @@ type (
 		UpdateAppAuthToken(ctx context.Context, info *alipay_model.UpdateMerchantAppAuthToken) (bool, error)
 		UpdateAppConfigHttps(ctx context.Context, info *alipay_model.UpdateMerchantAppConfigHttpsReq) (bool, error)
 		UpdateMerchantKeyCert(ctx context.Context, info *alipay_model.UpdateMerchantKeyCertReq) (bool, error)
+		CreatePolicy(ctx context.Context, info *alipay_model.CreatePolicyReq) (bool, error)
+		GetPolicy(ctx context.Context, appId string) (*alipay_model.GetPolicyRes, error)
 	}
 	IThirdAppConfig interface {
 		GetThirdAppConfigById(ctx context.Context, id int64) (*alipay_model.AlipayThirdAppConfig, error)
@@ -54,22 +56,11 @@ type (
 )
 
 var (
-	localConsumerConfig    IConsumerConfig
-	localGateway           IGateway
 	localMerchantAppConfig IMerchantAppConfig
 	localThirdAppConfig    IThirdAppConfig
+	localConsumerConfig    IConsumerConfig
+	localGateway           IGateway
 )
-
-func MerchantAppConfig() IMerchantAppConfig {
-	if localMerchantAppConfig == nil {
-		panic("implement not found for interface IMerchantAppConfig, forgot register?")
-	}
-	return localMerchantAppConfig
-}
-
-func RegisterMerchantAppConfig(i IMerchantAppConfig) {
-	localMerchantAppConfig = i
-}
 
 func ThirdAppConfig() IThirdAppConfig {
 	if localThirdAppConfig == nil {
@@ -102,4 +93,15 @@ func Gateway() IGateway {
 
 func RegisterGateway(i IGateway) {
 	localGateway = i
+}
+
+func MerchantAppConfig() IMerchantAppConfig {
+	if localMerchantAppConfig == nil {
+		panic("implement not found for interface IMerchantAppConfig, forgot register?")
+	}
+	return localMerchantAppConfig
+}
+
+func RegisterMerchantAppConfig(i IMerchantAppConfig) {
+	localMerchantAppConfig = i
 }
