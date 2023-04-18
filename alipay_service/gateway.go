@@ -56,33 +56,11 @@ type (
 )
 
 var (
-	localMerchantAppConfig IMerchantAppConfig
-	localThirdAppConfig    IThirdAppConfig
 	localConsumerConfig    IConsumerConfig
 	localGateway           IGateway
+	localMerchantAppConfig IMerchantAppConfig
+	localThirdAppConfig    IThirdAppConfig
 )
-
-func ThirdAppConfig() IThirdAppConfig {
-	if localThirdAppConfig == nil {
-		panic("implement not found for interface IThirdAppConfig, forgot register?")
-	}
-	return localThirdAppConfig
-}
-
-func RegisterThirdAppConfig(i IThirdAppConfig) {
-	localThirdAppConfig = i
-}
-
-func ConsumerConfig() IConsumerConfig {
-	if localConsumerConfig == nil {
-		panic("implement not found for interface IConsumerConfig, forgot register?")
-	}
-	return localConsumerConfig
-}
-
-func RegisterConsumerConfig(i IConsumerConfig) {
-	localConsumerConfig = i
-}
 
 func Gateway() IGateway {
 	if localGateway == nil {
@@ -104,4 +82,26 @@ func MerchantAppConfig() IMerchantAppConfig {
 
 func RegisterMerchantAppConfig(i IMerchantAppConfig) {
 	localMerchantAppConfig = i
+}
+
+func ThirdAppConfig() IThirdAppConfig {
+	if localThirdAppConfig == nil {
+		panic("implement not found for interface IThirdAppConfig, forgot register?")
+	}
+	return localThirdAppConfig
+}
+
+func RegisterThirdAppConfig(i IThirdAppConfig) {
+	localThirdAppConfig = i
+}
+
+func ConsumerConfig() IConsumerConfig {
+	if localConsumerConfig == nil {
+		panic("implement not found for interface IConsumerConfig, forgot register?")
+	}
+	return localConsumerConfig
+}
+
+func RegisterConsumerConfig(i IConsumerConfig) {
+	localConsumerConfig = i
 }
