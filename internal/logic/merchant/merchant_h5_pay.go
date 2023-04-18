@@ -32,7 +32,56 @@ func (s *sMerchantH5Pay) InstallHook(actionType pay_enum.OrderStateType, hookFun
 	s.BaseHook.InstallHook(actionType, hookFunc)
 }
 
-func (s *sMerchantH5Pay) H5TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32) (string, error) {
+// H5交易下单
+func (s *sMerchantH5Pay) TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error) {
+	// 通过商家中的第三方应用的AppId创建客户端
+	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	notifyUrl := merchantApp.NotifyUrl
+	//配置公共参数
+	client.SetCharset("utf-8").
+		SetSignType(alipay.RSA2).
+		SetReturnUrl(info.ReturnUrl).
+		SetNotifyUrl(notifyUrl)
+
+	orderId := orderInfo.Id // 提交给支付宝的订单Id就是写我们平台数据库中的订单id
+
+	//请求参数
+	bm := make(gopay.BodyMap)
+	bm.Set("subject", info.ProductName)
+	bm.Set("buyer_id", userId)
+	bm.Set("out_trade_no", orderId)
+	bm.Set("total_amount", totalAmount)
+
+	//bm.Set("product_code", info.ProductNumber)
+	//bm.Set("passback_params", g.Map{ // 可携带数据，在异步通知的的时候会一起回调回来
+	//	"notify_type": enum.Notify.NotifyType.PayCallBack.Code(),
+	//	"order_id":    orderId,
+	//})
+	bm.Set("extend_params", g.Map{ // 业务拓展参数
+		"royalty_freeze": true, // 资金冻结标识
+	})
+	bm.Set("app_auth_token", merchantApp.AppAuthToken)
+	// 2.统一下单交易创建
+	aliRsp, err := client.TradeCreate(ctx, bm)
+
+	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
+		if bizErr, ok := alipay.IsBizError(err); ok {
+			xlog.Errorf("%s, %s", bizErr.Code, bizErr.Msg)
+			// do something
+			return "", err
+		}
+		xlog.Errorf("%s", err)
+		return "", err
+	}
+	xlog.Debug("aliRsp:", *aliRsp)
+	xlog.Debug("aliRsp.TradeNo:", aliRsp.Response.TradeNo)
+
+	return aliRsp.Response.TradeNo, err
+
+}
+
+// H5 支付，返回支付url
+func (s *sMerchantH5Pay) H5TradePay(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32) (string, error) {
 	// 通过商家中的第三方应用的AppId创建客户端
 	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
 	notifyUrl := merchantApp.NotifyUrl

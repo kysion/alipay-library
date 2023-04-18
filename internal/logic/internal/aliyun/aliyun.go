@@ -101,8 +101,8 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 		SetSignType(alipay.RSA2)
 
 	// 自动同步验签（只支持证书模式）
-	// 传入 alipayCertPublicKey_RSA2.crt 内容
-	aliPayClient.AutoVerifySign([]byte(config.AppPublicCertKey))
+	// 传入 alipayCertPublicKey_RSA2.crt 支付宝证书公钥内容
+	aliPayClient.AutoVerifySign([]byte(config.PublicKeyCert))
 
 	// 证书路径(应用公钥证书路径、 支付宝根证书文件路径、 支付宝公钥证书文件路径)
 	// err = aliPayClient.SetCertSnByPath(config.AppPublicCertKey, config.AlipayRootCertPublicKey, config.PublicKeyCert)

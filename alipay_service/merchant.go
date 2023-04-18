@@ -55,6 +55,12 @@ type (
 		OrderSend(ctx context.Context)
 		TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error)
 	}
+	IMerchantTransfer interface {
+		FundTransUniTransfer(ctx context.Context, appId string, info *alipay_model.FundTransUniTransferReq) (aliRsp *alipay_model.TransUniTransferRes, err error)
+	}
+	IPayTrade interface {
+		PayTradeCreate(ctx context.Context, info *alipay_model.TradeOrder, userId string, notifyFunc ...hook.NotifyHookFunc) (res string, err error)
+	}
 	ISubAccount interface {
 		TradeRelationBind(ctx context.Context, appId int64, info *alipay_model.TradeRelationBindReq) (bool, error)
 		TradeRelationUnbind(ctx context.Context, appId string, info *alipay_model.TradeRelationBindReq) (*alipay_model.TradeRelationUnbindResponse, error)
@@ -65,27 +71,16 @@ type (
 )
 
 var (
+	localSubAccount         ISubAccount
 	localAppAuth            IAppAuth
+	localMerchantH5Pay      IMerchantH5Pay
+	localMerchantNotify     IMerchantNotify
 	localMerchantService    IMerchantService
+	localMerchantTinyappPay IMerchantTinyappPay
 	localMerchantTransfer   IMerchantTransfer
 	localPayTrade           IPayTrade
 	localWallet             IWallet
-	localMerchantH5Pay      IMerchantH5Pay
-	localMerchantNotify     IMerchantNotify
-	localMerchantTinyappPay IMerchantTinyappPay
-	localSubAccount         ISubAccount
 )
-
-func MerchantNotify() IMerchantNotify {
-	if localMerchantNotify == nil {
-		panic("implement not found for interface IMerchantNotify, forgot register?")
-	}
-	return localMerchantNotify
-}
-
-func RegisterMerchantNotify(i IMerchantNotify) {
-	localMerchantNotify = i
-}
 
 func MerchantTinyappPay() IMerchantTinyappPay {
 	if localMerchantTinyappPay == nil {
@@ -96,6 +91,28 @@ func MerchantTinyappPay() IMerchantTinyappPay {
 
 func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
 	localMerchantTinyappPay = i
+}
+
+func MerchantTransfer() IMerchantTransfer {
+	if localMerchantTransfer == nil {
+		panic("implement not found for interface IMerchantTransfer, forgot register?")
+	}
+	return localMerchantTransfer
+}
+
+func RegisterMerchantTransfer(i IMerchantTransfer) {
+	localMerchantTransfer = i
+}
+
+func PayTrade() IPayTrade {
+	if localPayTrade == nil {
+		panic("implement not found for interface IPayTrade, forgot register?")
+	}
+	return localPayTrade
+}
+
+func RegisterPayTrade(i IPayTrade) {
+	localPayTrade = i
 }
 
 func SubAccount() ISubAccount {
