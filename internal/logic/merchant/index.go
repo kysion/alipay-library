@@ -19,4 +19,7 @@ func init() {
 	//service.RegisterWallet(NewWallet())
 
 	service.RegisterMerchantService(NewMerchantService())
+
+	service.RegisterAppVersion(NewAppVersion())
+
 }
