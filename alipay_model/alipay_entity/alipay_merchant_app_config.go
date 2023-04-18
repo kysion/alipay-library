@@ -45,4 +45,6 @@ type AlipayMerchantAppConfig struct {
 	ServerRate              float64     `json:"serverRate"              description:"手续费比例，默认0.006%"`
 	UnionMainType           int         `json:"unionMainType"           description:"应用关联主体类型，和user_type保持一致"`
 	Version                 string      `json:"version"                 description:"应用版本"`
+	PrivacyPolicy           string      `json:"privacyPolicy"           description:"隐私协议"`
+	UserPolicy              string      `json:"userPolicy"              description:"用户协议"`
 }

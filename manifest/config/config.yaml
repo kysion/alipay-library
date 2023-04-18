@@ -9,11 +9,11 @@ server:
   openapiPath: "/openapi/alipay-library.json"
   swaggerPath: "/docs/alipay-library"
   # TLS/HTTPS配置，同时需要配置证书和密钥
-  httpsAddr: ":443"
-  # TLS/HTTPS证书文件路径
-  httpsCertPath: "/data/kysion_files/ssl/alipay.kuaimk.com/9427929_alipay.kuaimk.com.pem"
-  # TLS/HTTPS密钥文件路径
-  httpsKeyPath: "/data/kysion_files/ssl/alipay.kuaimk.com/9427929_alipay.kuaimk.com.key"
+#  httpsAddr: ":443"
+#  # TLS/HTTPS证书文件路径
+#  httpsCertPath: "/data/kysion_files/ssl/alipay.kuaimk.com/9427929_alipay.kuaimk.com.pem"
+#  # TLS/HTTPS密钥文件路径
+#  httpsKeyPath: "/data/kysion_files/ssl/alipay.kuaimk.com/9427929_alipay.kuaimk.com.key"
 
 service:
   # 用户表ID生成器，分布式终端标识，取值范围 1 ~ 63，解决分布式多服务横向扩展时保证生成的ID不重复

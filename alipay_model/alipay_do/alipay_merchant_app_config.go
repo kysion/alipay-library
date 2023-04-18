@@ -47,4 +47,6 @@ type AlipayMerchantAppConfig struct {
 	ServerRate              interface{} // 手续费比例，默认0.006%
 	UnionMainType           interface{} // 应用关联主体类型，和user_type保持一致
 	Version                 interface{} // 应用版本
+	PrivacyPolicy           interface{} // 隐私协议
+	UserPolicy              interface{} // 用户协议
 }
