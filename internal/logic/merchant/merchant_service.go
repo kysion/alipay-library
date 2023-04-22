@@ -48,6 +48,8 @@ func (s *sMerchantService) injectHook() {
 }
 
 func (s *sMerchantService) InstallConsumerHook(infoType hook.ConsumerKey, hookFunc hook.ConsumerHookFunc) {
+	sys_service.SysLogs().InfoSimple(context.Background(), nil, "\n-------订阅sMerchantService-Hook： ------- ", "sPlatformUser")
+
 	s.ConsumerHook.InstallHook(infoType, hookFunc)
 }
 
@@ -57,6 +59,8 @@ func (s *sMerchantService) GetHook() base_hook.BaseHook[hook.ConsumerKey, hook.C
 
 // GetUserId 用于检查是否注册,如果已经注册，返会userId
 func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId string) (res string, err error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------获取用户JwtToken----GetUserId---- ", "sMerchantService")
+
 	client, err := aliyun.NewClient(ctx, appId)
 	userId := ""
 	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
@@ -90,6 +94,8 @@ func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId
 
 // UserInfoAuth 具体服务 用户授权 + 小程序和H5都兼容
 func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string { // code string, appId string, sysUserId ...int64
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------支付宝用户授权 UserInfoAuth", "sMerchantService")
+
 	from := gmap.NewStrAnyMapFrom(info)
 
 	//code := from.Get("code") //
@@ -150,6 +156,9 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 							SysUserId:     sysUser.Id, // (消费者id = sys_User_id)
 							UserInfoShare: *userInfo.Response,
 						}
+
+						sys_service.SysLogs().InfoSimple(ctx, nil, "\n广播-------存储消费者数据 kmk-consumer", "sMerchantService")
+
 						//consumerId = value(ctx, data)
 						value(ctx, data)
 					})
@@ -202,6 +211,7 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 					//if consumerId != 0 { // 适用于消费者没有员工的情况下  注意：错误思想，没有员工但是会有sysUser
 					//	data.EmployeeId = consumerId
 					//}
+					sys_service.SysLogs().InfoSimple(ctx, nil, "\n广播-------存储第三方应用和用户关系记录 kmk-plat_form_user", "sMerchantService")
 
 					value(ctx, platformUser) // 调用Hook
 				})

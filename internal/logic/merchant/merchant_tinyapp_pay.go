@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/kysion/alipay-library/alipay_model"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
@@ -41,9 +42,10 @@ func (s *sMerchantTinyappPay) OrderSend(ctx context.Context) {
 
 }
 
-// TradeCreate  2、创建交易订单
+// TradeCreate  2、小程序创建交易订单
 func (s *sMerchantTinyappPay) TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error) {
 	//appId, _ := strconv.ParseInt(info.AppId, 32, 0)
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------小程序创建交易订单 ------- ", "sMerchantH5Pay")
 
 	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
 	notifyUrl := merchantApp.NotifyUrl

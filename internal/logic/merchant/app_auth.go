@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -39,6 +40,8 @@ func (s *sAppAuth) injectHook() {
 
 // AppAuth 具体服务
 func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) string { // 返回商户userId
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay应用授权 ------- ", "sAppAuth")
+
 	fmt.Println("hello authApp")
 
 	data := gopay.BodyMap{}
@@ -60,7 +63,7 @@ func (s *sAppAuth) AppAuth(ctx context.Context, info g.Map) string { // 返回�
 	gconv.Int64(data.Get("sys_user_id")) // 授权码的附带数据sys_user_id
 
 	authInfos := g.Map{}
-	
+
 	if len(aliRsp.Response.Tokens) != 0 {
 		token := aliRsp.Response.Tokens[0]
 		authInfos = g.Map{

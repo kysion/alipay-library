@@ -31,6 +31,8 @@ func NewPayTrade() *sPayTrade {
 
 // PayTradeCreate  1、创建交易订单   （AppId的H5是没有的，需要写死，小程序有的 ）
 func (s *sPayTrade) PayTradeCreate(ctx context.Context, info *alipay_model.TradeOrder, userId string, notifyFunc ...hook.NotifyHookFunc) (res string, err error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay创建交易订单 ------- ", "sPayTrade")
+
 	// 100分 / 100 = 1元  10 /100
 	totalAmount := gconv.Float32(info.Amount) / 100.0
 
