@@ -21,6 +21,10 @@ type GetMerchantAppConfigByIdReq struct {
 	Id     int64 `json:"id" dc:"商家应用Id"`
 }
 
+type GetMerchantAppConfigByAppIdReq struct {
+	g.Meta `path:"/:appId/getMerchantAppConfigByAppId" method:"post" summary:"根据AppId获取商家应用" tags:"Alipay商家应用"`
+}
+
 type UpdateMerchantAppConfigReq struct {
 	g.Meta `path:"/updateMerchantAppConfig" method:"post" summary:"修改商家应用基础信息" tags:"Alipay商家应用"`
 	alipay_model.UpdateMerchantAppConfigReq
