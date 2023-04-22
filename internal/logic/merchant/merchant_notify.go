@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"
@@ -48,6 +49,8 @@ func NewMerchantNotify() *sMerchantNotify {
 
 // InstallNotifyHook 订阅异步通知Hook
 func (s *sMerchantNotify) InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc) {
+	sys_service.SysLogs().InfoSimple(context.Background(), nil, "\n-------订阅订阅异步通知Hook： ------- ", "sPlatformUser")
+
 	hookKey.HookCreatedAt = *gtime.Now()
 
 	secondAt := gtime.New(alipay_consts.Global.TradeHookExpireAt * gconv.Int64(time.Second))
@@ -79,6 +82,8 @@ func (s *sMerchantNotify) InstallSubAccountHook(hookKey hook.SubAccountHookKey, 
 
 // MerchantNotifyServices 异步通知地址  用于接收支付宝推送给商户的支付/退款成功的消息。
 func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n----------支付宝异步通知", "sMerchantNotify")
+
 	err := dao.AlipayConsumerConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 		notifyKey := hook.NotifyKey{}
@@ -100,6 +105,8 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 					return
 				}
 				g.Try(ctx, func(ctx context.Context) { // 满足条件，Hook调用
+					sys_service.SysLogs().InfoSimple(ctx, nil, "\n----------广播异步通知Hook", "MerchantNotify")
+
 					isClean = value(ctx, kconv.Struct(bm, gmap.Map{}), key)
 				})
 			}
@@ -184,7 +191,6 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			s.TradeHook.Iterator(func(key hook.TradeHookKey, value hook.TradeHookFunc) {
 				if key.AlipayTradeStatus.Code() == pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code() {
 					fmt.Println()
-					fmt.Println("广播TradeHook", time.Now())
 
 					//var v interface{} = value
 					//{
@@ -193,7 +199,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 					//		h(ctx, orderInfo)
 					//	}
 					//}
-
+					sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------异步通知TradeHook发布广播-------- ", "sMerchantNotify")
 					value(ctx, orderInfo)
 				}
 

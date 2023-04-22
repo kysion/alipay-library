@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
@@ -32,8 +33,10 @@ func (s *sMerchantH5Pay) InstallHook(actionType pay_enum.OrderStateType, hookFun
 	s.BaseHook.InstallHook(actionType, hookFunc)
 }
 
-// H5交易下单
+// TradeCreate H5交易下单
 func (s *sMerchantH5Pay) TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5交易下单 ------- ", "sMerchantH5Pay")
+
 	// 通过商家中的第三方应用的AppId创建客户端
 	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
 	notifyUrl := merchantApp.NotifyUrl
@@ -136,6 +139,8 @@ func (s *sMerchantH5Pay) H5TradePay(ctx context.Context, info *alipay_model.Trad
 
 // QueryOrderInfo 查询订单
 func (s *sMerchantH5Pay) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
+
 	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
 
 	client.SetAppAuthToken(merchantApp.AppAuthToken)

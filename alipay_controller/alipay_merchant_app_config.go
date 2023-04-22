@@ -43,11 +43,14 @@ func (c *cAlipayMerchantAppConfig) CreateMerchantAppConfig(ctx context.Context, 
 	return (*alipay_merchant_v1.MerchantAppConfigRes)(ret), err
 }
 
-// GetMerchantAppConfigByAppId 根据AppId查找第三方应用配置信息
-func (c *cAlipayMerchantAppConfig) GetMerchantAppConfigByAppId(ctx context.Context, req *alipay_merchant_v1.GetMerchantAppConfigByIdReq) (*alipay_merchant_v1.MerchantAppConfigRes, error) {
+// GetMerchantAppConfigByAppId 根据AppId查找商家应用配置信息
+func (c *cAlipayMerchantAppConfig) GetMerchantAppConfigByAppId(ctx context.Context, req *alipay_merchant_v1.GetMerchantAppConfigByAppIdReq) (*alipay_merchant_v1.MerchantAppConfigRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*alipay_merchant_v1.MerchantAppConfigRes, error) {
-			ret, err := alipay_service.MerchantAppConfig().GetMerchantAppConfigById(ctx, req.Id)
+			info := g.RequestFromCtx(ctx).Get("appId").String()
+			appId, _ := strconv.ParseInt(info, 32, 0)
+
+			ret, err := alipay_service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, gconv.String(appId))
 			return (*alipay_merchant_v1.MerchantAppConfigRes)(ret), err
 		},
 		// 记得添加权限

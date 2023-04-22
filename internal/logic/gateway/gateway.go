@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/encoding/gxml"
 	"github.com/gogf/gf/v2/frame/g"
@@ -55,7 +56,6 @@ func NewGateway() *sGateway {
 
 // GatewayServices 接收消息通知  B端消息
 func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
-
 	// 拿到路径的AppId进行搜索、
 	urlAppId := g.RequestFromCtx(ctx).Get("appId").String()
 	var pathAppId int64
@@ -74,7 +74,9 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 	bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 	fmt.Println(bm)
 
-	fmt.Println("应用通知类型----------------  ", bm.Get("service"))
+	fmt.Println("Alipay应用通知类型----------------  ", bm.Get("service"))
+
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay应用通知类型： ------- "+bm.Get("service"), "sGateway")
 
 	// 验证应用网关我们直接处理
 	if bm.Get("service") == enum.Info.ServiceType.ServiceCheck.Code() {
@@ -85,6 +87,7 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 	s.ServiceNotifyTypeHook.Iterator(func(key enum.ServiceNotifyType, value hook.ServiceNotifyHookFunc) {
 		if key.Code() == gconv.String(bm.Get("service")) {
 			g.Try(ctx, func(ctx context.Context) {
+				sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay应用通知广播： ------- "+bm.Get("source"), "sGateway")
 				value(ctx, bm)
 			})
 		}
@@ -95,6 +98,8 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 
 // 验证应用网关
 func (s *sGateway) checkGateway(ctx context.Context, client *aliyun.AliPay, info gopay.BodyMap) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay验证应用网关： ------- ", "sGateway")
+
 	sign, err := client.GetRsaSign(gopay.BodyMap{
 		"success": "true",
 	}, "RSA2", "", "xml")
@@ -127,6 +132,7 @@ func (s *sGateway) checkGateway(ctx context.Context, client *aliyun.AliPay, info
 
 // GatewayCallback 接收消息回调  C端消息
 func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
+
 	// 商家的话，先授权，然后获取应用token，存起来
 
 	// 用户的话，直接登录，然后通过code获得token，然后存起来
@@ -146,6 +152,8 @@ func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
 		"merchant_id": bm.Get("merchant_id"),
 	}
 
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay消息回调类型： ------- "+bm.Get("source"), "sGateway")
+
 	// 判断回调的源目标source  HOOK解决switch
 	switch bm.Get("source") {
 	// 商家应用授权
@@ -159,6 +167,7 @@ func (s *sGateway) GatewayCallback(ctx context.Context) (string, error) {
 	s.CallbackMsgHook.Iterator(func(key enum.CallbackMsgType, value hook.ServiceMsgHookFunc) {
 		if key.Code() == gconv.String(bm.Get("source")) {
 			g.Try(ctx, func(ctx context.Context) {
+				sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay消息回调类型广播： ------- "+bm.Get("source"), "sGateway")
 				value(ctx, data)
 			})
 		}

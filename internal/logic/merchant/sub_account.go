@@ -35,6 +35,8 @@ func (s *sSubAccount) TradeRelationBind(ctx context.Context, appId int64, info *
 	// 商家AppId解析，获取商家应用，创建阿里支付客户端
 	// appId, _ := strconv.ParseInt(g.RequestFromCtx(ctx).Get("appId").String(), 32, 0)
 
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay分账关系绑定 ------- ", "sSubAccount")
+
 	appIdStr := gconv.String(appId)
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
@@ -61,6 +63,8 @@ func (s *sSubAccount) TradeRelationBind(ctx context.Context, appId int64, info *
 
 // TradeRelationUnbind  分账关系解绑
 func (s *sSubAccount) TradeRelationUnbind(ctx context.Context, appId string, info *alipay_model.TradeRelationBindReq) (*alipay_model.TradeRelationUnbindResponse, error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay分账关系解绑 ------- ", "sSubAccount")
+
 	appIdStr := gconv.String(appId)
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
@@ -115,6 +119,8 @@ func (s *sSubAccount) TradeRelationBatchQuery(ctx context.Context, appId string,
 
 // TradeOrderSettleQuery 交易分账查询接口  必须传递第一个参数，或者后两个同时传递
 func (s *sSubAccount) TradeOrderSettleQuery(ctx context.Context, appId string, settleNo string, outRequestNo string, tradeNo string) (*alipay_model.TradeOrderSettleQueryRes, error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay交易分账查询接口 ------- ", "sSubAccount")
+
 	appIdStr := gconv.String(appId)
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
@@ -141,6 +147,8 @@ func (s *sSubAccount) TradeOrderSettleQuery(ctx context.Context, appId string, s
 
 // TradeOrderSettle 分账交易下单
 func (s *sSubAccount) TradeOrderSettle(ctx context.Context, appId string, info alipay_model.TradeOrderSettleReq) (*alipay_model.TradeOrderSettleResponse, error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay分账交易下单 ------- ", "sSubAccount")
+
 	appIdStr := gconv.String(appId)
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
