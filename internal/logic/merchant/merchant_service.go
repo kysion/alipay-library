@@ -201,7 +201,7 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 						OperatorId:    0,
 						EmployeeId:    sysUser.Id,                                   // EmployeeId  == consumerId == sysUserId   三者相等
 						MerchantId:    merchantId,                                   // 商家id，就是消费者首次扫码的商家
-						Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 来源
+						Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 平台类型：1支付宝、2微信、4抖音、8银联
 						ThirdAppId:    merchantApp.ThirdAppId,
 						MerchantAppId: merchantApp.AppId,
 						UserId:        token.Response.UserId,                // 平台账户唯一标识
