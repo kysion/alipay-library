@@ -124,8 +124,8 @@ github.com/kysion/base-library v0.0.12 h1:4pyQZXLkwUqYbX/XOq2bHOdNdfjFnU2FX3L2xb
 github.com/kysion/base-library v0.0.12/go.mod h1:ysP/ule32mvLsTs1gjfyOXOd9n2lVTbTqu9Mu3nWpVs=
 github.com/kysion/gopay v0.0.3 h1:BGW8QzZ/T0i6wqtN4bdGK//dMX4IlNjW1CUOQZSo0ek=
 github.com/kysion/gopay v0.0.3/go.mod h1:ixPkE2xPwJ/RXDk4Ia2ZbMDZLpPMmWeR3ihnJGXCmcM=
-github.com/kysion/pay-share-library v0.1.5 h1:pJW2j6YnvJYDe08ro68f44KXrq/mzT2d/53945YIzxA=
-github.com/kysion/pay-share-library v0.1.5/go.mod h1:eCipEO9ZrbKeS/IvEG6iJFrmPOW76wuyTAm1RuS2/Cg=
+github.com/kysion/pay-share-library v0.1.6 h1:khBEbEsZf2LeuJ6Cwr/m8T2/4TLjt1hU6gSUVJNLW3I=
+github.com/kysion/pay-share-library v0.1.6/go.mod h1:eCipEO9ZrbKeS/IvEG6iJFrmPOW76wuyTAm1RuS2/Cg=
 github.com/kysion/sms-library v0.0.3 h1:V5QyVpJSZfMZsxfR44fkW6DKuxucLvEIBTrAYiuChAc=
 github.com/kysion/sms-library v0.0.3/go.mod h1:GiPDNDCW2vPY/n4A/i97+uzglryrvr4GC6Rjt/3l3JE=
 github.com/lib/pq v1.10.4 h1:SO9z7FRPzA03QhHKJrH5BXA6HU1rS4V2nIVrrNC1iYk=

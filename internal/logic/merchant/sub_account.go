@@ -161,6 +161,7 @@ func (s *sSubAccount) TradeOrderSettle(ctx context.Context, appId string, info a
 
 	// bindReq.outRequestNo = gconv.String(orderId) // 外部请求号  == 单号
 	data := kconv.Struct(info, &gopay.BodyMap{})
+	data.Set("app_auth_token", merchantApp.AppAuthToken)
 
 	// 1.分账下单 （商户与分账方）
 	res, err := client.TradeOrderSettle(ctx, *data)
