@@ -61,8 +61,8 @@ func (s *sThirdAppConfig) CreateThirdAppConfig(ctx context.Context, info *alipay
 	appId := strconv.FormatInt(gconv.Int64(info.AppId), 32)
 
 	if info.ServerDomain != "" {
-		info.AppGatewayUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.services"
-		info.AppCallbackUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.callback"
+		info.AppGatewayUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.services"
+		info.AppCallbackUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.callback"
 	} else if info.ServerDomain == "" {
 		// 没指定服务器域名，默认使用当前服务器域名
 		info.ServerDomain = "https://alipay.kuaimk.com"

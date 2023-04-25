@@ -249,7 +249,7 @@ func (s *sAppVersion) SubmitVersionAudit(ctx context.Context, info *alipay_model
 
 	var nonce = gconv.String(idgen.NextId())
 
-	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + strconv.FormatInt(time.Now().Unix(), 10) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
+	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + gconv.String(time.Now().UnixNano()/1000000) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
 
 	var content = auth_string + "\n" +
 		"POST" + "\n" +
@@ -318,7 +318,8 @@ func (s *sAppVersion) CancelVersionAudit(ctx context.Context, version string) (*
 
 	var nonce = gconv.String(idgen.NextId())
 
-	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + strconv.FormatInt(time.Now().Unix(), 10) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
+	// strconv.FormatInt(time.Now().Unix(), 10) 
+	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + gconv.String(time.Now().UnixNano()/1000000) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
 
 	var content = auth_string + "\n" +
 		"POST" + "\n" +
@@ -384,7 +385,8 @@ func (s *sAppVersion) CancelVersion(ctx context.Context, version string) (*alipa
 
 	var nonce = gconv.String(idgen.NextId())
 
-	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + strconv.FormatInt(time.Now().Unix(), 10) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
+	// strconv.FormatInt(time.Now().Unix(), 10) 
+	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + gconv.String(time.Now().UnixNano()/1000000) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
 
 	// 待签名内容
 	var content = auth_string + "\n" +
@@ -450,7 +452,8 @@ func (s *sAppVersion) AppOnline(ctx context.Context, version string) (*alipay_mo
 
 	var nonce = gconv.String(idgen.NextId())
 
-	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + strconv.FormatInt(time.Now().Unix(), 10) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
+	// strconv.FormatInt(time.Now().Unix(), 10) 
+	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + gconv.String(time.Now().UnixNano()/1000000) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
 
 	var content = auth_string + "\n" +
 		"POST" + "\n" +
@@ -514,7 +517,8 @@ func (s *sAppVersion) AppOffline(ctx context.Context, version string) (*alipay_m
 
 	var nonce = gconv.String(idgen.NextId())
 
-	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + strconv.FormatInt(time.Now().Unix(), 10) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
+	// strconv.FormatInt(time.Now().Unix(), 10) 
+	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + gconv.String(time.Now().UnixNano()/1000000) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
 
 	var content = auth_string + "\n" +
 		"POST" + "\n" +
@@ -577,7 +581,8 @@ func (s *sAppVersion) QueryAppVersionList(ctx context.Context, versionStatus str
 
 	var nonce = gconv.String(idgen.NextId())
 
-	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + strconv.FormatInt(time.Now().Unix(), 10) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
+	// strconv.FormatInt(time.Now().Unix(), 10) 
+	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + gconv.String(time.Now().UnixNano()/1000000) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
 
 	var content = auth_string + "\n" +
 		"GET" + "\n" +
@@ -641,7 +646,8 @@ func (s *sAppVersion) GetAppVersionDetail(ctx context.Context, version string) (
 
 	var nonce = gconv.String(idgen.NextId())
 
-	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + strconv.FormatInt(time.Now().Unix(), 10) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
+	// strconv.FormatInt(time.Now().Unix(), 10) 
+	var auth_string = "app_id=" + aliClient.ThirdConfig.AppId + ",timestamp=" + gconv.String(time.Now().UnixNano()/1000000) + ",nonce=" + nonce + ",app_cert_sn=" + aliClient.AppCertSN + ",alipay_root_cert_sn=" + aliClient.AliPayRootCertSN
 
 	var content = auth_string + "\n" +
 		"GET" + "\n" +
