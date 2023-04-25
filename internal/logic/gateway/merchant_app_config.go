@@ -64,14 +64,17 @@ func (s *sMerchantAppConfig) CreateMerchantAppConfig(ctx context.Context, info *
 	if info.ServerDomain != "" {
 		//appIdHash := utility.Md5Hash(info.AppId)
 		//// 取其appId Md5加密后的前16位  //https://alipay.jditco.com/alipay/appIdMd5-16/gateway.services
-		info.AppGatewayUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.services"
-		info.AppCallbackUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.callback"
+		info.AppGatewayUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.services"
+		info.AppCallbackUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.callback"
+		info.NotifyUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.notify"
+
 		//info.AppIdMd5 = appIdHash
 	} else if info.ServerDomain == "" {
 		// 没指定服务器域名，默认使用当前服务器域名
 		info.ServerDomain = "https://alipay.kuaimk.com"
 		info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.services"
 		info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.callback"
+		info.NotifyUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.notify"
 	}
 
 	// 用户id默认是当前登录用户
