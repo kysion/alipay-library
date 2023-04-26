@@ -3,7 +3,6 @@ package merchant
 import (
 	"context"
 	"fmt"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -204,8 +203,8 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 						Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 平台类型：1支付宝、2微信、4抖音、8银联
 						ThirdAppId:    merchantApp.ThirdAppId,
 						MerchantAppId: merchantApp.AppId,
-						UserId:        token.Response.UserId,                // 平台账户唯一标识
-						Type:          sys_enum.User.Type.New(0, "").Code(), // 用户类型：消费者为0或者1
+						UserId:        token.Response.UserId, // 平台账户唯一标识
+						Type:          sysUser.Type,          // 用户类型
 					}
 
 					//if consumerId != 0 { // 适用于消费者没有员工的情况下  注意：错误思想，没有员工但是会有sysUser
