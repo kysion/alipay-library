@@ -2,8 +2,9 @@ package alipay_model
 
 // FundTransUniTransferReq ====================单笔资金转账Req===============================
 type FundTransUniTransferReq struct {
-	OutBizNo       string    `json:"out_biz_no" dc:"商家侧唯一订单号，由商家自定义。对于不同转账请求"`
-	TransAmount    float32   `json:"trans_amount" dc:"订单总金额，单位为元，"`
+	OutBizNo    string  `json:"out_biz_no" dc:"商家侧唯一订单号，由商家自定义。对于不同转账请求"`
+	TransAmount float32 `json:"trans_amount" dc:"订单总金额，单位为元，"`
+	// 单笔无密转账是指在进行转账操作时，不需要输入支付密码或者其他安全验证方式，直接完成转账的操作。
 	ProductCode    string    `json:"product_code" dc:"销售产品码。单笔无密转账固定为 TRANS_ACCOUNT_NO_PWD。"`
 	BizScene       string    `json:"biz_scene" dc:"业务场景。单笔无密转账固定为 DIRECT_TRANSFER。"`
 	OrderTitle     string    `json:"order_title" dc:"转账业务的标题，用于在支付宝用户的账单里显示。"`
@@ -15,6 +16,7 @@ type FundTransUniTransferReq struct {
 	        true：展示别名，将展示商家支付宝在商家中心商户信息> 商户基本信息 页面配置的 商户别名。
 	        false：不展示别名。默认为 false
 	*/
+
 }
 
 // PayeeInfo 收款方信息
@@ -54,4 +56,50 @@ type TransToaccountTransfer struct {
 	OutBizNo string `json:"out_biz_no,omitempty"`
 	OrderId  string `json:"order_id,omitempty"`
 	PayDate  string `json:"pay_date,omitempty"`
+}
+
+// FundTransCommonQueryRes ======================转账查询=============================
+type FundTransCommonQueryRes struct {
+	Response     *FundTransCommonQuery `json:"alipay_fund_trans_common_query_response"`
+	AlipayCertSn string                `json:"alipay_cert_sn,omitempty"`
+	SignData     string                `json:"-"`
+	Sign         string                `json:"sign"`
+}
+
+type FundTransCommonQuery struct {
+	ErrorResponse
+	OrderId        string `json:"order_id,omitempty"`
+	PayFundOrderId string `json:"pay_fund_order_id,omitempty"`
+	OutBizNo       string `json:"out_biz_no,omitempty"`
+	TransAmount    string `json:"trans_amount,omitempty"`
+	Status         string `json:"status,omitempty"`
+	PayDate        string `json:"pay_date,omitempty"`
+	ArrivalTimeEnd string `json:"arrival_time_end,omitempty"`
+	OrderFee       string `json:"order_fee,omitempty"`
+	ErrorCode      string `json:"error_code,omitempty"`
+	FailReason     string `json:"fail_reason,omitempty"`
+}
+
+// FundAccountQueryResponse ======================余额查询=============================
+type FundAccountQueryResponse struct {
+	Response     *FundAccountQuery `json:"alipay_fund_account_query_response"`
+	AlipayCertSn string            `json:"alipay_cert_sn,omitempty"`
+	SignData     string            `json:"-"`
+	Sign         string            `json:"sign"`
+}
+
+type FundAccountQuery struct {
+	ErrorResponse
+	AvailableAmount string       `json:"available_amount,omitempty" dc:"账户可用余额，单位元，精确到小数点后两位。"` // freeze_amount dc:"当前支付宝账户的实时冻结余额"
+	ExtCardInfo     *ExtCardInfo `json:"ext_card_info,omitempty" `
+}
+
+type ExtCardInfo struct {
+	CardNo       string `json:"card_no,omitempty"`
+	BankAccName  string `json:"bank_acc_name,omitempty"`
+	CardBranch   string `json:"card_branch,omitempty"`
+	CardBank     string `json:"card_bank,omitempty"`
+	CardLocation string `json:"card_location,omitempty"`
+	CardDeposit  string `json:"card_deposit,omitempty"`
+	Status       string `json:"status,omitempty"`
 }
