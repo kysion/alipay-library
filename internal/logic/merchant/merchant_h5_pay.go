@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
+	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/gopay"
@@ -126,7 +127,7 @@ func (s *sMerchantH5Pay) H5TradePay(ctx context.Context, info *alipay_model.Trad
 	// g.RequestFromCtx(ctx).Response.WriteJson(payUrl)
 
 	// 查询订单并返回tradeNo给前端
-	rsp, err := s.QueryOrderInfo(ctx, gconv.String(orderId), merchantApp)
+	rsp, err := service.PayTrade().QueryOrderInfo(ctx, gconv.String(orderId), merchantApp)
 
 	return rsp.Response.TradeNo, err
 
@@ -136,29 +137,3 @@ func (s *sMerchantH5Pay) H5TradePay(ctx context.Context, info *alipay_model.Trad
 }
 
 // 2、异步通知 merchant_notify.go
-
-// QueryOrderInfo 查询订单
-func (s *sMerchantH5Pay) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error) {
-	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
-
-	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
-
-	client.SetAppAuthToken(merchantApp.AppAuthToken)
-
-	//请求参数
-	bm := make(gopay.BodyMap)
-	bm.Set("out_trade_no", outTradeNo)
-
-	//查询订单
-	aliRsp, err = client.TradeQuery(ctx, bm)
-	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
-		xlog.Error("err:", err)
-		return
-	}
-
-	//g.RequestFromCtx(ctx).Response.Write(aliRsp.Response.TradeNo)
-
-	xlog.Debug("订单数据:", *aliRsp)
-
-	return aliRsp, err
-}

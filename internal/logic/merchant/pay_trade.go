@@ -9,6 +9,10 @@ import (
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	service "github.com/kysion/alipay-library/alipay_service"
+	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
+	"github.com/kysion/gopay"
+	"github.com/kysion/gopay/alipay"
+	"github.com/kysion/gopay/pkg/xlog"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_service"
 	"strconv"
@@ -80,4 +84,60 @@ func (s *sPayTrade) PayTradeCreate(ctx context.Context, info *alipay_model.Trade
 	}
 
 	return res, err
+}
+
+// QueryOrderInfo 查询订单
+func (s *sPayTrade) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
+
+	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
+
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
+
+	//请求参数
+	bm := make(gopay.BodyMap)
+	bm.Set("out_trade_no", outTradeNo)
+
+	//查询订单
+	aliRsp, err = client.TradeQuery(ctx, bm)
+	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
+		xlog.Error("err:", err)
+		return
+	}
+
+	//g.RequestFromCtx(ctx).Response.Write(aliRsp.Response.TradeNo)
+
+	xlog.Debug("订单数据:", *aliRsp)
+
+	return aliRsp, err
+}
+
+// PayTradeClose alipay.trade.close(统一收单交易关闭接口)
+func (s *sPayTrade) PayTradeClose(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeCloseResponse, err error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
+
+	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
+	//配置公共参数
+	client.SetCharset("utf-8").
+		SetSignType(alipay.RSA2).
+		SetNotifyUrl(merchantApp.NotifyUrl)
+
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
+
+	//请求参数
+	bm := make(gopay.BodyMap)
+	bm.Set("out_trade_no", outTradeNo)
+
+	//查询订单
+	aliRsp, err = client.TradeClose(ctx, bm)
+	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
+		xlog.Error("err:", err)
+		return
+	}
+
+	//g.RequestFromCtx(ctx).Response.Write(aliRsp.Response.TradeNo)
+
+	xlog.Debug("订单数据:", *aliRsp)
+
+	return aliRsp, err
 }
