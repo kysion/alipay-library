@@ -213,6 +213,12 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 					return isClean && filter == conditionKey
 				})
 			})
+
+			go func() {
+				url := "http://10.168.173.252:7771/device/setPowerState?serialNumber=" + orderInfo.ProductNumber + "&isPowerOn=true"
+				g.Client().PostContent(ctx, url)
+			}()
+
 		}
 
 		return nil
