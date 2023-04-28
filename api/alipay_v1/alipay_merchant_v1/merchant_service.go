@@ -41,5 +41,5 @@ type GetUserInfoByAuthCodeReq struct {
 
 	AuthCode string `json:"auth_code" dc:"第三方平台用户唯一标识ID"`
 
-	AppId string `json:"app_id" dc:"商户应用id"`
+	AppId string `json:"appId" dc:"商户应用id"`
 }
