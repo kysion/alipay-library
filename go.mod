@@ -3,8 +3,8 @@ module github.com/kysion/alipay-library
 go 1.19
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.4.5
-	github.com/SupenBysz/gf-admin-company-modules v0.4.7
+	github.com/SupenBysz/gf-admin-community v0.4.6
+	github.com/SupenBysz/gf-admin-company-modules v0.4.9
 	github.com/gogf/gf/v2 v2.3.2
 	github.com/kysion/base-library v0.0.12
 	github.com/kysion/gopay v0.0.3
