@@ -57,6 +57,9 @@ type AlipayMerchantAppConfigColumns struct {
 	NotifyUrl               string // 异步通知地址，允许业务层追加相关参数
 	ServerRate              string // 手续费比例，默认0.006%
 	UnionMainType           string // 应用关联主体类型，和user_type保持一致
+	Version                 string // 应用版本
+	PrivacyPolicy           string // 隐私协议
+	UserPolicy              string // 用户协议
 }
 
 // alipayMerchantAppConfigColumns holds the columns for table alipay_merchant_app_config.
@@ -95,6 +98,9 @@ var alipayMerchantAppConfigColumns = AlipayMerchantAppConfigColumns{
 	NotifyUrl:               "notify_url",
 	ServerRate:              "server_rate",
 	UnionMainType:           "union_main_type",
+	Version:                 "version",
+	PrivacyPolicy:           "privacy_policy",
+	UserPolicy:              "user_policy",
 }
 
 // NewAlipayMerchantAppConfigDao creates and returns a new DAO object for table data access.

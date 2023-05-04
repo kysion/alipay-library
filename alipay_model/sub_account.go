@@ -7,11 +7,11 @@ type TradeRelationBindReq struct { // List
 }
 
 type ReceiverList struct {
-	Type          string `json:"type" dc:"分账接收方方类型。"`                   // 硬编码：loginName  可以是手机号或者邮箱
-	Account       string `json:"account" dc:"分账接收方账号"`                  // account.Account_number
-	Name          string `json:"name" dc:"分账接收方真实姓名。"`                  // accuont.name
-	Memo          string `json:"memo" dc:"分账关系描述"`                      // 硬编码：充电佣金收入
-	LoginName     string `json:"login_name" dc:"当前userId对应的支付宝登录号"`     // 邮箱或者phone手机号
+	Type          string `json:"type" dc:"分账接收方方类型。"`                          // 硬编码：loginName  可以是手机号或者邮箱
+	Account       string `json:"account" dc:"分账接收方账号"`                          // account.Account_number
+	Name          string `json:"name" dc:"分账接收方真实姓名。"`                        // accuont.name
+	Memo          string `json:"memo" dc:"分账关系描述"`                               // 硬编码：充电佣金收入
+	LoginName     string `json:"login_name" dc:"当前userId对应的支付宝登录号"`         // 邮箱或者phone手机号
 	BindLoginName string `json:"bind_login_name" dc:"分账收款方绑定时的支付宝登录号。"` // 同上 可选
 }
 
@@ -71,9 +71,9 @@ type TradeOrderSettleReq struct {
 }
 
 type RoyaltyParameters struct {
-	RoyaltyType  string  `json:"royalty_type" dc:"分账类型."`
-	TransOut     string  `json:"trans_out" dc:"支出方账户。可选"`
-	TransOutType string  `json:"trans_out_type" dc:"支出方账户类型。可选"`
+	RoyaltyType string `json:"royalty_type" dc:"分账类型."`
+	//TransOut     string  `json:"trans_out" dc:"支出方账户。可选"`
+	//TransOutType string  `json:"trans_out_type" dc:"支出方账户类型。可选"`
 	TransInType  string  `json:"trans_in_type" dc:"收入方账户类型。"`
 	TransIn      string  `json:"trans_in" dc:"收入方账户。"`
 	Amount       float32 `json:"amount" dc:"分账的金额，单位为元"`

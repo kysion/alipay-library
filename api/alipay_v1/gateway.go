@@ -5,11 +5,11 @@ import (
 )
 
 type AliPayServicesReq struct {
-	g.Meta `path:"/:appId/gateway.services" method:"post" summary:"阿里云网关消息接收" tags:"阿里云"`
+	g.Meta `path:"/:appId/gateway.services" method:"post" summary:"阿里云网关消息接收" tags:"Alipay"`
 }
 
 type AliPayCallbackReq struct {
-	g.Meta `path:"/:appId/gateway.callback" method:"get"  summary:"阿里云网关回调" tags:"阿里云"`
+	g.Meta `path:"/:appId/gateway.callback" method:"get"  summary:"阿里云网关回调" tags:"Alipay"`
 }
 
 //

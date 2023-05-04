@@ -9,7 +9,7 @@ import (
 
 // H5TradeReq  创建订单，执行支付  https://alipay.kuaimk.com/alipay/pay/h5Pay/6327966408572997/h5Trade
 type H5TradeReq struct {
-	g.Meta `path:"/:appId/h5Trade" method:"get" summary:"H5支付创建" tags:"阿里云支付"`
+	g.Meta `path:"/:appId/h5Trade" method:"get" summary:"H5支付创建" tags:"Alipay商户服务"`
 	alipay_model.TradeOrder
 }
 
@@ -26,20 +26,20 @@ https://alipay.kuaimk.com/alipay/2021003179623086/gateway.notify"
 
 // AuthMerchantAppReq 商户授权,内部调起授权页面
 type AuthMerchantAppReq struct {
-	g.Meta    ` path:"/:appId/gateway.auth"  method:"get" summary:"商户授权" tags:"阿里商户服务"`
+	g.Meta    ` path:"/:appId/gateway.auth"  method:"get" summary:"商户授权" tags:"Alipay商户服务"`
 	SysUserId string
 }
 
 // GetAlipayUserInfoReq 获取支付宝会员信息，相当于静默登录
 type GetAlipayUserInfoReq struct {
-	g.Meta `path:"/:appId/gateway.call" method:"get" summary:"获取支付宝会员信息" tags:"阿里商户服务"`
+	g.Meta `path:"/:appId/gateway.call" method:"get" summary:"获取支付宝会员信息" tags:"Alipay商户服务"`
 }
 
 // GetUserInfoByAuthCodeReq 根据认证码获取会员信息
 type GetUserInfoByAuthCodeReq struct {
-	g.Meta `path:"/getUserInfoByAuthCode" method:"get" summary:"根据认证code获取用户信息" tags:"阿里商户服务"`
+	g.Meta `path:"/getUserInfoByAuthCode" method:"get" summary:"根据认证code获取用户信息" tags:"Alipay商户服务"`
 
 	AuthCode string `json:"auth_code" dc:"第三方平台用户唯一标识ID"`
 
-	AppId string `json:"app_id" dc:"商户应用id"`
+	AppId string `json:"appId" dc:"商户应用id"`
 }

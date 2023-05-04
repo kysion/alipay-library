@@ -71,6 +71,10 @@ var (
 
 					// 前端传递auth_code和appId获取用户信息
 					//merchant_controller.MerchantService.GetUserInfoByAuthCode,
+
+					// 小程序开发管理
+					merchant_controller.AppVersionManager,
+
 				)
 
 				// 支付

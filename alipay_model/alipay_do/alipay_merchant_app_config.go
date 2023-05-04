@@ -46,4 +46,7 @@ type AlipayMerchantAppConfig struct {
 	NotifyUrl               interface{} // 异步通知地址，允许业务层追加相关参数
 	ServerRate              interface{} // 手续费比例，默认0.006%
 	UnionMainType           interface{} // 应用关联主体类型，和user_type保持一致
+	Version                 interface{} // 应用版本
+	PrivacyPolicy           interface{} // 隐私协议
+	UserPolicy              interface{} // 用户协议
 }

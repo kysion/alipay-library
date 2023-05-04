@@ -2,15 +2,14 @@ package merchant
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/kysion/alipay-library/alipay_model"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/gopay"
 	"github.com/kysion/gopay/alipay"
-	"github.com/kysion/gopay/pkg/util"
 	"github.com/kysion/gopay/pkg/xlog"
-	"strconv"
+	"github.com/kysion/pay-share-library/pay_model"
 )
 
 /*
@@ -38,41 +37,50 @@ func NewMerchantTinyappPay() *sMerchantTinyappPay {
 	return result
 }
 
-// OrderSend 1、发送订单消息
+// OrderSend 1、发送订单消息   前端完成了
 func (s *sMerchantTinyappPay) OrderSend(ctx context.Context) {
 
 }
 
-// TradeCreate  2、创建交易订单
-func (s *sMerchantTinyappPay) TradeCreate(ctx context.Context, info *alipay_model.CreateTrade) (aliRsp *alipay_model.TradeCreateResponse, err error) {
-	appId, _ := strconv.ParseInt(info.AppId, 32, 0)
+// TradeCreate  2、小程序创建交易订单
+func (s *sMerchantTinyappPay) TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error) {
+	//appId, _ := strconv.ParseInt(info.AppId, 32, 0)
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------小程序创建交易订单 ------- ", "sMerchantH5Pay")
 
-	client, _ := aliyun.NewClient(ctx, gconv.String(appId))
+	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	notifyUrl := merchantApp.NotifyUrl
+	//配置公共参数
+	client.SetCharset("utf-8").
+		SetSignType(alipay.RSA2).
+		SetReturnUrl(info.ReturnUrl).
+		SetNotifyUrl(notifyUrl)
 
-	// 请求参数  需要传递
+	orderId := orderInfo.Id // 提交给支付宝的订单Id就是写我们平台数据库中的订单id
 
 	bm := make(gopay.BodyMap)
-	bm.Set("subject", "创建订单").
-		Set("buyer_id", "2088802095984694").
-		Set("out_trade_no", util.RandomString(32)).
-		Set("total_amount", "0.01")
+	bm.Set("subject", info.ProductName).
+		Set("buyer_id", userId).
+		Set("out_trade_no", orderId).
+		Set("total_amount", totalAmount)
 
 	// 创建订单
 	// alipay.alipay_trade.create(统一收单交易创建接口)
-	client.TradeCreate(ctx, bm)
-	if err != nil {
+	aliRsp, err := client.TradeCreate(ctx, bm)
+	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
 		if bizErr, ok := alipay.IsBizError(err); ok {
 			xlog.Errorf("%s, %s", bizErr.Code, bizErr.Msg)
 			// do something
-			return
+			return "", err
 		}
 		xlog.Errorf("%s", err)
-		return
+		return "", err
 	}
 	xlog.Debug("aliRsp:", *aliRsp)
 	xlog.Debug("aliRsp.TradeNo:", aliRsp.Response.TradeNo)
 
+	//g.RequestFromCtx(ctx).Response.WriteJson(aliRsp.Response.TradeNo)
+
 	// 返回具体的订单信息并存储
 
-	return nil, err
+	return aliRsp.Response.TradeNo, err
 }

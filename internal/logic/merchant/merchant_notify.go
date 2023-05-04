@@ -2,6 +2,8 @@ package merchant
 
 import (
 	"context"
+	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"
@@ -47,6 +49,8 @@ func NewMerchantNotify() *sMerchantNotify {
 
 // InstallNotifyHook 订阅异步通知Hook
 func (s *sMerchantNotify) InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc) {
+	sys_service.SysLogs().InfoSimple(context.Background(), nil, "\n-------订阅订阅异步通知Hook： ------- ", "sPlatformUser")
+
 	hookKey.HookCreatedAt = *gtime.Now()
 
 	secondAt := gtime.New(alipay_consts.Global.TradeHookExpireAt * gconv.Int64(time.Second))
@@ -78,6 +82,8 @@ func (s *sMerchantNotify) InstallSubAccountHook(hookKey hook.SubAccountHookKey, 
 
 // MerchantNotifyServices 异步通知地址  用于接收支付宝推送给商户的支付/退款成功的消息。
 func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, error) {
+	sys_service.SysLogs().InfoSimple(ctx, nil, "\n----------支付宝异步通知", "sMerchantNotify")
+
 	err := dao.AlipayConsumerConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 		notifyKey := hook.NotifyKey{}
@@ -99,6 +105,8 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 					return
 				}
 				g.Try(ctx, func(ctx context.Context) { // 满足条件，Hook调用
+					sys_service.SysLogs().InfoSimple(ctx, nil, "\n----------广播异步通知Hook", "MerchantNotify")
+
 					isClean = value(ctx, kconv.Struct(bm, gmap.Map{}), key)
 				})
 			}
@@ -182,6 +190,8 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			// Trade发布广播
 			s.TradeHook.Iterator(func(key hook.TradeHookKey, value hook.TradeHookFunc) {
 				if key.AlipayTradeStatus.Code() == pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code() {
+					fmt.Println()
+
 					//var v interface{} = value
 					//{
 					//	h, ok  := v.(hook.TradeHookFunc[pay_model.OrderRes])
@@ -189,14 +199,13 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 					//		h(ctx, orderInfo)
 					//	}
 					//}
-					//
-					//
+					sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------异步通知TradeHook发布广播-------- ", "sMerchantNotify")
 					value(ctx, orderInfo)
 				}
 
 				s.TradeHook.UnInstallHook(key, func(filter hook.TradeHookKey, conditionKey hook.TradeHookKey) bool {
 					// 如果超时了，那么久返回true，代表可以删除
-					if key.HookExpireAt.Before(gtime.Now()) {
+					if key.HookExpireAt.Before(gtime.Now()) && key.TradeNo != "" {
 						// 底层的filter和conditionKey是一样的
 						return filter == conditionKey
 					}
@@ -204,6 +213,12 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 					return isClean && filter == conditionKey
 				})
 			})
+
+			go func() {
+				url := "http://10.168.173.252:7771/device/setPowerState?serialNumber=" + orderInfo.ProductNumber + "&isPowerOn=true"
+				g.Client().PostContent(ctx, url)
+			}()
+
 		}
 
 		return nil
@@ -212,6 +227,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 	if err != nil {
 		return "success", err
 	}
+
 	g.RequestFromCtx(ctx).Response.Write("success")
 
 	return "success", nil

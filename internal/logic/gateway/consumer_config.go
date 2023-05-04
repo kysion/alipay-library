@@ -14,24 +14,24 @@ import (
 	"time"
 )
 
-type sConsumer struct {
+type sConsumerConfig struct {
 	redisCache *gcache.Cache
 	Duration   time.Duration
 }
 
-func NewConsumerConfig() *sConsumer {
-	return &sConsumer{
+func NewConsumerConfig() *sConsumerConfig {
+	return &sConsumerConfig{
 		redisCache: gcache.New(),
 	}
 }
 
 // GetConsumerById 根据id查找消费者信息
-func (s *sConsumer) GetConsumerById(ctx context.Context, id int64) (*alipay_model.AlipayConsumerConfig, error) {
+func (s *sConsumerConfig) GetConsumerById(ctx context.Context, id int64) (*alipay_model.AlipayConsumerConfig, error) {
 	return daoctl.GetByIdWithError[alipay_model.AlipayConsumerConfig](dao.AlipayConsumerConfig.Ctx(ctx), id)
 }
 
 // GetConsumerByUserId  根据平台用户id查询消费者信息
-func (s *sConsumer) GetConsumerByUserId(ctx context.Context, userId string) (*alipay_model.AlipayConsumerConfig, error) {
+func (s *sConsumerConfig) GetConsumerByUserId(ctx context.Context, userId string) (*alipay_model.AlipayConsumerConfig, error) {
 	result := alipay_model.AlipayConsumerConfig{}
 	model := dao.AlipayConsumerConfig.Ctx(ctx)
 
@@ -45,7 +45,7 @@ func (s *sConsumer) GetConsumerByUserId(ctx context.Context, userId string) (*al
 }
 
 // GetConsumerBySysUserId  根据用户id查询消费者信息
-func (s *sConsumer) GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error) {
+func (s *sConsumerConfig) GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error) {
 	result := alipay_model.AlipayConsumerConfig{}
 	model := dao.AlipayConsumerConfig.Ctx(ctx)
 
@@ -59,7 +59,7 @@ func (s *sConsumer) GetConsumerBySysUserId(ctx context.Context, sysUserId int64)
 }
 
 // CreateConsumer  创建消费者信息
-func (s *sConsumer) CreateConsumer(ctx context.Context, info alipay_model.AlipayConsumerConfig) (*alipay_model.AlipayConsumerConfig, error) {
+func (s *sConsumerConfig) CreateConsumer(ctx context.Context, info *alipay_model.AlipayConsumerConfig) (*alipay_model.AlipayConsumerConfig, error) {
 	data := do.AlipayConsumerConfig{}
 
 	gconv.Struct(info, &data)
@@ -83,7 +83,7 @@ func (s *sConsumer) CreateConsumer(ctx context.Context, info alipay_model.Alipay
 }
 
 // UpdateConsumer 更新消费者信息
-func (s *sConsumer) UpdateConsumer(ctx context.Context, id int64, info alipay_model.UpdateConsumerReq) (bool, error) {
+func (s *sConsumerConfig) UpdateConsumer(ctx context.Context, id int64, info *alipay_model.UpdateConsumerReq) (bool, error) {
 	// 首先判断消费者信息是否存在
 	consumerInfo, err := daoctl.GetByIdWithError[entity.AlipayConsumerConfig](dao.AlipayConsumerConfig.Ctx(ctx), id)
 	if err != nil || consumerInfo == nil {
@@ -105,7 +105,7 @@ func (s *sConsumer) UpdateConsumer(ctx context.Context, id int64, info alipay_mo
 }
 
 // UpdateConsumerState 修改用户状态
-func (s *sConsumer) UpdateConsumerState(ctx context.Context, id int64, state int) (bool, error) {
+func (s *sConsumerConfig) UpdateConsumerState(ctx context.Context, id int64, state int) (bool, error) {
 	affected, err := daoctl.UpdateWithError(dao.AlipayConsumerConfig.Ctx(ctx).Data(do.AlipayConsumerConfig{
 		UserState: state,
 	}).OmitNilData().Where(do.AlipayConsumerConfig{Id: id}))

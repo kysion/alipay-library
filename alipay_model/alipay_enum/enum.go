@@ -1,6 +1,7 @@
 package alipay_enum
 
 import (
+	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/app_version_manager"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/consumer"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/info_type"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum/internal/notify"
@@ -17,11 +18,15 @@ type (
 
 	NotifyType     notify.NotifyTypeEnum
 	ConsumerAction consumer.ActionEnum
+	Category       consumer.CategoryEnum
 
 	// SubAccountBindRes 分账绑定
 	SubAccountBindRes sub_account.SubAccountBindResEnum
 	// SubAccountAction 分账行为
 	SubAccountAction sub_account.OperationTypeEnum
+
+	// AppVersionStatus 小程序开发管理
+	AppVersionStatus app_version_manager.VersionStatusEnum
 )
 
 var (
@@ -30,4 +35,6 @@ var (
 	Notify   = notify.Notify
 
 	SubAccount = sub_account.SubAccount
+
+	AppVersionManager = app_version_manager.AppVersionManager
 )

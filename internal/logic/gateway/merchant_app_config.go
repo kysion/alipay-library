@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
@@ -58,19 +59,22 @@ func (s *sMerchantAppConfig) GetMerchantAppConfigBySysUserId(ctx context.Context
 func (s *sMerchantAppConfig) CreateMerchantAppConfig(ctx context.Context, info *alipay_model.AlipayMerchantAppConfig) (*alipay_model.AlipayMerchantAppConfig, error) {
 	// 创建的时候可指定域名，没指定就是用使用当前域名
 	// appId的32进制编码
-	appId := strconv.FormatInt(gconv.Int64(info.AppId), 36)
+	appId := strconv.FormatInt(gconv.Int64(info.AppId), 32)
 
 	if info.ServerDomain != "" {
 		//appIdHash := utility.Md5Hash(info.AppId)
 		//// 取其appId Md5加密后的前16位  //https://alipay.jditco.com/alipay/appIdMd5-16/gateway.services
-		info.AppGatewayUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.services"
-		info.AppCallbackUrl = info.ServerDomain + "/merchant/" + appId + "/gateway.callback"
+		info.AppGatewayUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.services"
+		info.AppCallbackUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.callback"
+		info.NotifyUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.notify"
+
 		//info.AppIdMd5 = appIdHash
 	} else if info.ServerDomain == "" {
 		// 没指定服务器域名，默认使用当前服务器域名
 		info.ServerDomain = "https://alipay.kuaimk.com"
 		info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.services"
 		info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.callback"
+		info.NotifyUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.notify"
 	}
 
 	// 用户id默认是当前登录用户
@@ -173,11 +177,58 @@ func (s *sMerchantAppConfig) UpdateMerchantKeyCert(ctx context.Context, info *al
 	gconv.Struct(info, &data)
 
 	model := dao.AlipayMerchantAppConfig.Ctx(ctx)
-	affected, err := daoctl.UpdateWithError(model.Data(model).OmitNilData().Where(do.AlipayMerchantAppConfig{AppId: info.AppId}))
+	affected, err := daoctl.UpdateWithError(model.Data(data).OmitNilData().Where(do.AlipayMerchantAppConfig{AppId: info.AppId}))
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "商家应用密钥证书更新失败", dao.AlipayMerchantAppConfig.Table())
 	}
 
 	return affected > 0, nil
+}
+
+// CreatePolicy 创建用户协议或隐私协议
+func (s *sMerchantAppConfig) CreatePolicy(ctx context.Context, info *alipay_model.CreatePolicyReq) (bool, error) {
+	id := g.RequestFromCtx(ctx).Get("appId").String()
+
+	appId, _ := strconv.ParseInt(id, 32, 0)
+
+	app, err := s.GetMerchantAppConfigByAppId(ctx, gconv.String(appId))
+
+	if err != nil || app == nil {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "该商家应用不存在", dao.AlipayMerchantAppConfig.Table())
+	}
+
+	data := do.AlipayMerchantAppConfig{}
+
+	if info.UserPolicy != "" {
+		data.UserPolicy = info.UserPolicy
+	}
+
+	if info.PrivacyPolicy != "" {
+		data.PrivacyPolicy = info.PrivacyPolicy
+	}
+
+	model := dao.AlipayMerchantAppConfig.Ctx(ctx)
+	affected, err := daoctl.UpdateWithError(model.Data(data).OmitEmptyData().Where(do.AlipayMerchantAppConfig{AppId: appId}))
+
+	if err != nil {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "商家应用协议添加失败", dao.AlipayMerchantAppConfig.Table())
+	}
+
+	return affected > 0, nil
+}
+
+// GetPolicy 获取协议
+func (s *sMerchantAppConfig) GetPolicy(ctx context.Context, appId string) (*alipay_model.GetPolicyRes, error) {
+	res := alipay_model.GetPolicyRes{}
+
+	err := dao.AlipayMerchantAppConfig.Ctx(ctx).Fields(dao.AlipayMerchantAppConfig.Columns().PrivacyPolicy, dao.AlipayMerchantAppConfig.Columns().UserPolicy).Where(do.AlipayMerchantAppConfig{
+		AppId: appId,
+	}).Scan(&res)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "该AppId商家应用不存在", dao.AlipayMerchantAppConfig.Table())
+	}
+
+	return &res, nil
 }
