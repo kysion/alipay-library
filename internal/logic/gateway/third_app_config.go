@@ -65,9 +65,9 @@ func (s *sThirdAppConfig) CreateThirdAppConfig(ctx context.Context, info *alipay
 		info.AppCallbackUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.callback"
 	} else if info.ServerDomain == "" {
 		// 没指定服务器域名，默认使用当前服务器域名
-		info.ServerDomain = "https://alipay.kuaimk.com"
-		info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.services"
-		info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.callback"
+		info.ServerDomain = "https://www.kuaimk.com"
+		info.AppGatewayUrl = "https://www.kuaimk.com/alipay/" + appId + "/gateway.services"
+		info.AppCallbackUrl = "https://www.kuaimk.com/alipay/" + appId + "/gateway.callback"
 	}
 
 	// 用户id默认是当前登录用户

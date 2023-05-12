@@ -71,10 +71,10 @@ func (s *sMerchantAppConfig) CreateMerchantAppConfig(ctx context.Context, info *
 		//info.AppIdMd5 = appIdHash
 	} else if info.ServerDomain == "" {
 		// 没指定服务器域名，默认使用当前服务器域名
-		info.ServerDomain = "https://alipay.kuaimk.com"
-		info.AppGatewayUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.services"
-		info.AppCallbackUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.callback"
-		info.NotifyUrl = "https://alipay.kuaimk.com/alipay/" + appId + "/gateway.notify"
+		info.ServerDomain = "https://www.kuaimk.com"
+		info.AppGatewayUrl = "https://www.kuaimk.com/alipay/" + appId + "/gateway.services"
+		info.AppCallbackUrl = "https://www.kuaimk.com/alipay/" + appId + "/gateway.callback"
+		info.NotifyUrl = "https://www.kuaimk.com/alipay/" + appId + "/gateway.notify"
 	}
 
 	// 用户id默认是当前登录用户

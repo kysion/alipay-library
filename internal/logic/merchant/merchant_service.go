@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
+	entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	service "github.com/kysion/alipay-library/alipay_service"
@@ -120,20 +121,19 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 		client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
 
 		// 1.auth_code换access_token
-		token, err := client.SystemOauthToken(ctx, data)
-
+		token, _ := client.SystemOauthToken(ctx, data)
+		fmt.Println(token)
 		fmt.Println("平台用户id：", token.Response.UserId)
+		res.UserId = token.Response.UserId
 
 		// 2.token获取支付宝会员授权信息查询接口  小程序好像查不到
-		aliRsp, err := client.UserInfoShare(ctx, token.Response.AccessToken)
-		fmt.Println(token)
+		aliRsp, _ := client.UserInfoShare(ctx, token.Response.AccessToken)
 		fmt.Println(aliRsp)
 
 		userInfo := alipay_model.UserInfoShareResponse{}
 		gconv.Struct(aliRsp, &userInfo)
 		// 将返回值赋值
 		gconv.Struct(userInfo.Response, &res) // 小程序的静默授权拿不到userInfo，只能拿到userId
-		res.UserId = token.Response.UserId
 		userInfo.Response.UserId = token.Response.UserId
 
 		// 根据sys_user_id查询商户信息
@@ -166,9 +166,9 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 		}
 
 		// 4.存储阿里消费者记录 alipay-consumer-config
-		alipayConsumer, err := service.ConsumerConfig().GetConsumerByUserId(ctx, userInfo.Response.UserId)
+		alipayConsumer, _ := service.ConsumerConfig().GetConsumerByUserId(ctx, userInfo.Response.UserId)
 
-		if err != nil && alipayConsumer == nil { // 消费者不存在，则创建
+		if alipayConsumer == nil { // 消费者不存在，则创建
 			consumerInfo := alipay_model.AlipayConsumerConfig{}
 			gconv.Struct(userInfo.Response, &consumerInfo)
 
@@ -191,10 +191,10 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 		}
 
 		// 5.存储第三方应用和用户关系记录
-		s.ConsumerHook.Iterator(func(key hook.ConsumerKey, value hook.ConsumerHookFunc) {                                                                             // 这会同时走两个Hook，kmk_consumer  + platform_user
+		s.ConsumerHook.Iterator(func(key hook.ConsumerKey, value hook.ConsumerHookFunc) { // 这会同时走两个Hook，kmk_consumer  + platform_user
 			if key.ConsumerAction.Code() == alipay_enum.Consumer.ActionEnum.Auth.Code() && key.Category.Code() == alipay_enum.Consumer.Category.PlatFormUser.Code() { // 如果订阅者是订阅授权
 				g.Try(ctx, func(ctx context.Context) {
-					platformUser := hook.PlatformUser{
+					platformUser := entity.PlatformUser{
 						Id:            idgen.NextId(),
 						FacilitatorId: 0,
 						OperatorId:    0,
@@ -207,9 +207,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 						Type:          sysUser.Type,          // 用户类型
 					}
 
-					//if consumerId != 0 { // 适用于消费者没有员工的情况下  注意：错误思想，没有员工但是会有sysUser
-					//	data.EmployeeId = consumerId
-					//}
 					sys_service.SysLogs().InfoSimple(ctx, nil, "\n广播-------存储第三方应用和用户关系记录 kmk-plat_form_user", "sMerchantService")
 
 					value(ctx, platformUser) // 调用Hook
