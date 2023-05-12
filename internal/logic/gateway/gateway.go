@@ -45,8 +45,8 @@ func (s *sGateway) GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType
 	return &s.CallbackMsgHook
 }
 
-func (s *sGateway) GetServiceNotifyTypeHook() base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc] {
-	return s.ServiceNotifyTypeHook
+func (s *sGateway) GetServiceNotifyTypeHook() *base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc] {
+	return &s.ServiceNotifyTypeHook
 }
 
 func NewGateway() *sGateway {
