@@ -6,9 +6,9 @@ import (
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
+	alipay_merchant_v1 "github.com/kysion/alipay-library/alipay_api/alipay_v1/alipay_merchant_v1"
 	"github.com/kysion/alipay-library/alipay_model"
 	"github.com/kysion/alipay-library/alipay_service"
-	alipay_merchant_v1 "github.com/kysion/alipay-library/api/alipay_v1/alipay_merchant_v1"
 	"strconv"
 )
 

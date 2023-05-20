@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/encoding/gurl"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/alipay-library/alipay_api/alipay_v1/alipay_merchant_v1"
 	service "github.com/kysion/alipay-library/alipay_service"
-	"github.com/kysion/alipay-library/api/alipay_v1/alipay_merchant_v1"
 	"strconv"
 )
 

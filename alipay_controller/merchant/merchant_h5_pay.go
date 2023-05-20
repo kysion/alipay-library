@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/gogf/gf/v2/container/gmap"
+	"github.com/kysion/alipay-library/alipay_api/alipay_v1/alipay_merchant_v1"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
-	"github.com/kysion/alipay-library/api/alipay_v1/alipay_merchant_v1"
 )
 
 var MerchantH5Pay = merchantH5Pay{}

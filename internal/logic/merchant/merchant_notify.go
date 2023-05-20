@@ -84,7 +84,7 @@ func (s *sMerchantNotify) InstallSubAccountHook(hookKey hook.SubAccountHookKey, 
 func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, error) {
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n----------支付宝异步通知", "sMerchantNotify")
 
-	err := dao.AlipayConsumerConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err := dao.AlipayConsumerConfig.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 		notifyKey := hook.NotifyKey{}
 
@@ -124,31 +124,33 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 		bmJson, _ := gjson.Encode(bm)
 
 		{
-			// 1. 将交易元数据存储起来 kmk_order
+			// 1. 将交易元数据存储至 kmk_order
+			tradeNo := gconv.String(bm["trade_no"])
+			bmJsonStr := gconv.String(bmJson)
+			outTradeId := gconv.Int64(bm["out_trade_no"]) // 商户订单号，是我们自己指定的，OutTradeNo = orderId
 			info := pay_model.UpdateOrderTradeInfo{
-				Id:              gconv.Int64(bm["out_trade_no"]),
-				PlatformOrderId: gconv.String(bm["trade_no"]), //支付宝交易凭证号。支付宝交易凭证号。
-				TradeSource:     gconv.String(bmJson),
+				PlatformOrderId: &tradeNo, // 支付宝交易凭证号
+				TradeSource:     &bmJsonStr,
 			}
-			_, err := pay_service.Order().UpdateOrderTradeSource(ctx, &info)
+			_, err := pay_service.Order().UpdateOrderTradeSource(ctx, outTradeId, &info)
 			if err != nil {
 				return err
 			}
 		}
 
 		{
-			// 2.判断交易状态，然后修改对应的状态
+			// 2.判断交易状态，然后修改对应的订单状态
 			var orderState int
 			switch bm["trade_status"] {
 			case pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code():
 				// 成功 --> 订单状态为已支付
 				orderState = pay_enum.Order.StateType.Paymented.Code()
 
-			case bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_CLOSED.Code():
+			case pay_enum.AlipayTrade.TradeStatus.TRADE_CLOSED.Code():
 				// 交易超时 --> 订单状态为交易超时
 				orderState = pay_enum.Order.StateType.PaymentTimeOut.Code()
 
-			case bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_FINISHED.Code():
+			case pay_enum.AlipayTrade.TradeStatus.TRADE_FINISHED.Code():
 				// 交易结束，不可退款 --> 订单状态为已完成
 				orderState = pay_enum.Order.StateType.PaymentComplete.Code()
 			}
@@ -164,7 +166,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			return err
 		}
 
-		// 3. 添加账单account_bill  商家 消费者的账单  业务层Hook
+		// 3. 支付成功，添加账单account_bill  商家 消费者的账单  及广播业务层Hook
 		if bm["trade_status"] == pay_enum.AlipayTrade.TradeStatus.TRADE_SUCCESS.Code() {
 			// 4. 分账交易下单结算  需要支付状态为Success的订单
 
@@ -214,6 +216,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 				})
 			})
 
+			// 4.远程设置设备通电
 			go func() {
 				url := "http://10.168.173.252:7771/device/setPowerState?serialNumber=" + orderInfo.ProductNumber + "&isPowerOn=true"
 				g.Client().PostContent(ctx, url)

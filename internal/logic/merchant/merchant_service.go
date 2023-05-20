@@ -63,31 +63,31 @@ func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId
 
 	client, err := aliyun.NewClient(ctx, appId)
 	userId := ""
-	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	//err = dao.AlipayMerchantAppConfig.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
-		// 根据AppId获取商家相关配置，包括AppAuthToken
-		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
-		if err != nil || merchantApp == nil {
-			return err
-		}
-
-		client.SetAppAuthToken(merchantApp.AppAuthToken)
-
-		// 1.auth_code换Token
-		token, _ := client.SystemOauthToken(ctx, gopay.BodyMap{
-			"code":       authCode,
-			"grant_type": "authorization_code",
-		})
-
-		fmt.Println("平台用户id：", token.Response.UserId)
-		userId = token.Response.UserId
-
-		return nil
-	})
-
-	if err != nil {
+	// 根据AppId获取商家相关配置，包括AppAuthToken
+	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
+	if err != nil || merchantApp == nil {
 		return "", err
 	}
+
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
+
+	// 1.auth_code换Token
+	token, _ := client.SystemOauthToken(ctx, gopay.BodyMap{
+		"code":       authCode,
+		"grant_type": "authorization_code",
+	})
+
+	fmt.Println("平台用户id：", token.Response.UserId)
+	userId = token.Response.UserId
+
+	//return "", nil
+	//})
+	//
+	//if err != nil {
+	//	return "", err
+	//}
 
 	return userId, nil
 }
@@ -110,7 +110,7 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 	data := gopay.BodyMap{}
 	gconv.Struct(info, &data)
 
-	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = dao.AlipayMerchantAppConfig.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 根据AppId获取商家相关配置，包括AppAuthToken
 		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
 		if err != nil || merchantApp == nil {

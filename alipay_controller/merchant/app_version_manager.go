@@ -2,9 +2,9 @@ package merchant_controller
 
 import (
 	"context"
+	"github.com/kysion/alipay-library/alipay_api/alipay_v1/alipay_merchant_v1"
 	"github.com/kysion/alipay-library/alipay_model"
 	service "github.com/kysion/alipay-library/alipay_service"
-	"github.com/kysion/alipay-library/api/alipay_v1/alipay_merchant_v1"
 )
 
 var AppVersionManager = cAppVersionManager{}
