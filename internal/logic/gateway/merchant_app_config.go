@@ -3,13 +3,13 @@ package gateway
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
 	do "github.com/kysion/alipay-library/alipay_model/alipay_do"
 	entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
+	"github.com/kysion/alipay-library/alipay_utility"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/yitter/idgenerator-go/idgen"
 	"strconv"
@@ -62,7 +62,7 @@ func (s *sMerchantAppConfig) CreateMerchantAppConfig(ctx context.Context, info *
 	appId := strconv.FormatInt(gconv.Int64(info.AppId), 32)
 
 	if info.ServerDomain != "" {
-		//appIdHash := utility.Md5Hash(info.AppId)
+		//appIdHash := alipay_utility.Md5Hash(info.AppId)
 		//// 取其appId Md5加密后的前16位  //https://alipay.jditco.com/alipay/appIdMd5-16/gateway.services
 		info.AppGatewayUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.services"
 		info.AppCallbackUrl = info.ServerDomain + "/alipay/" + appId + "/gateway.callback"
@@ -188,9 +188,7 @@ func (s *sMerchantAppConfig) UpdateMerchantKeyCert(ctx context.Context, info *al
 
 // CreatePolicy 创建用户协议或隐私协议
 func (s *sMerchantAppConfig) CreatePolicy(ctx context.Context, info *alipay_model.CreatePolicyReq) (bool, error) {
-	id := g.RequestFromCtx(ctx).Get("appId").String()
-
-	appId, _ := strconv.ParseInt(id, 32, 0)
+	appId := alipay_utility.GetAlipayAppIdFormCtx(ctx)
 
 	app, err := s.GetMerchantAppConfigByAppId(ctx, gconv.String(appId))
 
