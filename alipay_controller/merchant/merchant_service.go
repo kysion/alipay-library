@@ -10,7 +10,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_api/alipay_v1/alipay_merchant_v1"
 	service "github.com/kysion/alipay-library/alipay_service"
-	"strconv"
+	"github.com/kysion/alipay-library/alipay_utility"
 )
 
 var MerchantService = cMerchantService{}
@@ -19,9 +19,8 @@ type cMerchantService struct{}
 
 // AuthMerchantApp 商家授权
 func (c *cMerchantService) AuthMerchantApp(ctx context.Context, _ *alipay_merchant_v1.AuthMerchantAppReq) (api_v1.StringRes, error) {
-	info := g.RequestFromCtx(ctx).Get("appId").String()
 
-	appId, _ := strconv.ParseInt(info, 32, 0)
+	appId := alipay_utility.GetAlipayAppIdFormCtx(ctx)
 
 	app, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, gconv.String(appId))
 	if err != nil {
@@ -55,9 +54,7 @@ func (c *cMerchantService) AuthMerchantApp(ctx context.Context, _ *alipay_mercha
 
 // GetAlipayUserInfo 获取支付宝会员信息，相当于静默登录  H5
 func (c *cMerchantService) GetAlipayUserInfo(ctx context.Context, _ *alipay_merchant_v1.GetAlipayUserInfoReq) (api_v1.StringRes, error) {
-	info := g.RequestFromCtx(ctx).Get("appId").String()
-
-	appId, _ := strconv.ParseInt(info, 32, 0)
+	appId := alipay_utility.GetAlipayAppIdFormCtx(ctx)
 
 	app, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, gconv.String(appId))
 	if err != nil {

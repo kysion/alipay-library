@@ -88,7 +88,6 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 		bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 		notifyKey := hook.NotifyKey{}
 
-		// 解析消息参数。。。。
 		if bm.GetInterface("passback_params") != nil {
 			data := kconv.Struct(bm.GetInterface("passback_params"), &gmap.Map{})
 
@@ -131,6 +130,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			info := pay_model.UpdateOrderTradeInfo{
 				PlatformOrderId: &tradeNo, // 支付宝交易凭证号
 				TradeSource:     &bmJsonStr,
+				PayParams: nil,
 			}
 			_, err := pay_service.Order().UpdateOrderTradeSource(ctx, outTradeId, &info)
 			if err != nil {
