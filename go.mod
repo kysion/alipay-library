@@ -3,12 +3,12 @@ module github.com/kysion/alipay-library
 go 1.19
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.4.7
-	github.com/SupenBysz/gf-admin-company-modules v0.4.11
+	github.com/SupenBysz/gf-admin-community v0.4.9
+	github.com/SupenBysz/gf-admin-company-modules v0.4.12
 	github.com/gogf/gf/v2 v2.4.1
 	github.com/kysion/base-library v0.0.13
 	github.com/kysion/gopay v0.0.3
-	github.com/kysion/pay-share-library v0.1.12
+	github.com/kysion/pay-share-library v0.1.13
 	github.com/yitter/idgenerator-go v1.3.2
 )
 
