@@ -20,6 +20,33 @@ import (
 )
 
 type (
+	ICertify interface {
+		UserCertifyOpenInit(ctx context.Context, appId int64, info *alipay_model.CertifyInitReq) (*alipay_model.UserCertifyOpenInitRes, error)
+		UserCertifyOpenCertify(ctx context.Context, appId int64, certifyId string) (certifyUrl string, err error)
+		UserCertifyOpenQuery(ctx context.Context, appId int64, certifyId string) (*alipay_model.UserCertifyOpenQueryRes, error)
+	}
+	IMerchantH5Pay interface {
+		InstallHook(actionType pay_enum.OrderStateType, hookFunc pay_hook.OrderHookFunc)
+		TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error)
+		H5TradePay(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32) (string, error)
+	}
+	IMerchantNotify interface {
+		InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc)
+		InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc)
+		InstallSubAccountHook(hookKey hook.SubAccountHookKey, hookFunc hook.SubAccountHookFunc)
+		MerchantNotifyServices(ctx context.Context) (string, error)
+	}
+	IMerchantService interface {
+		InstallConsumerHook(infoType hook.ConsumerKey, hookFunc hook.ConsumerHookFunc)
+		GetHook() base_hook.BaseHook[hook.ConsumerKey, hook.ConsumerHookFunc]
+		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
+		UserInfoAuth(ctx context.Context, info g.Map) string
+	}
+	IMerchantTransfer interface {
+		FundTransUniTransfer(ctx context.Context, appId string, info *alipay_model.FundTransUniTransferReq) (aliRsp *alipay_model.TransUniTransferRes, err error)
+		FundTransCommonQuery(ctx context.Context, appId string, outBizNo string) (aliRsp *alipay_model.FundTransCommonQueryRes, err error)
+		FundAccountQuery(ctx context.Context, appId string, userId string) (aliRsp *alipay_model.FundAccountQueryResponse, err error)
+	}
 	IPayTrade interface {
 		PayTradeCreate(ctx context.Context, info *alipay_model.TradeOrder, userId string, notifyFunc ...hook.NotifyHookFunc) (res string, err error)
 		QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error)
@@ -32,13 +59,6 @@ type (
 		TradeOrderSettleQuery(ctx context.Context, appId string, settleNo string, outRequestNo string, tradeNo string) (*alipay_model.TradeOrderSettleQueryRes, error)
 		TradeOrderSettle(ctx context.Context, appId string, info alipay_model.TradeOrderSettleReq) (*alipay_model.TradeOrderSettleResponse, error)
 	}
-	IWallet interface {
-		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
-		Wallet(ctx context.Context, info g.Map) string
-	}
-	IAppAuth interface {
-		AppAuth(ctx context.Context, info g.Map) string
-	}
 	IAppVersion interface {
 		SubmitVersionAudit(ctx context.Context, info *alipay_model.AppVersionAuditReq, pic *alipay_model.AppVersionAuditPicReq) (*alipay_model.AppVersionAuditRes, error)
 		CancelVersionAudit(ctx context.Context, version string) (*alipay_model.CancelVersionAuditRes, error)
@@ -48,79 +68,32 @@ type (
 		QueryAppVersionList(ctx context.Context, versionStatus string) (res *alipay_model.QueryAppVersionListRes, err error)
 		GetAppVersionDetail(ctx context.Context, version string) (*alipay_model.QueryAppVersionDetailRes, error)
 	}
-	IMerchantNotify interface {
-		InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc)
-		InstallTradeHook(hookKey hook.TradeHookKey, hookFunc hook.TradeHookFunc)
-		InstallSubAccountHook(hookKey hook.SubAccountHookKey, hookFunc hook.SubAccountHookFunc)
-		MerchantNotifyServices(ctx context.Context) (string, error)
-	}
-	IMerchantTransfer interface {
-		FundTransUniTransfer(ctx context.Context, appId string, info *alipay_model.FundTransUniTransferReq) (aliRsp *alipay_model.TransUniTransferRes, err error)
-		FundTransCommonQuery(ctx context.Context, appId string, outBizNo string) (aliRsp *alipay_model.FundTransCommonQueryRes, err error)
-		FundAccountQuery(ctx context.Context, appId string, userId string) (aliRsp *alipay_model.FundAccountQueryResponse, err error)
-	}
-	IMerchantH5Pay interface {
-		InstallHook(actionType pay_enum.OrderStateType, hookFunc pay_hook.OrderHookFunc)
-		TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error)
-		H5TradePay(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32) (string, error)
-	}
-	IMerchantService interface {
-		InstallConsumerHook(infoType hook.ConsumerKey, hookFunc hook.ConsumerHookFunc)
-		GetHook() base_hook.BaseHook[hook.ConsumerKey, hook.ConsumerHookFunc]
-		GetUserId(ctx context.Context, authCode string, appId string) (res string, err error)
-		UserInfoAuth(ctx context.Context, info g.Map) string
+	IWallet interface {
+		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
+		Wallet(ctx context.Context, info g.Map) string
 	}
 	IMerchantTinyappPay interface {
 		OrderSend(ctx context.Context)
 		TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error)
 	}
+	IAppAuth interface {
+		AppAuth(ctx context.Context, info g.Map) string
+	}
 )
 
 var (
-	localAppAuth            IAppAuth
 	localAppVersion         IAppVersion
+	localCertify            ICertify
+	localMerchantH5Pay      IMerchantH5Pay
 	localMerchantNotify     IMerchantNotify
+	localMerchantService    IMerchantService
+	localMerchantTransfer   IMerchantTransfer
 	localPayTrade           IPayTrade
 	localSubAccount         ISubAccount
 	localWallet             IWallet
-	localMerchantH5Pay      IMerchantH5Pay
-	localMerchantService    IMerchantService
+	localAppAuth            IAppAuth
 	localMerchantTinyappPay IMerchantTinyappPay
-	localMerchantTransfer   IMerchantTransfer
 )
-
-func MerchantH5Pay() IMerchantH5Pay {
-	if localMerchantH5Pay == nil {
-		panic("implement not found for interface IMerchantH5Pay, forgot register?")
-	}
-	return localMerchantH5Pay
-}
-
-func RegisterMerchantH5Pay(i IMerchantH5Pay) {
-	localMerchantH5Pay = i
-}
-
-func MerchantService() IMerchantService {
-	if localMerchantService == nil {
-		panic("implement not found for interface IMerchantService, forgot register?")
-	}
-	return localMerchantService
-}
-
-func RegisterMerchantService(i IMerchantService) {
-	localMerchantService = i
-}
-
-func MerchantTinyappPay() IMerchantTinyappPay {
-	if localMerchantTinyappPay == nil {
-		panic("implement not found for interface IMerchantTinyappPay, forgot register?")
-	}
-	return localMerchantTinyappPay
-}
-
-func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
-	localMerchantTinyappPay = i
-}
 
 func MerchantTransfer() IMerchantTransfer {
 	if localMerchantTransfer == nil {
@@ -131,39 +104,6 @@ func MerchantTransfer() IMerchantTransfer {
 
 func RegisterMerchantTransfer(i IMerchantTransfer) {
 	localMerchantTransfer = i
-}
-
-func AppAuth() IAppAuth {
-	if localAppAuth == nil {
-		panic("implement not found for interface IAppAuth, forgot register?")
-	}
-	return localAppAuth
-}
-
-func RegisterAppAuth(i IAppAuth) {
-	localAppAuth = i
-}
-
-func AppVersion() IAppVersion {
-	if localAppVersion == nil {
-		panic("implement not found for interface IAppVersion, forgot register?")
-	}
-	return localAppVersion
-}
-
-func RegisterAppVersion(i IAppVersion) {
-	localAppVersion = i
-}
-
-func MerchantNotify() IMerchantNotify {
-	if localMerchantNotify == nil {
-		panic("implement not found for interface IMerchantNotify, forgot register?")
-	}
-	return localMerchantNotify
-}
-
-func RegisterMerchantNotify(i IMerchantNotify) {
-	localMerchantNotify = i
 }
 
 func PayTrade() IPayTrade {
@@ -188,6 +128,61 @@ func RegisterSubAccount(i ISubAccount) {
 	localSubAccount = i
 }
 
+func AppVersion() IAppVersion {
+	if localAppVersion == nil {
+		panic("implement not found for interface IAppVersion, forgot register?")
+	}
+	return localAppVersion
+}
+
+func RegisterAppVersion(i IAppVersion) {
+	localAppVersion = i
+}
+
+func Certify() ICertify {
+	if localCertify == nil {
+		panic("implement not found for interface ICertify, forgot register?")
+	}
+	return localCertify
+}
+
+func RegisterCertify(i ICertify) {
+	localCertify = i
+}
+
+func MerchantH5Pay() IMerchantH5Pay {
+	if localMerchantH5Pay == nil {
+		panic("implement not found for interface IMerchantH5Pay, forgot register?")
+	}
+	return localMerchantH5Pay
+}
+
+func RegisterMerchantH5Pay(i IMerchantH5Pay) {
+	localMerchantH5Pay = i
+}
+
+func MerchantNotify() IMerchantNotify {
+	if localMerchantNotify == nil {
+		panic("implement not found for interface IMerchantNotify, forgot register?")
+	}
+	return localMerchantNotify
+}
+
+func RegisterMerchantNotify(i IMerchantNotify) {
+	localMerchantNotify = i
+}
+
+func MerchantService() IMerchantService {
+	if localMerchantService == nil {
+		panic("implement not found for interface IMerchantService, forgot register?")
+	}
+	return localMerchantService
+}
+
+func RegisterMerchantService(i IMerchantService) {
+	localMerchantService = i
+}
+
 func Wallet() IWallet {
 	if localWallet == nil {
 		panic("implement not found for interface IWallet, forgot register?")
@@ -197,4 +192,26 @@ func Wallet() IWallet {
 
 func RegisterWallet(i IWallet) {
 	localWallet = i
+}
+
+func AppAuth() IAppAuth {
+	if localAppAuth == nil {
+		panic("implement not found for interface IAppAuth, forgot register?")
+	}
+	return localAppAuth
+}
+
+func RegisterAppAuth(i IAppAuth) {
+	localAppAuth = i
+}
+
+func MerchantTinyappPay() IMerchantTinyappPay {
+	if localMerchantTinyappPay == nil {
+		panic("implement not found for interface IMerchantTinyappPay, forgot register?")
+	}
+	return localMerchantTinyappPay
+}
+
+func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
+	localMerchantTinyappPay = i
 }

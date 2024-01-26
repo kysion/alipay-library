@@ -37,6 +37,9 @@ func (s *sMerchantAppConfig) GetMerchantAppConfigByAppId(ctx context.Context, id
 	var data *alipay_model.AlipayMerchantAppConfig
 
 	err := dao.AlipayMerchantAppConfig.Ctx(ctx).Where(do.AlipayMerchantAppConfig{AppId: id}).Scan(&data)
+	if err != nil {
+		return nil, err
+	}
 
 	return data, err
 }

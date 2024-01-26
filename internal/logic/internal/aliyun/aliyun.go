@@ -40,7 +40,7 @@ import (
 
 type AliPay struct {
 	*alipay.Client
-	ThirdConfig     alipay_model.AlipayThirdAppConfig
+	ThirdConfig     *alipay_model.AlipayThirdAppConfig
 	MerchantConfig  *alipay_model.AlipayMerchantAppConfig
 	privateKey      *rsa.PrivateKey
 	aliPayPublicKey *rsa.PublicKey // 支付宝证书公钥内容 alipayCertPublicKey_RSA2.crt
@@ -52,6 +52,7 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 	aliPayClient := &alipay.Client{}
 
 	client = &AliPay{}
+	privateKey := ""
 
 	if appId == "" {
 		//appId = "2021003179681073"
@@ -59,21 +60,31 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 	} else {
 		client.MerchantConfig, err = alipay_service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
 
-		if client.MerchantConfig != nil {
+		if client.MerchantConfig != nil && client.MerchantConfig.ThirdAppId != "" {
 			appId = client.MerchantConfig.ThirdAppId
 		}
 	}
-	config, err := alipay_service.ThirdAppConfig().GetThirdAppConfigByAppId(ctx, appId)
-	if err != nil {
-		return nil, err
+	// TODO 这里强制第三方待调用了
+	config, _ := alipay_service.ThirdAppConfig().GetThirdAppConfigByAppId(ctx, appId)
+	//if err != nil {
+	//	return nil, err
+	//}
+	if config != nil {
+		client.ThirdConfig = config
+		privateKey = config.PrivateKey
 	}
-	client.ThirdConfig = *config
+
+	if config == nil && client.MerchantConfig != nil && client.MerchantConfig.ThirdAppId == "" {
+		//merchantAppId = client.MerchantConfig.AppId
+		privateKey = client.MerchantConfig.PrivateKey
+	}
 
 	//global := alipay_consts.Global
 	// 微信：拿到token、每个请求都需要进行携带签名这些
 
 	// 1、初始化支付宝客户端并做配置(appid：应用ID、privateKey：应用私钥，支持PKCS1和PKCS8、isProd：是否是正式环境)
-	aliPayClient, err = alipay.NewClient(config.AppId, config.PrivateKey, true)
+	//aliPayClient, err = alipay.NewClient(config.AppId,config.privateKey, true)
+	aliPayClient, err = alipay.NewClient(appId, privateKey, true)
 
 	if err != nil {
 		xlog.Error(err)
@@ -88,18 +99,32 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 
 	// 设置支付宝请求 公共参数
 	//    注意：具体设置哪些参数，根据不同的方法而不同，此处列举出所有设置参数
-	aliPayClient.SetLocation(alipay.LocationShanghai). // 设置时区，不设置或出错均为默认服务器时间
-		SetCharset(alipay.UTF8). // 设置字符编码，不设置默认 utf-8
-		SetSignType(alipay.RSA2). // 设置签名类型，不设置默认 RSA2
-		SetReturnUrl(config.AppGatewayUrl). // 设置回调URL
-		SetNotifyUrl(config.AppCallbackUrl). // 设置异步通知URL
-		SetAppAuthToken(config.AppAuthToken)
+	if config != nil {
+		aliPayClient.SetLocation(alipay.LocationShanghai). // 设置时区，不设置或出错均为默认服务器时间
+									SetCharset(alipay.UTF8).             // 设置字符编码，不设置默认 utf-8
+									SetSignType(alipay.RSA2).            // 设置签名类型，不设置默认 RSA2
+									SetReturnUrl(config.AppGatewayUrl).  // 设置回调URL
+									SetNotifyUrl(config.AppCallbackUrl). // 设置异步通知URL
+									SetAppAuthToken(config.AppAuthToken)
+	} else {
+		aliPayClient.SetLocation(alipay.LocationShanghai). // 设置时区，不设置或出错均为默认服务器时间
+									SetCharset(alipay.UTF8).                            // 设置字符编码，不设置默认 utf-8
+									SetSignType(alipay.RSA2).                           // 设置签名类型，不设置默认 RSA2
+									SetReturnUrl(client.MerchantConfig.AppGatewayUrl).  // 设置回调URL
+									SetNotifyUrl(client.MerchantConfig.AppCallbackUrl). // 设置异步通知URL
+									SetAppAuthToken(client.MerchantConfig.AppAuthToken)
+	}
 
 	if client.MerchantConfig != nil {
 		aliPayClient.SetAppAuthToken(client.MerchantConfig.AppAuthToken)
 	}
 
-	key := xrsa.FormatAlipayPrivateKey(config.PrivateKey)
+	key := ""
+	if config != nil {
+		key = xrsa.FormatAlipayPrivateKey(config.PrivateKey)
+	} else {
+		key = xrsa.FormatAlipayPrivateKey(client.MerchantConfig.PrivateKey)
+	}
 	priKey, err := xpem.DecodePrivateKey([]byte(key))
 
 	client.privateKey = priKey
@@ -108,19 +133,28 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 	aliPayClient.SetCharset("utf-8").
 		SetSignType(alipay.RSA2)
 
-	// 自动同步验签（只支持证书模式）
-	// 传入 alipayCertPublicKey_RSA2.crt 支付宝证书公钥内容
-	aliPayClient.AutoVerifySign([]byte(config.PublicKeyCert))
+	if config != nil {
+		// 自动同步验签（只支持证书模式）
+		// 传入 alipayCertPublicKey_RSA2.crt 支付宝证书公钥内容
+		aliPayClient.AutoVerifySign([]byte(config.PublicKeyCert))
+	} else {
+		aliPayClient.AutoVerifySign([]byte(client.MerchantConfig.PublicKeyCert))
+	}
 
 	// 证书路径(应用公钥证书路径、 支付宝根证书文件路径、 支付宝公钥证书文件路径)
 	// err = aliPayClient.SetCertSnByPath(config.AppPublicCertKey, config.AlipayRootCertPublicKey, config.PublicKeyCert)
 
 	// 证书内容(应用公钥证书文件内容、支付宝根证书文件内容、支付宝公钥证书文件内容)
-	err = aliPayClient.SetCertSnByContent([]byte(config.AppPublicCertKey), []byte(config.AlipayRootCertPublicKey), []byte(config.PublicKeyCert))
+	if config != nil {
+		err = aliPayClient.SetCertSnByContent([]byte(config.AppPublicCertKey), []byte(config.AlipayRootCertPublicKey), []byte(config.PublicKeyCert))
+	} else {
+		err = aliPayClient.SetCertSnByContent([]byte(client.MerchantConfig.AppPublicCertKey), []byte(client.MerchantConfig.AlipayRootCertPublicKey), []byte(client.MerchantConfig.PublicKeyCert))
+	}
 	if err != nil {
 		xlog.Debug("SetCertSn:", err)
 		return nil, err
 	}
+
 	client.Client = aliPayClient
 
 	return client, nil
@@ -433,7 +467,7 @@ func NewMerchantClient(ctx context.Context, appId string) (client *AliPay, err e
 	if err != nil {
 		return nil, err
 	}
-	client.ThirdConfig = *thirdConfig
+	client.ThirdConfig = thirdConfig
 
 	//global := alipay_consts.Global
 	// 微信：拿到token、每个请求都需要进行携带签名这些
@@ -455,11 +489,11 @@ func NewMerchantClient(ctx context.Context, appId string) (client *AliPay, err e
 	// 设置支付宝请求 公共参数
 	//    注意：具体设置哪些参数，根据不同的方法而不同，此处列举出所有设置参数
 	aliPayClient.SetLocation(alipay.LocationShanghai). // 设置时区，不设置或出错均为默认服务器时间
-		SetCharset(alipay.UTF8). // 设置字符编码，不设置默认 utf-8
-		SetSignType(alipay.RSA2). // 设置签名类型，不设置默认 RSA2
-		SetReturnUrl(config.AppGatewayUrl). // 应用网关地址
-		SetNotifyUrl(config.AppCallbackUrl). // 消息回调地址
-		SetAppAuthToken(config.AppAuthToken)
+								SetCharset(alipay.UTF8).             // 设置字符编码，不设置默认 utf-8
+								SetSignType(alipay.RSA2).            // 设置签名类型，不设置默认 RSA2
+								SetReturnUrl(config.AppGatewayUrl).  // 应用网关地址
+								SetNotifyUrl(config.AppCallbackUrl). // 消息回调地址
+								SetAppAuthToken(config.AppAuthToken)
 
 	if client.MerchantConfig != nil {
 		aliPayClient.SetAppAuthToken(client.MerchantConfig.AppAuthToken)

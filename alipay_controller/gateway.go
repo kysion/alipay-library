@@ -20,6 +20,15 @@ func (c *cGateway) AliPayServices(ctx context.Context, req *v1.AliPayServicesReq
 	return result != "", err
 }
 
+// GatewayServices 应用网关设置
+func (c *cGateway) GatewayServices(ctx context.Context, req *v1.GatewayServicesReq) (api_v1.StringRes, error) {
+	alipay_service.Gateway().GatewayServices(ctx)
+
+	//g.RequestFromCtx(ctx).Response.Write("success")
+
+	return "success", nil
+}
+
 // AliPayCallback 回调消息：针对C端业务消息   消费者支付.....
 func (c *cGateway) AliPayCallback(ctx context.Context, req *v1.AliPayCallbackReq) (api_v1.BoolRes, error) {
 	result, err := alipay_service.Gateway().GatewayCallback(ctx)

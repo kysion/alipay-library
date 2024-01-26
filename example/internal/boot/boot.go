@@ -49,7 +49,7 @@ var (
 							// 图型验证码
 							sys_controller.Captcha,
 							// 短信验证码
-							sys_controller.SysSms,
+							//sys_controller.SysSms,
 							// 地区
 							sys_controller.SysArea,
 						)
@@ -74,7 +74,6 @@ var (
 
 					// 小程序开发管理
 					merchant_controller.AppVersionManager,
-
 				)
 
 				// 支付

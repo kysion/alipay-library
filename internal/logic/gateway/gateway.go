@@ -14,7 +14,6 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/gopay"
 	"github.com/kysion/gopay/alipay"
-	"strconv"
 )
 
 var (
@@ -58,18 +57,19 @@ func NewGateway() *sGateway {
 func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 	// 拿到路径的AppId进行搜索、
 	urlAppId := g.RequestFromCtx(ctx).Get("appId").String()
-	var pathAppId int64
+	// 不额外处理APPID
+	//var pathAppId int64
 	if urlAppId != "" {
 		// 解析AppId
-		pathAppId, _ = strconv.ParseInt(urlAppId, 32, 0)
-
-		if pathAppId == 0 {
-			g.RequestFromCtx(ctx).Response.Write("")
-			return "参数错误！", nil
-		}
+		//pathAppId, _ = strconv.ParseInt(urlAppId, 32, 0)
+		//
+		//if pathAppId == 0 {
+		//	g.RequestFromCtx(ctx).Response.Write("")
+		//	return "参数错误！", nil
+		//}
 	}
-
-	client, _ := aliyun.NewClient(ctx, gconv.String(pathAppId))
+	//client, _ := aliyun.NewClient(ctx, gconv.String(pathAppId))
+	client, _ := aliyun.NewClient(ctx, gconv.String(urlAppId))
 
 	bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 	fmt.Println(bm)

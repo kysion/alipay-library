@@ -36,6 +36,9 @@ func (s *sThirdAppConfig) GetThirdAppConfigByAppId(ctx context.Context, id strin
 	data := alipay_model.AlipayThirdAppConfig{}
 
 	err := dao.AlipayThirdAppConfig.Ctx(ctx).Where(do.AlipayThirdAppConfig{AppId: id}).Scan(&data)
+	if err != nil {
+		return nil, err
+	}
 
 	return &data, err
 }
