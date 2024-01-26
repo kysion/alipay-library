@@ -1,4 +1,4 @@
-package utility
+package alipay_utility
 
 import (
 	"crypto/md5"

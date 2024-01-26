@@ -17,6 +17,6 @@ type ConsumerKey struct {
 	alipay_enum.ConsumerAction
 }
 type UserInfo struct {
-	SysUserId int64
+	SysUserId int64 `json:"sys_user_id" dc:"筷满客平台用户id"`
 	alipay_model.UserInfoShare
 }

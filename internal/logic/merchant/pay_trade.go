@@ -3,19 +3,18 @@ package merchant
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	service "github.com/kysion/alipay-library/alipay_service"
+	"github.com/kysion/alipay-library/alipay_utility"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/gopay"
 	"github.com/kysion/gopay/alipay"
 	"github.com/kysion/gopay/pkg/xlog"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_service"
-	"strconv"
 )
 
 type sPayTrade struct {
@@ -41,7 +40,9 @@ func (s *sPayTrade) PayTradeCreate(ctx context.Context, info *alipay_model.Trade
 	totalAmount := gconv.Float32(info.Amount) / 100.0
 
 	// 商家AppId解析，获取商家应用，创建阿里支付客户端
-	appId, _ := strconv.ParseInt(g.RequestFromCtx(ctx).Get("appId").String(), 32, 0)
+	//appId, _ := strconv.ParseInt(g.RequestFromCtx(ctx).Get("appId").String(), 32, 0)
+	appId := alipay_utility.GetAlipayAppIdFormCtx(ctx)
+
 	appIdStr := gconv.String(appId)
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appIdStr)
 	if err != nil {
@@ -89,6 +90,10 @@ func (s *sPayTrade) PayTradeCreate(ctx context.Context, info *alipay_model.Trade
 // QueryOrderInfo 查询订单
 func (s *sPayTrade) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error) {
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
+
+	if merchantApp == nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "\n应用不存在	", "sMerchantH5Pay")
+	}
 
 	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
 

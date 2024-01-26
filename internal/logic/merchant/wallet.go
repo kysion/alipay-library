@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
+	entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	service "github.com/kysion/alipay-library/alipay_service"
@@ -169,7 +170,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 		s.ConsumerHook.Iterator(func(key enum.ConsumerAction, value hook.ConsumerHookFunc) {
 			if key.Code() == enum.Consumer.ActionEnum.Auth.Code() { // 如果订阅者是订阅授权
 				g.Try(ctx, func(ctx context.Context) {
-					data := hook.PlatformUser{
+					data := entity.PlatformUser{
 						Id:            idgen.NextId(),
 						FacilitatorId: 0,
 						OperatorId:    0,

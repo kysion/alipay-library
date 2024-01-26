@@ -3,7 +3,7 @@
 // You can delete these comments if you wish manually maintain this interface file.
 // ================================================================================
 
-package share_service
+package alipay_service
 
 {Imports}
 `

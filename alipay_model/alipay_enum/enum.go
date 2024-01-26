@@ -16,7 +16,10 @@ type (
 	// ServiceNotifyType 应用通知
 	ServiceNotifyType info_type.ServiceNotifyTypeEnum
 
-	NotifyType     notify.NotifyTypeEnum
+	// NotifyType 异步通知类型
+	NotifyType notify.NotifyTypeEnum
+
+	// ConsumerAction 消费者相关
 	ConsumerAction consumer.ActionEnum
 	Category       consumer.CategoryEnum
 
