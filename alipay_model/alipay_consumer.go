@@ -27,3 +27,25 @@ type UpdateConsumerReq struct {
 	AuthToken          string `json:"authToken"          dc:"授权token"`
 	ExtJson            string `json:"extJson"            dc:"拓展字段"`
 }
+
+type OpenInitialize struct {
+	OuterOrderNo  string `json:"outerOrderNo " dc:"商户请求的唯一的标识符"`
+	BizCode       string `json:"bizCode" dc:"认证场景码"`
+	IdentityParam IdentityParam
+}
+
+type ResponseRes struct {
+	ErrorResponse
+	CertifyId string `json:"certify_id" dc:"本次申请操作的唯一标识"`
+}
+
+type IdentityParam struct {
+	IdentityType string `json:"identityType" dc:"身份信息参数类型" default:"CERT_INFO"`
+	CertType     string `json:"certType" dc:"证件类型" v:"required#请选择证件类型"`
+	CertName     string `json:"certName" dc:"真实姓名" v:"required#请输入真实名字"`
+	CertNo       string `json:"certNo" dc:"证件号码" v:"required#请输入证件号码"`
+}
+
+type MerchantConfig struct {
+	ReturnUrl string `json:"returnUrl" dc:"需要回跳的目标地址"`
+}
