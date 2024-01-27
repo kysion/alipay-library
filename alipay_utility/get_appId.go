@@ -12,8 +12,8 @@ func GetAlipayAppIdFormCtx(ctx context.Context) string {
 	appId := g.RequestFromCtx(ctx).Get("appId").String()
 
 	if len(appId) < 16 {
-		id, _ := strconv.ParseInt(appId, 32, 0)
-		
+		id, _ := strconv.ParseInt(appId, 36, 0)
+
 		appId = gconv.String(id)
 	}
 
