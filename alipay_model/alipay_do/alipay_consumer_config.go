@@ -26,6 +26,14 @@ type AlipayConsumerConfig struct {
 	Sex                interface{} // 性别：0女 1男
 	AuthToken          interface{} // 授权token
 	ExtJson            interface{} // 拓展字段
+	AuthState          interface{} // 用户授权状态：1授权、2未授权
+	AlipayUserId       interface{} // Alipay的UserId
+	ExpiresIn          *gtime.Time // 用户授权Token过期时间
+	ReFreshToken       interface{} // 刷新Token
+	ReExpiresIn        *gtime.Time // 刷新Token过期时间
+	AuthStart          *gtime.Time // 用户授权开始时间
+	AppType            interface{} // 应用类型：1小程序  2网站/移动应用  4生活号
+	AppId              interface{} // 商家应用Id
 	CreatedAt          *gtime.Time //
 	UpdatedAt          *gtime.Time //
 	DeletedAt          *gtime.Time //

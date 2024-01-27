@@ -24,6 +24,14 @@ type AlipayConsumerConfig struct {
 	Sex                int         `json:"sex"                description:"性别：0女 1男"`
 	AuthToken          string      `json:"authToken"          description:"授权token"`
 	ExtJson            string      `json:"extJson"            description:"拓展字段"`
+	AuthState          int         `json:"authState"          description:"用户授权状态：1授权、2未授权"`
+	AlipayUserId       string      `json:"alipayUserId"       description:"Alipay的UserId"`
+	ExpiresIn          *gtime.Time `json:"expiresIn"          description:"用户授权Token过期时间"`
+	ReFreshToken       string      `json:"reFreshToken"       description:"刷新Token"`
+	ReExpiresIn        *gtime.Time `json:"reExpiresIn"        description:"刷新Token过期时间"`
+	AuthStart          *gtime.Time `json:"authStart"          description:"用户授权开始时间"`
+	AppType            int         `json:"appType"            description:"应用类型：1小程序  2网站/移动应用  4生活号"`
+	AppId              string      `json:"appId"              description:"商家应用Id"`
 	CreatedAt          *gtime.Time `json:"createdAt"          description:""`
 	UpdatedAt          *gtime.Time `json:"updatedAt"          description:""`
 	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
