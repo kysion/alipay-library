@@ -27,7 +27,7 @@ func NewMerchantTransfer() *sMerchantTransfer {
 	return result
 }
 
-// FundTransUniTransfer 单笔转账申请
+// FundTransUniTransfer 单笔转账申请  -
 func (s *sMerchantTransfer) FundTransUniTransfer(ctx context.Context, appId string, info *alipay_model.FundTransUniTransferReq) (aliRsp *alipay_model.TransUniTransferRes, err error) {
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------单笔转账申请 ------- ", "sMerchantTransfer")
 
@@ -49,9 +49,10 @@ func (s *sMerchantTransfer) FundTransUniTransfer(ctx context.Context, appId stri
 		BizScene:    "DIRECT_TRANSFER",      // 业务场景
 		OrderTitle:  info.OrderTitle,        // 转账标题
 		PayeeInfo: alipay_model.PayeeInfo{ // 收款方信息
-			Identity:     info.PayeeInfo.Identity, // 参与方的标识ID，例如收款账号
-			IdentityType: "ALIPAY_LOGON_ID",       // 参与方的标识类型
-			Name:         info.PayeeInfo.Name,     // 参与方真实姓名
+			Identity: info.PayeeInfo.Identity, // 参与方的标识ID，例如收款账号
+			//IdentityType: "ALIPAY_LOGON_ID",       // 参与方的标识类型：
+			IdentityType: info.PayeeInfo.IdentityType, // 参与方的标识类型：
+			Name:         info.PayeeInfo.Name,         // 参与方真实姓名
 		}, // 收款方信息
 		Remark:         info.Remark,
 		BusinessParams: "",

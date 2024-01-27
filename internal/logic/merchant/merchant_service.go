@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
@@ -97,28 +98,35 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------支付宝用户授权 UserInfoAuth", "sMerchantService")
 
 	from := gmap.NewStrAnyMapFrom(info)
-
+	var client *aliyun.AliPay
 	//code := from.Get("code") //
 	appId := gconv.String(from.Get("app_id"))
 	sysUserId := gconv.Int64(from.Get("sys_user_id"))
+	//sysUserId = 8138722065186885
 	merchantId := gconv.Int64(from.Get("merchant_id"))
 
 	res := alipay_model.UserInfoShare{}
+	// 根据AppId获取商家相关配置，包括AppAuthToken
+	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
+	if err != nil || merchantApp == nil {
+		return ""
+	}
 
-	client, err := aliyun.NewClient(ctx, appId)
+	if merchantApp.ThirdAppId != "" {
+		client, err = aliyun.NewClient(ctx, appId)
+	} else {
+		client, err = aliyun.NewMerchantClient(ctx, appId)
+	}
 
 	data := gopay.BodyMap{}
 	gconv.Struct(info, &data)
 
 	err = dao.AlipayMerchantAppConfig.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
-		// 根据AppId获取商家相关配置，包括AppAuthToken
-		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
-		if err != nil || merchantApp == nil {
-			return err
-		}
 
 		// 这个token是动态的，哪个商家需要获取，appId和appAuthToken就传递对应的
-		client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
+		if merchantApp.AppAuthToken != "" {
+			client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
+		}
 
 		// 1.auth_code换access_token
 		token, _ := client.SystemOauthToken(ctx, data)
@@ -138,9 +146,25 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 
 		// 根据sys_user_id查询商户信息
 		sys_service.SysUser().MakeSession(ctx, sysUserId)
-
 		sysUser, err := sys_service.SysUser().GetSysUserById(ctx, sysUserId)
-		if err != nil {
+		if err != nil && sysUser == nil {
+			// TODO 后续需要删除下面创建用户的代码。需要在业务层先创建好用户
+			// 1.创建一个匿名sysUser = 用户登录信息
+			/*id := idgen.NextId()
+			passwordLen := len(gconv.String(id))
+			pwd := gstr.SubStr(gconv.String(id), passwordLen-6, 6) // 密码为id后六位
+
+			data := sys_model.UserInnerRegister{
+				Username:        strconv.FormatInt(gconv.Int64(id), 36),
+				Password:        pwd,
+				ConfirmPassword: pwd,
+			}
+			sysUser, err = sys_service.SysUser().CreateUser(ctx, data, sys_enum.User.State.Normal, sys_enum.User.Type.New(0, "匿名"), id)
+			if err != nil {
+				return err
+			}
+			sysUserId = sysUser.Id*/
+
 			return err
 		}
 
@@ -166,13 +190,25 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 		}
 
 		// 4.存储阿里消费者记录 alipay-consumer-config
-		alipayConsumer, _ := service.ConsumerConfig().GetConsumerByUserId(ctx, userInfo.Response.UserId)
+		//alipayConsumer, _ := service.ConsumerConfig().GetConsumerByUserId(ctx, userInfo.Response.UserId)
+		alipayConsumer, _ := service.ConsumerConfig().GetConsumerByUserIdAndAppId(ctx, userInfo.Response.UserId, appId)
 
 		if alipayConsumer == nil { // 消费者不存在，则创建
 			consumerInfo := alipay_model.AlipayConsumerConfig{}
 			gconv.Struct(userInfo.Response, &consumerInfo)
+			consumerInfo.AppId = appId
+			consumerInfo.AppType = merchantApp.AppType
 
 			consumerInfo.UserId = gconv.String(userInfo.Response.UserId)
+			consumerInfo.AuthToken = token.Response.AccessToken
+			consumerInfo.ReFreshToken = token.Response.RefreshToken
+			consumerInfo.AuthState = alipay_enum.Consumer.AuthState.Auth.Code()
+			consumerInfo.AuthStart = gtime.NewFromStr(token.Response.AuthStart)
+			consumerInfo.AlipayUserId = token.Response.AlipayUserId
+			consumerInfo.ExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ExpiresIn))
+			consumerInfo.ReExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ReExpiresIn))
+
+			//consumerInfo. =  token.Response.AccessToken
 			consumerInfo.SysUserId = sysUser.Id
 
 			_, err = service.ConsumerConfig().CreateConsumer(ctx, &consumerInfo)
@@ -182,7 +218,15 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 
 		} else { // 存在则更新
 			consumerInfo := alipay_model.UpdateConsumerReq{}
+			authEnum := alipay_enum.Consumer.AuthState.Auth.Code()
 			gconv.Struct(userInfo.Response, &consumerInfo)
+			consumerInfo.AuthToken = &token.Response.AccessToken
+			consumerInfo.ReFreshToken = &token.Response.RefreshToken
+			consumerInfo.AuthState = &authEnum
+			consumerInfo.AuthStart = gtime.NewFromStr(token.Response.AuthStart)
+			consumerInfo.AlipayUserId = &token.Response.AlipayUserId
+			consumerInfo.ExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ExpiresIn))
+			consumerInfo.ReExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ReExpiresIn))
 
 			_, err = service.ConsumerConfig().UpdateConsumer(ctx, alipayConsumer.Id, &consumerInfo)
 			if err != nil {

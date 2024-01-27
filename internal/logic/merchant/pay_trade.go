@@ -81,13 +81,14 @@ func (s *sPayTrade) PayTradeCreate(ctx context.Context, info *alipay_model.Trade
 		res, err = service.MerchantTinyappPay().TradeCreate(ctx, info, merchantApp, orderInfo, totalAmount, userId)
 	} else if merchantApp.AppType == 2 {
 		// H5 支付
-		res, err = service.MerchantH5Pay().TradeCreate(ctx, info, merchantApp, orderInfo, totalAmount, userId)
+		//res, err = service.MerchantH5Pay().TradeCreate(ctx, info, merchantApp, orderInfo, totalAmount, userId)
+		res, err = service.MerchantH5Pay().H5TradePay(ctx, info, merchantApp, orderInfo, totalAmount)
 	}
 
 	return res, err
 }
 
-// QueryOrderInfo 查询订单
+// QueryOrderInfo 查询订单 - 当面付-alipay.trade.query(统一收单线下交易查询)
 func (s *sPayTrade) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error) {
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
 
@@ -95,9 +96,13 @@ func (s *sPayTrade) QueryOrderInfo(ctx context.Context, outTradeNo string, merch
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "\n应用不存在	", "sMerchantH5Pay")
 	}
 
-	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
-
-	client.SetAppAuthToken(merchantApp.AppAuthToken)
+	var client *aliyun.AliPay
+	if merchantApp != nil && merchantApp.ThirdAppId != "" {
+		client, err = aliyun.NewClient(ctx, merchantApp.AppId)
+		client.SetAppAuthToken(merchantApp.AppAuthToken)
+	} else {
+		client, err = aliyun.NewMerchantClient(ctx, merchantApp.AppId)
+	}
 
 	//请求参数
 	bm := make(gopay.BodyMap)
