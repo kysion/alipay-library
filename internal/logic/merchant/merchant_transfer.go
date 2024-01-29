@@ -55,7 +55,7 @@ func (s *sMerchantTransfer) FundTransUniTransfer(ctx context.Context, appId stri
 			Name:         info.PayeeInfo.Name,         // 参与方真实姓名
 		}, // 收款方信息
 		Remark:         info.Remark,
-		BusinessParams: "",
+		BusinessParams: info.BusinessParams,
 	}
 
 	data := kconv.Struct(reqData, &gopay.BodyMap{})
