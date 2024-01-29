@@ -20,35 +20,14 @@ import (
 )
 
 type (
-	IAppVersion interface {
-		// SubmitVersionAudit 提交应用版本审核
-		SubmitVersionAudit(ctx context.Context, info *alipay_model.AppVersionAuditReq, pic *alipay_model.AppVersionAuditPicReq) (*alipay_model.AppVersionAuditRes, error)
-		// CancelVersionAudit 撤销版本审核
-		CancelVersionAudit(ctx context.Context, version string) (*alipay_model.CancelVersionAuditRes, error)
-		// CancelVersion 退回开发版本
-		CancelVersion(ctx context.Context, version string) (*alipay_model.CancelVersionRes, error)
-		// AppOnline 小程序上架
-		AppOnline(ctx context.Context, version string) (*alipay_model.AppOnlineRes, error)
-		// AppOffline 小程序下架
-		AppOffline(ctx context.Context, version string) (*alipay_model.AppOfflineRes, error)
-		// QueryAppVersionList 小程序版本列表查询 https://openapi.alipay.com/v3/alipay/open/mini/version/list/query GET
-		QueryAppVersionList(ctx context.Context, versionStatus string) (res *alipay_model.QueryAppVersionListRes, err error)
-		// GetAppVersionDetail 小程序版本详情查询 https://openapi.alipay.com/v3/alipay/open/mini/version/detail/query  GET
-		GetAppVersionDetail(ctx context.Context, version string) (*alipay_model.QueryAppVersionDetailRes, error)
+	ICertify interface {
+		// UserCertifyOpenInit 初始化身份认证单据号
+		UserCertifyOpenInit(ctx context.Context, appId int64, info *alipay_model.CertifyInitReq) (*alipay_model.UserCertifyOpenInitRes, error)
+		// UserCertifyOpenCertify (身份认证开始认证)
+		UserCertifyOpenCertify(ctx context.Context, appId int64, certifyId string) (certifyUrl string, err error)
+		// UserCertifyOpenQuery 身份认证结果查询
+		UserCertifyOpenQuery(ctx context.Context, appId int64, certifyId string) (*alipay_model.UserCertifyOpenQueryRes, error)
 	}
-	IPayTrade interface {
-		// PayTradeCreate  1、创建交易订单   （AppId的H5是没有的，需要写死，小程序有的 ）
-		PayTradeCreate(ctx context.Context, info *alipay_model.TradeOrder, userId string, notifyFunc ...hook.NotifyHookFunc) (res string, err error)
-		// QueryOrderInfo 查询订单 - 当面付-alipay.trade.query(统一收单线下交易查询)
-		QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error)
-		// PayTradeClose alipay.trade.close(统一收单交易关闭接口)
-		PayTradeClose(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeCloseResponse, err error)
-	}
-	IAppAuth interface {
-		// AppAuth 具体服务
-		AppAuth(ctx context.Context, info g.Map) string
-	}
-	IH5Order        interface{}
 	IMerchantNotify interface {
 		// InstallNotifyHook 订阅异步通知Hook
 		InstallNotifyHook(hookKey hook.NotifyKey, hookFunc hook.NotifyHookFunc)
@@ -67,24 +46,21 @@ type (
 		// FundAccountQuery 余额查询
 		FundAccountQuery(ctx context.Context, appId string, userId string) (aliRsp *alipay_model.FundAccountQueryResponse, err error)
 	}
-	IWallet interface {
-		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
-		// Wallet 具体服务 H5用户授权 + 小程序
-		Wallet(ctx context.Context, info g.Map) string
-	}
-	IMerchantTinyappPay interface {
-		// OrderSend 1、发送订单消息   前端完成了
-		OrderSend(ctx context.Context)
-		// TradeCreate  2、小程序创建交易订单
-		TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error)
-	}
-	ICertify interface {
-		// UserCertifyOpenInit 初始化身份认证单据号
-		UserCertifyOpenInit(ctx context.Context, appId int64, info *alipay_model.CertifyInitReq) (*alipay_model.UserCertifyOpenInitRes, error)
-		// UserCertifyOpenCertify (身份认证开始认证)
-		UserCertifyOpenCertify(ctx context.Context, appId int64, certifyId string) (certifyUrl string, err error)
-		// UserCertifyOpenQuery 身份认证结果查询
-		UserCertifyOpenQuery(ctx context.Context, appId int64, certifyId string) (*alipay_model.UserCertifyOpenQueryRes, error)
+	IAppVersion interface {
+		// SubmitVersionAudit 提交应用版本审核
+		SubmitVersionAudit(ctx context.Context, info *alipay_model.AppVersionAuditReq, pic *alipay_model.AppVersionAuditPicReq) (*alipay_model.AppVersionAuditRes, error)
+		// CancelVersionAudit 撤销版本审核
+		CancelVersionAudit(ctx context.Context, version string) (*alipay_model.CancelVersionAuditRes, error)
+		// CancelVersion 退回开发版本
+		CancelVersion(ctx context.Context, version string) (*alipay_model.CancelVersionRes, error)
+		// AppOnline 小程序上架
+		AppOnline(ctx context.Context, version string) (*alipay_model.AppOnlineRes, error)
+		// AppOffline 小程序下架
+		AppOffline(ctx context.Context, version string) (*alipay_model.AppOfflineRes, error)
+		// QueryAppVersionList 小程序版本列表查询 https://openapi.alipay.com/v3/alipay/open/mini/version/list/query GET
+		QueryAppVersionList(ctx context.Context, versionStatus string) (res *alipay_model.QueryAppVersionListRes, err error)
+		// GetAppVersionDetail 小程序版本详情查询 https://openapi.alipay.com/v3/alipay/open/mini/version/detail/query  GET
+		GetAppVersionDetail(ctx context.Context, version string) (*alipay_model.QueryAppVersionDetailRes, error)
 	}
 	IMerchantH5Pay interface {
 		// InstallHook 安装Hook的时候，如果状态类型为退款中，需要做响应的退款操作，谨防多模块订阅退款状态，产生重复退款
@@ -94,14 +70,17 @@ type (
 		// H5TradePay H5 支付，返回支付url  -（ 手机网站支付）
 		H5TradePay(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32) (string, error)
 	}
-	IMerchantService interface {
-		InstallConsumerHook(infoType hook.ConsumerKey, hookFunc hook.ConsumerHookFunc)
-		GetHook() base_hook.BaseHook[hook.ConsumerKey, hook.ConsumerHookFunc]
-		// GetUserId 用于检查是否注册,如果已经注册，返会userId
-		GetUserId(ctx context.Context, authCode string, appId string) (response *alipay.SystemOauthTokenResponse, err error)
-		// UserInfoAuth 具体服务 用户授权 + 小程序和H5都兼容
-		UserInfoAuth(ctx context.Context, info g.Map) string
+	IMerchantTinyappPay interface {
+		// OrderSend 1、发送订单消息   前端完成了
+		OrderSend(ctx context.Context)
+		// TradeCreate  2、小程序创建交易订单
+		TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error)
 	}
+	IUserCertity interface {
+		// AuditConsumer 身份认证初始化和开始
+		AuditConsumer(ctx context.Context, info *alipay_model.CertifyInitReq) (string, error)
+	}
+	IH5Order    interface{}
 	ISubAccount interface {
 		// TradeRelationBind 分账关系绑定
 		TradeRelationBind(ctx context.Context, appId int64, info *alipay_model.TradeRelationBindReq) (bool, error)
@@ -118,22 +97,48 @@ type (
 		// Cancelled 用户取消授权 （取消关注）
 		Cancelled(ctx context.Context, info g.Map) bool
 	}
+	IAppAuth interface {
+		// AppAuth 具体服务
+		AppAuth(ctx context.Context, info g.Map) string
+	}
+	IMerchantService interface {
+		InstallConsumerHook(infoType hook.ConsumerKey, hookFunc hook.ConsumerHookFunc)
+		GetHook() base_hook.BaseHook[hook.ConsumerKey, hook.ConsumerHookFunc]
+		// GetUserId 用于检查是否注册,如果已经注册，返会userId
+		GetUserId(ctx context.Context, authCode string, appId string) (response *alipay.SystemOauthTokenResponse, err error)
+		// UserInfoAuth 具体服务 用户授权 + 小程序和H5都兼容
+		UserInfoAuth(ctx context.Context, info g.Map) string
+	}
+	IPayTrade interface {
+		// PayTradeCreate  1、创建交易订单   （AppId的H5是没有的，需要写死，小程序有的 ）
+		PayTradeCreate(ctx context.Context, info *alipay_model.TradeOrder, userId string, notifyFunc ...hook.NotifyHookFunc) (res string, err error)
+		// QueryOrderInfo 查询订单 - 当面付-alipay.trade.query(统一收单线下交易查询)
+		QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error)
+		// PayTradeClose alipay.trade.close(统一收单交易关闭接口)
+		PayTradeClose(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeCloseResponse, err error)
+	}
+	IWallet interface {
+		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
+		// Wallet 具体服务 H5用户授权 + 小程序
+		Wallet(ctx context.Context, info g.Map) string
+	}
 )
 
 var (
-	localMerchantTinyappPay IMerchantTinyappPay
-	localCertify            ICertify
+	localAppVersion         IAppVersion
 	localMerchantH5Pay      IMerchantH5Pay
-	localMerchantService    IMerchantService
+	localMerchantTinyappPay IMerchantTinyappPay
+	localUserCertity        IUserCertity
+	localH5Order            IH5Order
 	localSubAccount         ISubAccount
 	localUserAuth           IUserAuth
-	localAppVersion         IAppVersion
-	localPayTrade           IPayTrade
 	localAppAuth            IAppAuth
-	localH5Order            IH5Order
+	localMerchantService    IMerchantService
+	localPayTrade           IPayTrade
+	localWallet             IWallet
+	localCertify            ICertify
 	localMerchantNotify     IMerchantNotify
 	localMerchantTransfer   IMerchantTransfer
-	localWallet             IWallet
 )
 
 func AppVersion() IAppVersion {
@@ -147,70 +152,15 @@ func RegisterAppVersion(i IAppVersion) {
 	localAppVersion = i
 }
 
-func PayTrade() IPayTrade {
-	if localPayTrade == nil {
-		panic("implement not found for interface IPayTrade, forgot register?")
+func MerchantH5Pay() IMerchantH5Pay {
+	if localMerchantH5Pay == nil {
+		panic("implement not found for interface IMerchantH5Pay, forgot register?")
 	}
-	return localPayTrade
+	return localMerchantH5Pay
 }
 
-func RegisterPayTrade(i IPayTrade) {
-	localPayTrade = i
-}
-
-func MerchantNotify() IMerchantNotify {
-	if localMerchantNotify == nil {
-		panic("implement not found for interface IMerchantNotify, forgot register?")
-	}
-	return localMerchantNotify
-}
-
-func RegisterMerchantNotify(i IMerchantNotify) {
-	localMerchantNotify = i
-}
-
-func MerchantTransfer() IMerchantTransfer {
-	if localMerchantTransfer == nil {
-		panic("implement not found for interface IMerchantTransfer, forgot register?")
-	}
-	return localMerchantTransfer
-}
-
-func RegisterMerchantTransfer(i IMerchantTransfer) {
-	localMerchantTransfer = i
-}
-
-func Wallet() IWallet {
-	if localWallet == nil {
-		panic("implement not found for interface IWallet, forgot register?")
-	}
-	return localWallet
-}
-
-func RegisterWallet(i IWallet) {
-	localWallet = i
-}
-
-func AppAuth() IAppAuth {
-	if localAppAuth == nil {
-		panic("implement not found for interface IAppAuth, forgot register?")
-	}
-	return localAppAuth
-}
-
-func RegisterAppAuth(i IAppAuth) {
-	localAppAuth = i
-}
-
-func H5Order() IH5Order {
-	if localH5Order == nil {
-		panic("implement not found for interface IH5Order, forgot register?")
-	}
-	return localH5Order
-}
-
-func RegisterH5Order(i IH5Order) {
-	localH5Order = i
+func RegisterMerchantH5Pay(i IMerchantH5Pay) {
+	localMerchantH5Pay = i
 }
 
 func MerchantTinyappPay() IMerchantTinyappPay {
@@ -224,15 +174,26 @@ func RegisterMerchantTinyappPay(i IMerchantTinyappPay) {
 	localMerchantTinyappPay = i
 }
 
-func MerchantService() IMerchantService {
-	if localMerchantService == nil {
-		panic("implement not found for interface IMerchantService, forgot register?")
+func UserCertity() IUserCertity {
+	if localUserCertity == nil {
+		panic("implement not found for interface IUserCertity, forgot register?")
 	}
-	return localMerchantService
+	return localUserCertity
 }
 
-func RegisterMerchantService(i IMerchantService) {
-	localMerchantService = i
+func RegisterUserCertity(i IUserCertity) {
+	localUserCertity = i
+}
+
+func H5Order() IH5Order {
+	if localH5Order == nil {
+		panic("implement not found for interface IH5Order, forgot register?")
+	}
+	return localH5Order
+}
+
+func RegisterH5Order(i IH5Order) {
+	localH5Order = i
 }
 
 func SubAccount() ISubAccount {
@@ -257,6 +218,50 @@ func RegisterUserAuth(i IUserAuth) {
 	localUserAuth = i
 }
 
+func AppAuth() IAppAuth {
+	if localAppAuth == nil {
+		panic("implement not found for interface IAppAuth, forgot register?")
+	}
+	return localAppAuth
+}
+
+func RegisterAppAuth(i IAppAuth) {
+	localAppAuth = i
+}
+
+func MerchantService() IMerchantService {
+	if localMerchantService == nil {
+		panic("implement not found for interface IMerchantService, forgot register?")
+	}
+	return localMerchantService
+}
+
+func RegisterMerchantService(i IMerchantService) {
+	localMerchantService = i
+}
+
+func PayTrade() IPayTrade {
+	if localPayTrade == nil {
+		panic("implement not found for interface IPayTrade, forgot register?")
+	}
+	return localPayTrade
+}
+
+func RegisterPayTrade(i IPayTrade) {
+	localPayTrade = i
+}
+
+func Wallet() IWallet {
+	if localWallet == nil {
+		panic("implement not found for interface IWallet, forgot register?")
+	}
+	return localWallet
+}
+
+func RegisterWallet(i IWallet) {
+	localWallet = i
+}
+
 func Certify() ICertify {
 	if localCertify == nil {
 		panic("implement not found for interface ICertify, forgot register?")
@@ -268,13 +273,24 @@ func RegisterCertify(i ICertify) {
 	localCertify = i
 }
 
-func MerchantH5Pay() IMerchantH5Pay {
-	if localMerchantH5Pay == nil {
-		panic("implement not found for interface IMerchantH5Pay, forgot register?")
+func MerchantNotify() IMerchantNotify {
+	if localMerchantNotify == nil {
+		panic("implement not found for interface IMerchantNotify, forgot register?")
 	}
-	return localMerchantH5Pay
+	return localMerchantNotify
 }
 
-func RegisterMerchantH5Pay(i IMerchantH5Pay) {
-	localMerchantH5Pay = i
+func RegisterMerchantNotify(i IMerchantNotify) {
+	localMerchantNotify = i
+}
+
+func MerchantTransfer() IMerchantTransfer {
+	if localMerchantTransfer == nil {
+		panic("implement not found for interface IMerchantTransfer, forgot register?")
+	}
+	return localMerchantTransfer
+}
+
+func RegisterMerchantTransfer(i IMerchantTransfer) {
+	localMerchantTransfer = i
 }
