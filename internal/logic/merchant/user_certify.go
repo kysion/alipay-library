@@ -24,7 +24,7 @@ func init() {
 }
 
 // AuditConsumer 身份认证初始化和开始
-func (s *sUserCertity) AuditConsumer(ctx context.Context, info *alipay_model.CertifyInitReq) (string, error) {
+func (s *sUserCertity) AuditConsumer(ctx context.Context, info *alipay_model.CertifyInitReq) (*alipay_model.UserCertifyOpenQueryRes, error) {
 
 	var client *aliyun.AliPay
 
@@ -32,7 +32,7 @@ func (s *sUserCertity) AuditConsumer(ctx context.Context, info *alipay_model.Cer
 	appId := alipay_utility.GetAlipayAppIdFormCtx(ctx)
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
 	if err != nil || merchantApp == nil {
-		return "", err
+		return nil, err
 	}
 	// 判断是否是第三方
 	if merchantApp.ThirdAppId != "" {
@@ -46,23 +46,34 @@ func (s *sUserCertity) AuditConsumer(ctx context.Context, info *alipay_model.Cer
 	// 身份认证初始化
 	res, err := client.UserCertifyOpenInit(ctx, *bm)
 
+	if err != nil {
+		return nil, err
+	}
+
 	ret := alipay_model.UserCertifyOpenInit{}
 	gconv.Struct(&res.Response, &ret)
 
 	if ret.Code != gconv.String(10000) {
-		return ret.SubMsg, err
+		re := &alipay_model.UserCertifyOpenQueryRes{}
+		re.Response.ErrorResponse = ret.ErrorResponse
+		return re, err
 	}
 
 	in := make(gopay.BodyMap)
 	in.Set("certify_id", ret.CertifyId)
 
 	// 身份认证开始
-	result, err := client.UserCertifyOpenCertify(ctx, in)
+	_, err = client.UserCertifyOpenCertify(ctx, in)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return result, nil
+	// 获取身份认证记录
+	re, err := client.UserCertifyOpenQuery(ctx, in)
+
+	r := kconv.Struct(re, &alipay_model.UserCertifyOpenQueryRes{})
+
+	return r, nil
 
 }

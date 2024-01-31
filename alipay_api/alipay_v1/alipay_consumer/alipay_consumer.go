@@ -8,6 +8,6 @@ import (
 // 阿里消费者相关接口
 
 type CertifyReq struct {
-	g.Meta `path:"/auditConsumer" method:"post" summary:"实名认证" tags:"Alipay消费者应用"`
+	g.Meta `path:"/:appId/auditConsumer" method:"post" summary:"实名认证" tags:"Alipay消费者应用"`
 	alipay_model.CertifyInitReq
 }

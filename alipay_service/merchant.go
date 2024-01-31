@@ -95,7 +95,7 @@ type (
 	}
 	IUserCertity interface {
 		// AuditConsumer 身份认证初始化和开始
-		AuditConsumer(ctx context.Context, info *alipay_model.CertifyInitReq) (string, error)
+		AuditConsumer(ctx context.Context, info *alipay_model.CertifyInitReq) (*alipay_model.UserCertifyOpenQueryRes, error)
 	}
 	IWallet interface {
 		InstallConsumerHook(infoType enum.ConsumerAction, hookFunc hook.ConsumerHookFunc)
