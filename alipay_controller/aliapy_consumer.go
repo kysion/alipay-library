@@ -11,6 +11,6 @@ var AlipayConsumerConfig = cAlipayConsumerConfig{}
 type cAlipayConsumerConfig struct{}
 
 func (c *cAlipayConsumerConfig) AuditConsumer(ctx context.Context, req *alipay_consumer_v1.CertifyReq) (string, error) {
-	ret, err := service.UserCertity().AuditConsumer(ctx, &req.MerchantConfig)
+	ret, err := service.UserCertity().AuditConsumer(ctx, &req.CertifyInitReq)
 	return ret, err
 }
