@@ -17,7 +17,9 @@ import (
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/gopay"
+	"github.com/kysion/gopay/alipay"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/yitter/idgenerator-go/idgen"
 )
@@ -59,17 +61,23 @@ func (s *sMerchantService) GetHook() base_hook.BaseHook[hook.ConsumerKey, hook.C
 }
 
 // GetUserId 用于检查是否注册,如果已经注册，返会userId
-func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId string) (res string, err error) {
+func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId string) (response *alipay.SystemOauthTokenResponse, err error) {
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------获取用户JwtToken----GetUserId---- ", "sMerchantService")
 
-	client, err := aliyun.NewClient(ctx, appId)
-	userId := ""
+	//userId := ""
 	//err = dao.AlipayMerchantAppConfig.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	var client *aliyun.AliPay
 
 	// 根据AppId获取商家相关配置，包括AppAuthToken
 	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
 	if err != nil || merchantApp == nil {
-		return "", err
+		return nil, err
+	}
+
+	if merchantApp.ThirdAppId != "" {
+		client, err = aliyun.NewClient(ctx, appId)
+	} else {
+		client, err = aliyun.NewMerchantClient(ctx, appId)
 	}
 
 	client.SetAppAuthToken(merchantApp.AppAuthToken)
@@ -80,8 +88,8 @@ func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId
 		"grant_type": "authorization_code",
 	})
 
-	fmt.Println("平台用户id：", token.Response.UserId)
-	userId = token.Response.UserId
+	//fmt.Println("平台用户id：", token.Response.UserId)
+	//userId = token.Response.UserId
 
 	//return "", nil
 	//})
@@ -90,7 +98,7 @@ func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId
 	//	return "", err
 	//}
 
-	return userId, nil
+	return token, nil
 }
 
 // UserInfoAuth 具体服务 用户授权 + 小程序和H5都兼容
@@ -99,11 +107,14 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 
 	from := gmap.NewStrAnyMapFrom(info)
 	var client *aliyun.AliPay
-	//code := from.Get("code") //
+	code := from.Get("code") //
+	fmt.Println(code)
 	appId := gconv.String(from.Get("app_id"))
 	sysUserId := gconv.Int64(from.Get("sys_user_id"))
 	//sysUserId = 8138722065186885
 	merchantId := gconv.Int64(from.Get("merchant_id"))
+	tokenStr := from.Get("token")
+	token := kconv.Struct(tokenStr, &alipay.SystemOauthTokenResponse{})
 
 	res := alipay_model.UserInfoShare{}
 	// 根据AppId获取商家相关配置，包括AppAuthToken
@@ -128,11 +139,13 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 			client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
 		}
 
-		// 1.auth_code换access_token
-		token, _ := client.SystemOauthToken(ctx, data)
-		fmt.Println(token)
-		fmt.Println("平台用户id：", token.Response.UserId)
-		res.UserId = token.Response.UserId
+		if token.Response == nil { // 避免用过一次的情况
+			// 1.auth_code换access_token
+			token, _ = client.SystemOauthToken(ctx, data)
+			fmt.Println(token)
+			fmt.Println("平台用户id：", token.Response.UserId)
+			res.UserId = token.Response.UserId
+		}
 
 		// 2.token获取支付宝会员授权信息查询接口  小程序好像查不到
 		aliRsp, _ := client.UserInfoShare(ctx, token.Response.AccessToken)
