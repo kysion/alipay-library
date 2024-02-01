@@ -10,6 +10,7 @@ import (
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/gopay"
+	"github.com/yitter/idgenerator-go/idgen"
 )
 
 type sUserCertity struct{}
@@ -42,9 +43,12 @@ func (s *sUserCertity) AuditConsumer(ctx context.Context, info *alipay_model.Cer
 		client, err = aliyun.NewMerchantClient(ctx, appId)
 	}
 
+	if info.OuterOrderNo == "" {
+		info.OuterOrderNo = gconv.String(idgen.NextId())
+	}
 	bm := kconv.Struct(&info, &gopay.BodyMap{})
 
-	// 身份认证初始化
+	// 1、身份认证初始化
 	res, err := client.UserCertifyOpenInit(ctx, *bm)
 
 	if err != nil {
@@ -62,7 +66,7 @@ func (s *sUserCertity) AuditConsumer(ctx context.Context, info *alipay_model.Cer
 	in.Set("certify_id", ret.CertifyId)
 	fmt.Println(in)
 
-	// 身份认证开始
+	// 2、身份认证开始
 	result, err := client.UserCertifyOpenCertify(ctx, in)
 
 	if err != nil {
@@ -70,6 +74,10 @@ func (s *sUserCertity) AuditConsumer(ctx context.Context, info *alipay_model.Cer
 	}
 
 	ret.ReturnUrl = result
+
+	// 3、查询认证结果API
+	// 方案1: 认证结果只能通过API接口查询，延迟5分钟后去查询认证结果
+	// 方案2: 由前端定时循环查询后端的认证结果API，知道查询到认证成功退出循环  （红包项目使用方案2）
 
 	return &ret, err
 }
