@@ -48,3 +48,9 @@ type UserCertifyOpenQuery struct {
 	IdentityInfo string `json:"identity_info,omitempty"`
 	MaterialInfo string `json:"material_info,omitempty"`
 }
+
+type UserCertifyOpenRes struct {
+	ErrorResponse
+	ReturnUrl string `json:"returnUrl"`
+	CertifyId string `json:"certify_id,omitempty"`
+}
