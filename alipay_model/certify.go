@@ -16,7 +16,7 @@ type IdentityParam struct {
 
 type MerchantConfig struct {
 	FaceReserveStrategy string `json:"face_reserve_strategy" dc:"【可选】保存活体人脸: reserve、不保存活体人脸: never"`
-	ReturnUrl           string `json:"return_url" dc:"认证成功后需要跳转的地址，一般为商户业务页面；若无跳转地址可填空字符""`
+	ReturnUrl           string `json:"return_url" dc:"认证成功后需要跳转的地址，一般为商户业务页面；若无跳转地址可填空字符"`
 }
 
 // ======================================================================================================
