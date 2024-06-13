@@ -10,11 +10,12 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
+	"github.com/kysion/alipay-library/alipay_service"
+	"github.com/kysion/alipay-library/alipay_utility"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/gopay"
 	"github.com/kysion/gopay/alipay"
-	"strconv"
 )
 
 var (
@@ -45,8 +46,8 @@ func (s *sGateway) GetCallbackMsgHook() *base_hook.BaseHook[enum.CallbackMsgType
 	return &s.CallbackMsgHook
 }
 
-func (s *sGateway) GetServiceNotifyTypeHook() base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc] {
-	return s.ServiceNotifyTypeHook
+func (s *sGateway) GetServiceNotifyTypeHook() *base_hook.BaseHook[enum.ServiceNotifyType, hook.ServiceNotifyHookFunc] {
+	return &s.ServiceNotifyTypeHook
 }
 
 func NewGateway() *sGateway {
@@ -56,12 +57,12 @@ func NewGateway() *sGateway {
 
 // GatewayServices 接收消息通知  B端消息
 func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
-	// 拿到路径的AppId进行搜索、
 	urlAppId := g.RequestFromCtx(ctx).Get("appId").String()
 	var pathAppId int64
 	if urlAppId != "" {
 		// 解析AppId
-		pathAppId, _ = strconv.ParseInt(urlAppId, 32, 0)
+		//pathAppId, _ = strconv.ParseInt(urlAppId, 32, 0)
+		pathAppId = alipay_utility.AlipayAppIdDecode(urlAppId)
 
 		if pathAppId == 0 {
 			g.RequestFromCtx(ctx).Response.Write("")
@@ -69,10 +70,20 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 		}
 	}
 
-	client, _ := aliyun.NewClient(ctx, gconv.String(pathAppId))
+	//client, _ := aliyun.NewClient(ctx, gconv.String(pathAppId))
+	merchantConfig, _ := alipay_service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, gconv.String(pathAppId))
+
+	var client *aliyun.AliPay
+	if merchantConfig.ThirdAppId != "" {
+		client, _ = aliyun.NewClient(ctx, gconv.String(pathAppId))
+	} else {
+		client, _ = aliyun.NewMerchantClient(ctx, gconv.String(pathAppId))
+	}
 
 	bm, _ := alipay.ParseNotifyToBodyMap(g.RequestFromCtx(ctx).Request)
 	fmt.Println(bm)
+	msgType := bm.Get("msg_method")
+	fmt.Println(msgType)
 
 	fmt.Println("Alipay应用通知类型----------------  ", bm.Get("service"))
 
@@ -85,7 +96,8 @@ func (s *sGateway) GatewayServices(ctx context.Context) (string, error) {
 
 	// 通过Hook解决不同的回调类型
 	s.ServiceNotifyTypeHook.Iterator(func(key enum.ServiceNotifyType, value hook.ServiceNotifyHookFunc) {
-		if key.Code() == gconv.String(bm.Get("service")) {
+		//if key.Code() == gconv.String(bm.Get("service")) {
+		if key.Code() == gconv.String(bm.Get("msg_method")) {
 			g.Try(ctx, func(ctx context.Context) {
 				sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------Alipay应用通知广播： ------- "+bm.Get("source"), "sGateway")
 				value(ctx, bm)

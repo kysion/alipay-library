@@ -4,12 +4,11 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
+	alipay_merchant_v1 "github.com/kysion/alipay-library/alipay_api/alipay_v1/alipay_merchant_v1"
 	"github.com/kysion/alipay-library/alipay_model"
 	"github.com/kysion/alipay-library/alipay_service"
-	alipay_merchant_v1 "github.com/kysion/alipay-library/api/alipay_v1/alipay_merchant_v1"
-	"strconv"
+	"github.com/kysion/alipay-library/alipay_utility"
 )
 
 var AlipayMerchantAppConfig = cAlipayMerchantAppConfig{}
@@ -47,8 +46,7 @@ func (c *cAlipayMerchantAppConfig) CreateMerchantAppConfig(ctx context.Context, 
 func (c *cAlipayMerchantAppConfig) GetMerchantAppConfigByAppId(ctx context.Context, req *alipay_merchant_v1.GetMerchantAppConfigByAppIdReq) (*alipay_merchant_v1.MerchantAppConfigRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*alipay_merchant_v1.MerchantAppConfigRes, error) {
-			info := g.RequestFromCtx(ctx).Get("appId").String()
-			appId, _ := strconv.ParseInt(info, 32, 0)
+			appId := alipay_utility.GetAlipayAppIdFormCtx(ctx)
 
 			ret, err := alipay_service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, gconv.String(appId))
 			return (*alipay_merchant_v1.MerchantAppConfigRes)(ret), err
@@ -96,9 +94,7 @@ func (c *cAlipayMerchantAppConfig) CreatePolicy(ctx context.Context, req *alipay
 
 // GetPolicy 获取协议
 func (c *cAlipayMerchantAppConfig) GetPolicy(ctx context.Context, _ *alipay_merchant_v1.GetPolicyReq) (*alipay_model.GetPolicyRes, error) {
-	info := g.RequestFromCtx(ctx).Get("appId").String()
-
-	appId, _ := strconv.ParseInt(info, 32, 0)
+	appId := alipay_utility.GetAlipayAppIdFormCtx(ctx)
 
 	ret, err := alipay_service.MerchantAppConfig().GetPolicy(ctx, gconv.String(appId))
 

@@ -1,13 +1,14 @@
 server:
   address: ":80"
-  serverRoot: "/resources"
-  dumpRouterMap: true
+  serverRoot: "/resource"
+  dumpRouterMap: false
   routeOverWrite: true
   accessLogEnabled: false
   SessionIdName: "KysionAlipayLibrarySessionId"
   sessionPath: "temp/sessions/alipay-library_sessions"    # Session文件存储目录
-  openapiPath: "/openapi/alipay-library.json"
-  swaggerPath: "/docs/alipay-library"
+  openapiPath: "/api/openapi.json"
+  swaggerPath: "/api/docs"
+  swaggerJsURL: "https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js" # 自定义 文档 JS 镜像地址，需要 gf 2.6.0以上版本才支持
   # TLS/HTTPS配置，同时需要配置证书和密钥
 #  httpsAddr: ":443"
 #  # TLS/HTTPS证书文件路径
@@ -99,7 +100,7 @@ database:
 #  default:
 #    address: 127.0.0.1:6379
 
-redis:
-  # 单实例配置示例1
-  default:
-    address: 172.23.0.5:6379
+#redis:
+#  # 单实例配置示例1
+#  default:
+#    address: 172.23.0.5:6379

@@ -40,7 +40,7 @@ import (
 
 type AliPay struct {
 	*alipay.Client
-	ThirdConfig     alipay_model.AlipayThirdAppConfig
+	ThirdConfig     *alipay_model.AlipayThirdAppConfig
 	MerchantConfig  *alipay_model.AlipayMerchantAppConfig
 	privateKey      *rsa.PrivateKey
 	aliPayPublicKey *rsa.PublicKey // 支付宝证书公钥内容 alipayCertPublicKey_RSA2.crt
@@ -67,7 +67,7 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 	if err != nil {
 		return nil, err
 	}
-	client.ThirdConfig = *config
+	client.ThirdConfig = config
 
 	//global := alipay_consts.Global
 	// 微信：拿到token、每个请求都需要进行携带签名这些
@@ -89,11 +89,11 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 	// 设置支付宝请求 公共参数
 	//    注意：具体设置哪些参数，根据不同的方法而不同，此处列举出所有设置参数
 	aliPayClient.SetLocation(alipay.LocationShanghai). // 设置时区，不设置或出错均为默认服务器时间
-		SetCharset(alipay.UTF8). // 设置字符编码，不设置默认 utf-8
-		SetSignType(alipay.RSA2). // 设置签名类型，不设置默认 RSA2
-		SetReturnUrl(config.AppGatewayUrl). // 设置回调URL
-		SetNotifyUrl(config.AppCallbackUrl). // 设置异步通知URL
-		SetAppAuthToken(config.AppAuthToken)
+								SetCharset(alipay.UTF8).             // 设置字符编码，不设置默认 utf-8
+								SetSignType(alipay.RSA2).            // 设置签名类型，不设置默认 RSA2
+								SetReturnUrl(config.AppGatewayUrl).  // 设置回调URL
+								SetNotifyUrl(config.AppCallbackUrl). // 设置异步通知URL
+								SetAppAuthToken(config.AppAuthToken)
 
 	if client.MerchantConfig != nil {
 		aliPayClient.SetAppAuthToken(client.MerchantConfig.AppAuthToken)
@@ -132,7 +132,11 @@ func NewClient(ctx context.Context, appId string) (client *AliPay, err error) {
 // privateKey：应用私钥，支持PKCS1和PKCS8
 func (s *AliPay) GetRsaSign(bm gopay.BodyMap, signType string, privateKey string, format string) (sign string, err error) {
 	if privateKey == "" {
-		privateKey = s.ThirdConfig.PrivateKey
+		if s.ThirdConfig != nil {
+			privateKey = s.ThirdConfig.PrivateKey
+		} else {
+			privateKey = s.MerchantConfig.PrivateKey
+		}
 	}
 	signParams := ""
 	key := xrsa.FormatAlipayPrivateKey(privateKey)
@@ -429,17 +433,23 @@ func NewMerchantClient(ctx context.Context, appId string) (client *AliPay, err e
 			config = *client.MerchantConfig
 		}
 	}
-	thirdConfig, err := alipay_service.ThirdAppConfig().GetThirdAppConfigByAppId(ctx, client.MerchantConfig.ThirdAppId)
-	if err != nil {
-		return nil, err
+	thirdConfig, _ := alipay_service.ThirdAppConfig().GetThirdAppConfigByAppId(ctx, client.MerchantConfig.ThirdAppId)
+	//if err != nil {
+	//	return nil, err
+	//}
+	if thirdConfig != nil {
+		client.ThirdConfig = thirdConfig
 	}
-	client.ThirdConfig = *thirdConfig
 
 	//global := alipay_consts.Global
 	// 微信：拿到token、每个请求都需要进行携带签名这些
 
 	// 1、初始化支付宝客户端并做配置(appid：应用ID、privateKey：应用私钥，支持PKCS1和PKCS8、isProd：是否是正式环境)
-	aliPayClient, err = alipay.NewClient(client.MerchantConfig.ThirdAppId, client.MerchantConfig.PrivateKey, true)
+	if thirdConfig != nil {
+		aliPayClient, err = alipay.NewClient(client.MerchantConfig.ThirdAppId, client.MerchantConfig.PrivateKey, true)
+	} else {
+		aliPayClient, err = alipay.NewClient(appId, client.MerchantConfig.PrivateKey, true)
+	}
 
 	if err != nil {
 		xlog.Error(err)
@@ -455,11 +465,11 @@ func NewMerchantClient(ctx context.Context, appId string) (client *AliPay, err e
 	// 设置支付宝请求 公共参数
 	//    注意：具体设置哪些参数，根据不同的方法而不同，此处列举出所有设置参数
 	aliPayClient.SetLocation(alipay.LocationShanghai). // 设置时区，不设置或出错均为默认服务器时间
-		SetCharset(alipay.UTF8). // 设置字符编码，不设置默认 utf-8
-		SetSignType(alipay.RSA2). // 设置签名类型，不设置默认 RSA2
-		SetReturnUrl(config.AppGatewayUrl). // 应用网关地址
-		SetNotifyUrl(config.AppCallbackUrl). // 消息回调地址
-		SetAppAuthToken(config.AppAuthToken)
+								SetCharset(alipay.UTF8).             // 设置字符编码，不设置默认 utf-8
+								SetSignType(alipay.RSA2).            // 设置签名类型，不设置默认 RSA2
+								SetReturnUrl(config.AppGatewayUrl).  // 应用网关地址
+								SetNotifyUrl(config.AppCallbackUrl). // 消息回调地址
+								SetAppAuthToken(config.AppAuthToken)
 
 	if client.MerchantConfig != nil {
 		aliPayClient.SetAppAuthToken(client.MerchantConfig.AppAuthToken)

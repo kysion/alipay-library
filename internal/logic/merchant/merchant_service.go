@@ -7,15 +7,19 @@ import (
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
+	entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
 	"github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/gopay"
+	"github.com/kysion/gopay/alipay"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/yitter/idgenerator-go/idgen"
 )
@@ -57,38 +61,44 @@ func (s *sMerchantService) GetHook() base_hook.BaseHook[hook.ConsumerKey, hook.C
 }
 
 // GetUserId 用于检查是否注册,如果已经注册，返会userId
-func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId string) (res string, err error) {
+func (s *sMerchantService) GetUserId(ctx context.Context, authCode string, appId string) (response *alipay.SystemOauthTokenResponse, err error) {
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------获取用户JwtToken----GetUserId---- ", "sMerchantService")
 
-	client, err := aliyun.NewClient(ctx, appId)
-	userId := ""
-	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	//userId := ""
+	//err = dao.AlipayMerchantAppConfig.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	var client *aliyun.AliPay
 
-		// 根据AppId获取商家相关配置，包括AppAuthToken
-		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
-		if err != nil || merchantApp == nil {
-			return err
-		}
-
-		client.SetAppAuthToken(merchantApp.AppAuthToken)
-
-		// 1.auth_code换Token
-		token, _ := client.SystemOauthToken(ctx, gopay.BodyMap{
-			"code":       authCode,
-			"grant_type": "authorization_code",
-		})
-
-		fmt.Println("平台用户id：", token.Response.UserId)
-		userId = token.Response.UserId
-
-		return nil
-	})
-
-	if err != nil {
-		return "", err
+	// 根据AppId获取商家相关配置，包括AppAuthToken
+	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
+	if err != nil || merchantApp == nil {
+		return nil, err
 	}
 
-	return userId, nil
+	if merchantApp.ThirdAppId != "" {
+		client, err = aliyun.NewClient(ctx, appId)
+	} else {
+		client, err = aliyun.NewMerchantClient(ctx, appId)
+	}
+
+	client.SetAppAuthToken(merchantApp.AppAuthToken)
+
+	// 1.auth_code换Token
+	token, _ := client.SystemOauthToken(ctx, gopay.BodyMap{
+		"code":       authCode,
+		"grant_type": "authorization_code",
+	})
+
+	//fmt.Println("平台用户id：", token.Response.UserId)
+	//userId = token.Response.UserId
+
+	//return "", nil
+	//})
+	//
+	//if err != nil {
+	//	return "", err
+	//}
+
+	return token, nil
 }
 
 // UserInfoAuth 具体服务 用户授权 + 小程序和H5都兼容
@@ -96,51 +106,78 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------支付宝用户授权 UserInfoAuth", "sMerchantService")
 
 	from := gmap.NewStrAnyMapFrom(info)
-
-	//code := from.Get("code") //
+	var client *aliyun.AliPay
+	code := from.Get("code") //
+	fmt.Println(code)
 	appId := gconv.String(from.Get("app_id"))
 	sysUserId := gconv.Int64(from.Get("sys_user_id"))
+	//sysUserId = 8138722065186885
 	merchantId := gconv.Int64(from.Get("merchant_id"))
+	tokenStr := from.Get("token")
+	token := kconv.Struct(tokenStr, &alipay.SystemOauthTokenResponse{})
 
 	res := alipay_model.UserInfoShare{}
+	// 根据AppId获取商家相关配置，包括AppAuthToken
+	merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
+	if err != nil || merchantApp == nil {
+		return ""
+	}
 
-	client, err := aliyun.NewClient(ctx, appId)
+	if merchantApp.ThirdAppId != "" {
+		client, err = aliyun.NewClient(ctx, appId)
+	} else {
+		client, err = aliyun.NewMerchantClient(ctx, appId)
+	}
 
 	data := gopay.BodyMap{}
 	gconv.Struct(info, &data)
 
-	err = dao.AlipayMerchantAppConfig.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
-		// 根据AppId获取商家相关配置，包括AppAuthToken
-		merchantApp, err := service.MerchantAppConfig().GetMerchantAppConfigByAppId(ctx, appId)
-		if err != nil || merchantApp == nil {
-			return err
-		}
+	err = dao.AlipayMerchantAppConfig.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
 		// 这个token是动态的，哪个商家需要获取，appId和appAuthToken就传递对应的
-		client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
+		if merchantApp.AppAuthToken != "" {
+			client.SetAppAuthToken(merchantApp.AppAuthToken) // 商家Token
+		}
 
-		// 1.auth_code换access_token
-		token, err := client.SystemOauthToken(ctx, data)
-
-		fmt.Println("平台用户id：", token.Response.UserId)
+		if token.Response == nil { // 避免用过一次的情况
+			// 1.auth_code换access_token
+			token, _ = client.SystemOauthToken(ctx, data)
+			fmt.Println(token)
+			fmt.Println("平台用户id：", token.Response.UserId)
+			res.UserId = token.Response.UserId
+		}
 
 		// 2.token获取支付宝会员授权信息查询接口  小程序好像查不到
-		aliRsp, err := client.UserInfoShare(ctx, token.Response.AccessToken)
-		fmt.Println(token)
+		aliRsp, _ := client.UserInfoShare(ctx, token.Response.AccessToken)
 		fmt.Println(aliRsp)
 
 		userInfo := alipay_model.UserInfoShareResponse{}
 		gconv.Struct(aliRsp, &userInfo)
 		// 将返回值赋值
 		gconv.Struct(userInfo.Response, &res) // 小程序的静默授权拿不到userInfo，只能拿到userId
-		res.UserId = token.Response.UserId
 		userInfo.Response.UserId = token.Response.UserId
 
 		// 根据sys_user_id查询商户信息
 		sys_service.SysUser().MakeSession(ctx, sysUserId)
-
 		sysUser, err := sys_service.SysUser().GetSysUserById(ctx, sysUserId)
-		if err != nil {
+		if err != nil && sysUser == nil {
+			// TODO 后续需要删除下面创建用户的代码。需要在业务层先创建好用户
+			// 1.创建一个匿名sysUser = 用户登录信息
+			/*id := idgen.NextId()
+			passwordLen := len(gconv.String(id))
+			pwd := gstr.SubStr(gconv.String(id), passwordLen-6, 6) // 密码为id后六位
+
+			data := sys_model.UserInnerRegister{
+				Username:        strconv.FormatInt(gconv.Int64(id), 36),
+				Password:        pwd,
+				ConfirmPassword: pwd,
+			}
+			sysUser, err = sys_service.SysUser().CreateUser(ctx, data, sys_enum.User.State.Normal, sys_enum.User.Type.New(0, "匿名"), id)
+			if err != nil {
+				return err
+			}
+			sysUserId = sysUser.Id*/
+
 			return err
 		}
 
@@ -166,13 +203,25 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 		}
 
 		// 4.存储阿里消费者记录 alipay-consumer-config
-		alipayConsumer, err := service.ConsumerConfig().GetConsumerByUserId(ctx, userInfo.Response.UserId)
+		//alipayConsumer, _ := service.ConsumerConfig().GetConsumerByUserId(ctx, userInfo.Response.UserId)
+		alipayConsumer, _ := service.ConsumerConfig().GetConsumerByUserIdAndAppId(ctx, userInfo.Response.UserId, appId)
 
-		if err != nil && alipayConsumer == nil { // 消费者不存在，则创建
+		if alipayConsumer == nil { // 消费者不存在，则创建
 			consumerInfo := alipay_model.AlipayConsumerConfig{}
 			gconv.Struct(userInfo.Response, &consumerInfo)
+			consumerInfo.AppId = appId
+			consumerInfo.AppType = merchantApp.AppType
 
 			consumerInfo.UserId = gconv.String(userInfo.Response.UserId)
+			consumerInfo.AuthToken = token.Response.AccessToken
+			consumerInfo.ReFreshToken = token.Response.RefreshToken
+			consumerInfo.AuthState = alipay_enum.Consumer.AuthState.Auth.Code()
+			consumerInfo.AuthStart = gtime.NewFromStr(token.Response.AuthStart)
+			consumerInfo.AlipayUserId = token.Response.AlipayUserId
+			consumerInfo.ExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ExpiresIn))
+			consumerInfo.ReExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ReExpiresIn))
+
+			//consumerInfo. =  token.Response.AccessToken
 			consumerInfo.SysUserId = sysUser.Id
 
 			_, err = service.ConsumerConfig().CreateConsumer(ctx, &consumerInfo)
@@ -182,7 +231,15 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 
 		} else { // 存在则更新
 			consumerInfo := alipay_model.UpdateConsumerReq{}
+			authEnum := alipay_enum.Consumer.AuthState.Auth.Code()
 			gconv.Struct(userInfo.Response, &consumerInfo)
+			consumerInfo.AuthToken = &token.Response.AccessToken
+			consumerInfo.ReFreshToken = &token.Response.RefreshToken
+			consumerInfo.AuthState = &authEnum
+			consumerInfo.AuthStart = gtime.NewFromStr(token.Response.AuthStart)
+			consumerInfo.AlipayUserId = &token.Response.AlipayUserId
+			consumerInfo.ExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ExpiresIn))
+			consumerInfo.ReExpiresIn = gtime.NewFromTimeStamp(gtime.Now().Timestamp() + gconv.Int64(token.Response.ReExpiresIn))
 
 			_, err = service.ConsumerConfig().UpdateConsumer(ctx, alipayConsumer.Id, &consumerInfo)
 			if err != nil {
@@ -191,10 +248,10 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 		}
 
 		// 5.存储第三方应用和用户关系记录
-		s.ConsumerHook.Iterator(func(key hook.ConsumerKey, value hook.ConsumerHookFunc) {                                                                             // 这会同时走两个Hook，kmk_consumer  + platform_user
+		s.ConsumerHook.Iterator(func(key hook.ConsumerKey, value hook.ConsumerHookFunc) { // 这会同时走两个Hook，kmk_consumer  + platform_user
 			if key.ConsumerAction.Code() == alipay_enum.Consumer.ActionEnum.Auth.Code() && key.Category.Code() == alipay_enum.Consumer.Category.PlatFormUser.Code() { // 如果订阅者是订阅授权
 				g.Try(ctx, func(ctx context.Context) {
-					platformUser := hook.PlatformUser{
+					platformUser := entity.PlatformUser{
 						Id:            idgen.NextId(),
 						FacilitatorId: 0,
 						OperatorId:    0,
@@ -207,9 +264,6 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 						Type:          sysUser.Type,          // 用户类型
 					}
 
-					//if consumerId != 0 { // 适用于消费者没有员工的情况下  注意：错误思想，没有员工但是会有sysUser
-					//	data.EmployeeId = consumerId
-					//}
 					sys_service.SysLogs().InfoSimple(ctx, nil, "\n广播-------存储第三方应用和用户关系记录 kmk-plat_form_user", "sMerchantService")
 
 					value(ctx, platformUser) // 调用Hook

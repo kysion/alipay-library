@@ -37,6 +37,14 @@ type AlipayConsumerConfigColumns struct {
 	Sex                string // 性别：0女 1男
 	AuthToken          string // 授权token
 	ExtJson            string // 拓展字段
+	AuthState          string // 用户授权状态：1授权、2未授权
+	AlipayUserId       string // Alipay的UserId
+	ExpiresIn          string // 用户授权Token过期时间
+	ReFreshToken       string // 刷新Token
+	ReExpiresIn        string // 刷新Token过期时间
+	AuthStart          string // 用户授权开始时间
+	AppType            string // 应用类型：1小程序  2网站/移动应用  4生活号
+	AppId              string // 商家应用Id
 	CreatedAt          string //
 	UpdatedAt          string //
 	DeletedAt          string //
@@ -58,6 +66,14 @@ var alipayConsumerConfigColumns = AlipayConsumerConfigColumns{
 	Sex:                "sex",
 	AuthToken:          "auth_token",
 	ExtJson:            "ext_json",
+	AuthState:          "auth_state",
+	AlipayUserId:       "alipay_user_id",
+	ExpiresIn:          "expires_in",
+	ReFreshToken:       "re_fresh_token",
+	ReExpiresIn:        "re_expires_in",
+	AuthStart:          "auth_start",
+	AppType:            "app_type",
+	AppId:              "app_id",
 	CreatedAt:          "created_at",
 	UpdatedAt:          "updated_at",
 	DeletedAt:          "deleted_at",

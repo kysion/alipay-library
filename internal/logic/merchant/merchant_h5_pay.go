@@ -4,10 +4,8 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
-	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/gopay"
@@ -34,12 +32,18 @@ func (s *sMerchantH5Pay) InstallHook(actionType pay_enum.OrderStateType, hookFun
 	s.BaseHook.InstallHook(actionType, hookFunc)
 }
 
-// TradeCreate H5交易下单
+// TradeCreate H5交易下单 - （当面付）
 func (s *sMerchantH5Pay) TradeCreate(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32, userId string) (string, error) {
 	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5交易下单 ------- ", "sMerchantH5Pay")
 
 	// 通过商家中的第三方应用的AppId创建客户端
-	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	var client *aliyun.AliPay
+	var err error
+	if merchantApp != nil && merchantApp.ThirdAppId != "" {
+		client, err = aliyun.NewClient(ctx, merchantApp.AppId)
+	} else {
+		client, err = aliyun.NewMerchantClient(ctx, merchantApp.AppId)
+	}
 	notifyUrl := merchantApp.NotifyUrl
 	//配置公共参数
 	client.SetCharset("utf-8").
@@ -66,6 +70,7 @@ func (s *sMerchantH5Pay) TradeCreate(ctx context.Context, info *alipay_model.Tra
 	})
 	bm.Set("app_auth_token", merchantApp.AppAuthToken)
 	// 2.统一下单交易创建
+	// alipay.trade.create(统一收单交易创建接口)
 	aliRsp, err := client.TradeCreate(ctx, bm)
 
 	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
@@ -84,10 +89,16 @@ func (s *sMerchantH5Pay) TradeCreate(ctx context.Context, info *alipay_model.Tra
 
 }
 
-// H5 支付，返回支付url
+// H5TradePay H5 支付，返回支付url  -（ 手机网站支付）
 func (s *sMerchantH5Pay) H5TradePay(ctx context.Context, info *alipay_model.TradeOrder, merchantApp *alipay_model.AlipayMerchantAppConfig, orderInfo *pay_model.OrderRes, totalAmount float32) (string, error) {
 	// 通过商家中的第三方应用的AppId创建客户端
-	client, err := aliyun.NewClient(ctx, merchantApp.AppId)
+	var client *aliyun.AliPay
+	var err error
+	if merchantApp != nil && merchantApp.ThirdAppId != "" {
+		client, err = aliyun.NewClient(ctx, merchantApp.AppId)
+	} else {
+		client, err = aliyun.NewMerchantClient(ctx, merchantApp.AppId)
+	}
 	notifyUrl := merchantApp.NotifyUrl
 	//配置公共参数
 	client.SetCharset("utf-8").
@@ -113,6 +124,7 @@ func (s *sMerchantH5Pay) H5TradePay(ctx context.Context, info *alipay_model.Trad
 	})
 
 	// 2.手机网站支付请求
+	// alipay.trade.wap.pay(手机网站支付接口2.0)
 	payUrl, err := client.TradeWapPay(ctx, bm)
 	if err != nil {
 		xlog.Error("err:", err)
@@ -126,10 +138,11 @@ func (s *sMerchantH5Pay) H5TradePay(ctx context.Context, info *alipay_model.Trad
 	// 将url返回给前端
 	// g.RequestFromCtx(ctx).Response.WriteJson(payUrl)
 
-	// 查询订单并返回tradeNo给前端
-	rsp, err := service.PayTrade().QueryOrderInfo(ctx, gconv.String(orderId), merchantApp)
+	// 查询订单并返回tradeNo给前端 - 线下当面付
+	//rsp, err := service.PayTrade().QueryOrderInfo(ctx, gconv.String(orderId), merchantApp)
+	//fmt.Println(rsp)
 
-	return rsp.Response.TradeNo, err
+	return payUrl, err
 
 	//return "", err
 

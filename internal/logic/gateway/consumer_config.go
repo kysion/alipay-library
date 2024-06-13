@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/gogf/gf/v2/os/gcache"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	dao "github.com/kysion/alipay-library/alipay_model/alipay_dao"
@@ -36,6 +37,20 @@ func (s *sConsumerConfig) GetConsumerByUserId(ctx context.Context, userId string
 	model := dao.AlipayConsumerConfig.Ctx(ctx)
 
 	err := model.Where(dao.AlipayConsumerConfig.Columns().UserId, userId).Scan(&result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// GetConsumerByUserIdAndAppId  根据平台用户id+ AppId查询消费者信息
+func (s *sConsumerConfig) GetConsumerByUserIdAndAppId(ctx context.Context, userId, appId string) (*alipay_model.AlipayConsumerConfig, error) {
+	result := alipay_model.AlipayConsumerConfig{}
+	model := dao.AlipayConsumerConfig.Ctx(ctx)
+
+	err := model.Where(do.AlipayConsumerConfig{UserId: userId, AppId: appId}).Scan(&result)
 
 	if err != nil {
 		return nil, err
@@ -91,11 +106,11 @@ func (s *sConsumerConfig) UpdateConsumer(ctx context.Context, id int64, info *al
 	}
 	data := do.AlipayConsumerConfig{}
 	gconv.Struct(info, &data)
-	if info.ExtJson == "" {
-		data.ExtJson = nil
-	}
+	//if *info.ExtJson == "" {
+	//	data.ExtJson = nil
+	//}
 	model := dao.AlipayConsumerConfig.Ctx(ctx)
-	affected, err := daoctl.UpdateWithError(model.Data(data).OmitEmptyData().Where(do.AlipayConsumerConfig{Id: id}))
+	affected, err := daoctl.UpdateWithError(model.Data(data).OmitNilData().Where(do.AlipayConsumerConfig{Id: id}))
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "消费者信息更新失败", dao.AlipayConsumerConfig.Table())
@@ -112,6 +127,19 @@ func (s *sConsumerConfig) UpdateConsumerState(ctx context.Context, id int64, sta
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "消费者状态修改失败", dao.AlipayConsumerConfig.Table())
+	}
+	return affected > 0, err
+}
+
+// SetAuthState 是否授权
+func (s *sConsumerConfig) SetAuthState(ctx context.Context, userId string, appID string, authState int) (bool, error) {
+	affected, err := daoctl.UpdateWithError(dao.AlipayConsumerConfig.Ctx(ctx).Data(do.AlipayConsumerConfig{
+		AuthState: authState,
+		UpdatedAt: gtime.Now(),
+	}).OmitNilData().Where(do.AlipayConsumerConfig{UserId: userId, AppId: appID}))
+
+	if err != nil {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "消费者是否关注公众号修改失败", dao.AlipayConsumerConfig.Table())
 	}
 	return affected > 0, err
 }

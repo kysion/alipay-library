@@ -22,4 +22,8 @@ func init() {
 
 	service.RegisterAppVersion(NewAppVersion())
 
+	service.RegisterCertify(NewCertify())
+
+	service.RegisterUserAuth(NewUserAuth())
+
 }
