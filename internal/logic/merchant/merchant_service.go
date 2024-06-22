@@ -252,16 +252,16 @@ func (s *sMerchantService) UserInfoAuth(ctx context.Context, info g.Map) string 
 			if key.ConsumerAction.Code() == alipay_enum.Consumer.ActionEnum.Auth.Code() && key.Category.Code() == alipay_enum.Consumer.Category.PlatFormUser.Code() { // 如果订阅者是订阅授权
 				g.Try(ctx, func(ctx context.Context) {
 					platformUser := entity.PlatformUser{
-						Id:            idgen.NextId(),
-						FacilitatorId: 0,
-						OperatorId:    0,
-						EmployeeId:    sysUser.Id,                                   // EmployeeId  == consumerId == sysUserId   三者相等
-						MerchantId:    merchantId,                                   // 商家id，就是消费者首次扫码的商家
-						Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 平台类型：1支付宝、2微信、4抖音、8银联
-						ThirdAppId:    merchantApp.ThirdAppId,
-						MerchantAppId: merchantApp.AppId,
-						UserId:        token.Response.UserId, // 平台账户唯一标识
-						Type:          sysUser.Type,          // 用户类型
+						Id:             idgen.NextId(),
+						FacilitatorId:  0,
+						OperatorId:     0,
+						SysUserId:      sysUser.Id,                                   // EmployeeId  == consumerId == sysUserId   三者相等
+						MerchantId:     merchantId,                                   // 商家id，就是消费者首次扫码的商家
+						PlatformType:   pay_enum.Order.TradeSourceType.Alipay.Code(), // 平台类型：1支付宝、2微信、4抖音、8银联
+						ThirdAppId:     merchantApp.ThirdAppId,
+						MerchantAppId:  merchantApp.AppId,
+						PlatformUserId: token.Response.UserId, // 平台账户唯一标识
+						SysUserType:    sysUser.Type,          // 用户类型
 					}
 
 					sys_service.SysLogs().InfoSimple(ctx, nil, "\n广播-------存储第三方应用和用户关系记录 kmk-plat_form_user", "sMerchantService")
