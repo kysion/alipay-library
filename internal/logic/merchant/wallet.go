@@ -171,16 +171,16 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 			if key.Code() == enum.Consumer.ActionEnum.Auth.Code() { // 如果订阅者是订阅授权
 				g.Try(ctx, func(ctx context.Context) {
 					data := entity.PlatformUser{
-						Id:            idgen.NextId(),
-						FacilitatorId: 0,
-						OperatorId:    0,
-						EmployeeId:    consumerId,
-						MerchantId:    0,
-						Platform:      pay_enum.Order.TradeSourceType.Alipay.Code(), // 来源
-						ThirdAppId:    merchantApp.ThirdAppId,
-						MerchantAppId: merchantApp.AppId,
-						UserId:        token.Response.UserId,                // 平台账户唯一标识
-						Type:          sys_enum.User.Type.New(0, "").Code(), // 用户类型匿名消费者
+						Id:             idgen.NextId(),
+						FacilitatorId:  0,
+						OperatorId:     0,
+						SysUserId:      consumerId,
+						MerchantId:     0,
+						PlatformType:   pay_enum.Order.TradeSourceType.Alipay.Code(), // 来源
+						ThirdAppId:     merchantApp.ThirdAppId,
+						MerchantAppId:  merchantApp.AppId,
+						PlatformUserId: token.Response.UserId,                // 平台账户唯一标识
+						SysUserType:    sys_enum.User.Type.New(0, "").Code(), // 用户类型匿名消费者
 					}
 					//
 					//if employee != nil {
@@ -189,7 +189,7 @@ func (s *sWallet) Wallet(ctx context.Context, info g.Map) string {
 					//}
 
 					if consumerId != 0 { // 适用于消费者没有员工的情况下
-						data.EmployeeId = consumerId
+						data.SysUserId = consumerId
 					}
 
 					value(ctx, data) // 调用Hook

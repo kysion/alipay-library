@@ -23,34 +23,34 @@ type PlatformUserDao struct {
 
 // PlatformUserColumns defines and stores column names for table platform_user.
 type PlatformUserColumns struct {
-	Id            string //
-	FacilitatorId string // 服务商id
-	OperatorId    string // 运营商id
-	MerchantId    string // 商户id
-	EmployeeId    string // 员工id
-	Platform      string // 平台类型：1支付宝、2微信、4抖音、8银联
-	ThirdAppId    string // 第三方平台AppId
-	MerchantAppId string // 商家应用AppId
-	CreatedAt     string //
-	UpdatedAt     string //
-	UserId        string // 平台用户唯一标识
-	Type          string // 用户类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营中心，64后台
+	Id             string //
+	FacilitatorId  string // 服务商id
+	OperatorId     string // 运营商id
+	MerchantId     string // 商户id
+	SysUserId      string // 系统用户id
+	PlatformType   string // 平台类型：1支付宝、2微信、4抖音、8银联
+	ThirdAppId     string // 第三方平台AppId
+	MerchantAppId  string // 商家应用AppId
+	CreatedAt      string //
+	UpdatedAt      string //
+	PlatformUserId string // 平台用户唯一标识
+	SysUserType    string // 系统用户类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营中心，64后台
 }
 
 // platformUserColumns holds the columns for table platform_user.
 var platformUserColumns = PlatformUserColumns{
-	Id:            "id",
-	FacilitatorId: "facilitator_id",
-	OperatorId:    "operator_id",
-	MerchantId:    "merchant_id",
-	EmployeeId:    "employee_id",
-	Platform:      "platform",
-	ThirdAppId:    "third_app_id",
-	MerchantAppId: "merchant_app_id",
-	CreatedAt:     "created_at",
-	UpdatedAt:     "updated_at",
-	UserId:        "user_id",
-	Type:          "type",
+	Id:             "id",
+	FacilitatorId:  "facilitator_id",
+	OperatorId:     "operator_id",
+	MerchantId:     "merchant_id",
+	SysUserId:      "sys_user_id",
+	PlatformType:   "platform_type",
+	ThirdAppId:     "third_app_id",
+	MerchantAppId:  "merchant_app_id",
+	CreatedAt:      "created_at",
+	UpdatedAt:      "updated_at",
+	PlatformUserId: "platform_user_id",
+	SysUserType:    "sys_user_type",
 }
 
 // NewPlatformUserDao creates and returns a new DAO object for table data access.
