@@ -14,7 +14,7 @@ type AlipayConsumerConfig struct {
 	UserType           string      `json:"userType"           dc:"用户账号类型"`
 	UserState          int         `json:"userState"          dc:"用户状态"`
 	IsCertified        int         `json:"isCertified"        dc:"是否实名认证"`
-	Sex                int         `json:"sex"                dc:"性别：0女 1男"`
+	Sex                int         `json:"sex"                dc:"性别：0未知、1男、2女"`
 	AuthToken          string      `json:"authToken"          dc:"授权token"`
 	ExtJson            string      `json:"extJson"            dc:"拓展字段"`
 	AuthState          int         `json:"authState"          description:"用户授权状态：1授权、2未授权"`

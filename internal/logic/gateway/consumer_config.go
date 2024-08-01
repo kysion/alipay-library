@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -11,7 +12,6 @@ import (
 	do "github.com/kysion/alipay-library/alipay_model/alipay_do"
 	entity "github.com/kysion/alipay-library/alipay_model/alipay_entity"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/yitter/idgenerator-go/idgen"
 	"time"
 )
 
