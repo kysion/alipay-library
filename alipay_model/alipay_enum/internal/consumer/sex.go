@@ -2,23 +2,34 @@ package consumer
 
 import "github.com/kysion/base-library/utility/enum"
 
-// SexEnum 性别：0女  1男
+//用户性别: 0未知、1男、2女
+
 type SexEnum enum.IEnumCode[int]
 
 type sex struct {
-	In  SexEnum
-	Out SexEnum
+	Unknown SexEnum
+	Woman   SexEnum
+	Man     SexEnum
 }
 
-var SexType = sex{
-	In:  enum.New[SexEnum](0, "女"),
-	Out: enum.New[SexEnum](1, "男"),
+var Sex = sex{
+	Unknown: enum.New[SexEnum](0, "未知"),
+	Man:     enum.New[SexEnum](1, "男"),
+	Woman:   enum.New[SexEnum](2, "女"),
 }
 
-func (e sex) New(code int, description string) SexEnum {
-	if (code&SexType.In.Code()) == SexType.In.Code() ||
-		(code&SexType.Out.Code()) == SexType.Out.Code() {
-		return enum.New[SexEnum](code, description)
+func (e sex) New(code int) SexEnum {
+	if code == Sex.Unknown.Code() {
+		return Sex.Unknown
 	}
-	panic("consumerSex: error")
+
+	if code == Sex.Man.Code() {
+		return Sex.Man
+	}
+
+	if code == Sex.Woman.Code() {
+		return Sex.Woman
+	}
+
+	panic("Sex.New: error")
 }

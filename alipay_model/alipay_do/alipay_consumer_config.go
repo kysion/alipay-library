@@ -23,7 +23,7 @@ type AlipayConsumerConfig struct {
 	UserType           interface{} // 用户账号类型
 	UserState          interface{} // 状态：0未激活、1正常、-1封号、-2异常、-3已注销
 	IsCertified        interface{} // 是否实名认证
-	Sex                interface{} // 性别：0女 1男
+	Sex                interface{} // 性别：0未知、1男、2女
 	AuthToken          interface{} // 授权token
 	ExtJson            interface{} // 拓展字段
 	AuthState          interface{} // 用户授权状态：1授权、2未授权
