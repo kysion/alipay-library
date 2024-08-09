@@ -9,27 +9,27 @@ import (
 )
 
 type (
-	SexType consumer.SexEnum
+	SexType = consumer.SexEnum
 	// CallbackMsgType 回调消息
-	CallbackMsgType info_type.CallBackMsgTypeEnum
+	CallbackMsgType = info_type.CallBackMsgTypeEnum
 
 	// ServiceNotifyType 应用通知
-	ServiceNotifyType info_type.ServiceNotifyTypeEnum
+	ServiceNotifyType = info_type.ServiceNotifyTypeEnum
 
 	// NotifyType 异步通知类型
-	NotifyType notify.NotifyTypeEnum
+	NotifyType = notify.NotifyTypeEnum
 
 	// ConsumerAction 消费者相关
-	ConsumerAction consumer.ActionEnum
-	Category       consumer.CategoryEnum
+	ConsumerAction = consumer.ActionEnum
+	Category       = consumer.CategoryEnum
 
 	// SubAccountBindRes 分账绑定
-	SubAccountBindRes sub_account.SubAccountBindResEnum
+	SubAccountBindRes = sub_account.SubAccountBindResEnum
 	// SubAccountAction 分账行为
-	SubAccountAction sub_account.OperationTypeEnum
+	SubAccountAction = sub_account.OperationTypeEnum
 
 	// AppVersionStatus 小程序开发管理
-	AppVersionStatus app_version_manager.VersionStatusEnum
+	AppVersionStatus = app_version_manager.VersionStatusEnum
 )
 
 var (

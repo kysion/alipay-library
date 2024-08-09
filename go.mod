@@ -3,13 +3,12 @@ module github.com/kysion/alipay-library
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.7.7
-	github.com/SupenBysz/gf-admin-company-modules v0.7.53
+	github.com/SupenBysz/gf-admin-community v0.7.20
+	github.com/SupenBysz/gf-admin-company-modules v0.7.62
 	github.com/gogf/gf/v2 v2.6.1
-	github.com/kysion/base-library v0.0.35
+	github.com/kysion/base-library v0.0.39
 	github.com/kysion/gopay v0.0.3
-	github.com/kysion/pay-share-library v0.1.17
-	github.com/yitter/idgenerator-go v1.3.3
+	github.com/kysion/pay-share-library v0.1.22
 )
 
 require (
@@ -39,13 +38,14 @@ require (
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.6.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/grokify/html-strip-tags-go v0.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kysion/oss-library v0.1.7 // indirect
-	github.com/kysion/sms-library v0.1.6 // indirect
+	github.com/kysion/oss-library v0.1.13 // indirect
+	github.com/kysion/sms-library v0.1.11 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20231013030745-3066d243cd04 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -60,10 +60,12 @@ require (
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
 	github.com/redis/go-redis/v9 v9.3.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.917 // indirect
+	github.com/samber/lo v1.46.0 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.972 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.834 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/faceid v1.0.917 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/faceid v1.0.972 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
+	github.com/yitter/idgenerator-go v1.3.3 // indirect
 	go.opentelemetry.io/otel v1.21.0 // indirect
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
@@ -73,7 +75,7 @@ require (
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect

@@ -8,7 +8,7 @@ type consumer struct {
 }
 
 var Consumer = consumer{
-	SexEnum:    SexType,
+	SexEnum:    Sex,
 	ActionEnum: ActionType,
 	Category:   CategoryType,
 	AuthState:  AuthState,

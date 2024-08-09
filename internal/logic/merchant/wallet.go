@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -18,7 +19,6 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/gopay"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
-	"github.com/yitter/idgenerator-go/idgen"
 )
 
 /*
