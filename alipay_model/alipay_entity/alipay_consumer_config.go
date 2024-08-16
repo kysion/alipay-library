@@ -10,29 +10,29 @@ import (
 
 // AlipayConsumerConfig is the golang structure for table alipay_consumer_config.
 type AlipayConsumerConfig struct {
-	Id                 int64       `json:"id"                 description:"id"`
-	UserId             string      `json:"userId"             description:"用户账号id"`
-	SysUserId          int64       `json:"sysUserId"          description:"用户id"`
-	Avatar             string      `json:"avatar"             description:"头像"`
-	Province           string      `json:"province"           description:"省份"`
-	City               string      `json:"city"               description:"城市"`
-	NickName           string      `json:"nickName"           description:"昵称"`
-	IsStudentCertified int         `json:"isStudentCertified" description:"学生认证"`
-	UserType           string      `json:"userType"           description:"用户账号类型"`
-	UserState          int         `json:"userState"          description:"状态：0未激活、1正常、-1封号、-2异常、-3已注销"`
-	IsCertified        int         `json:"isCertified"        description:"是否实名认证"`
-	Sex                int         `json:"sex"                description:"性别：0未知、1男、2女"`
-	AuthToken          string      `json:"authToken"          description:"授权token"`
-	ExtJson            string      `json:"extJson"            description:"拓展字段"`
-	AuthState          int         `json:"authState"          description:"用户授权状态：1授权、2未授权"`
-	AlipayUserId       string      `json:"alipayUserId"       description:"Alipay的UserId"`
-	ExpiresIn          *gtime.Time `json:"expiresIn"          description:"用户授权Token过期时间"`
-	ReFreshToken       string      `json:"reFreshToken"       description:"刷新Token"`
-	ReExpiresIn        *gtime.Time `json:"reExpiresIn"        description:"刷新Token过期时间"`
-	AuthStart          *gtime.Time `json:"authStart"          description:"用户授权开始时间"`
-	AppType            int         `json:"appType"            description:"应用类型：1小程序  2网站/移动应用  4生活号"`
-	AppId              string      `json:"appId"              description:"商家应用Id"`
-	CreatedAt          *gtime.Time `json:"createdAt"          description:""`
-	UpdatedAt          *gtime.Time `json:"updatedAt"          description:""`
-	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
+	Id                 int64       `json:"id"                 orm:"id"                   description:"id"`
+	UserId             string      `json:"userId"             orm:"user_id"              description:"用户账号id"`
+	SysUserId          int64       `json:"sysUserId"          orm:"sys_user_id"          description:"用户id"`
+	Avatar             string      `json:"avatar"             orm:"avatar"               description:"头像"`
+	Province           string      `json:"province"           orm:"province"             description:"省份"`
+	City               string      `json:"city"               orm:"city"                 description:"城市"`
+	NickName           string      `json:"nickName"           orm:"nick_name"            description:"昵称"`
+	IsStudentCertified int         `json:"isStudentCertified" orm:"is_student_certified" description:"学生认证"`
+	UserType           string      `json:"userType"           orm:"user_type"            description:"用户账号类型"`
+	UserState          int         `json:"userState"          orm:"user_state"           description:"状态：0未激活、1正常、-1封号、-2异常、-3已注销"`
+	IsCertified        int         `json:"isCertified"        orm:"is_certified"         description:"是否实名认证"`
+	Sex                int         `json:"sex"                orm:"sex"                  description:"性别：0未知、1男、2女"`
+	AuthToken          string      `json:"authToken"          orm:"auth_token"           description:"授权token"`
+	ExtJson            string      `json:"extJson"            orm:"ext_json"             description:"拓展字段"`
+	AuthState          int         `json:"authState"          orm:"auth_state"           description:"用户授权状态：1授权、2未授权"`
+	AlipayUserId       string      `json:"alipayUserId"       orm:"alipay_user_id"       description:"Alipay的UserId"`
+	ExpiresIn          *gtime.Time `json:"expiresIn"          orm:"expires_in"           description:"用户授权Token过期时间"`
+	ReFreshToken       string      `json:"reFreshToken"       orm:"re_fresh_token"       description:"刷新Token"`
+	ReExpiresIn        *gtime.Time `json:"reExpiresIn"        orm:"re_expires_in"        description:"刷新Token过期时间"`
+	AuthStart          *gtime.Time `json:"authStart"          orm:"auth_start"           description:"用户授权开始时间"`
+	AppType            int         `json:"appType"            orm:"app_type"             description:"应用类型：1小程序  2网站/移动应用  4生活号"`
+	AppId              string      `json:"appId"              orm:"app_id"               description:"商家应用Id"`
+	CreatedAt          *gtime.Time `json:"createdAt"          orm:"created_at"           description:""`
+	UpdatedAt          *gtime.Time `json:"updatedAt"          orm:"updated_at"           description:""`
+	DeletedAt          *gtime.Time `json:"deletedAt"          orm:"deleted_at"           description:""`
 }

@@ -10,16 +10,16 @@ import (
 
 // PlatformUser is the golang structure for table platform_user.
 type PlatformUser struct {
-	Id             int64       `json:"id"             description:""`
-	FacilitatorId  int64       `json:"facilitatorId"  description:"服务商id"`
-	OperatorId     int64       `json:"operatorId"     description:"运营商id"`
-	MerchantId     int64       `json:"merchantId"     description:"商户id"`
-	SysUserId      int64       `json:"sysUserId"      description:"系统用户id"`
-	PlatformType   int         `json:"platformType"   description:"平台类型：1支付宝、2微信、4抖音、8银联"`
-	ThirdAppId     string      `json:"thirdAppId"     description:"第三方平台AppId"`
-	MerchantAppId  string      `json:"merchantAppId"  description:"商家应用AppId"`
-	CreatedAt      *gtime.Time `json:"createdAt"      description:""`
-	UpdatedAt      *gtime.Time `json:"updatedAt"      description:""`
-	PlatformUserId string      `json:"platformUserId" description:"平台用户唯一标识"`
-	SysUserType    int         `json:"sysUserType"    description:"系统用户类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营中心，64后台"`
+	Id             int64       `json:"id"             orm:"id"               description:""`
+	FacilitatorId  int64       `json:"facilitatorId"  orm:"facilitator_id"   description:"服务商id"`
+	OperatorId     int64       `json:"operatorId"     orm:"operator_id"      description:"运营商id"`
+	MerchantId     int64       `json:"merchantId"     orm:"merchant_id"      description:"商户id"`
+	SysUserId      int64       `json:"sysUserId"      orm:"sys_user_id"      description:"系统用户id"`
+	PlatformType   int         `json:"platformType"   orm:"platform_type"    description:"平台类型：1支付宝、2微信、4抖音、8银联"`
+	ThirdAppId     string      `json:"thirdAppId"     orm:"third_app_id"     description:"第三方平台AppId"`
+	MerchantAppId  string      `json:"merchantAppId"  orm:"merchant_app_id"  description:"商家应用AppId"`
+	CreatedAt      *gtime.Time `json:"createdAt"      orm:"created_at"       description:""`
+	UpdatedAt      *gtime.Time `json:"updatedAt"      orm:"updated_at"       description:""`
+	PlatformUserId string      `json:"platformUserId" orm:"platform_user_id" description:"平台用户唯一标识"`
+	SysUserType    int         `json:"sysUserType"    orm:"sys_user_type"    description:"系统用户类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营中心，64后台"`
 }
