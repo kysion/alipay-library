@@ -8,7 +8,7 @@ require (
 	github.com/gogf/gf/v2 v2.7.2
 	github.com/kysion/base-library v0.0.41
 	github.com/kysion/gopay v0.0.3
-	github.com/kysion/pay-share-library v0.1.23
+	github.com/kysion/pay-share-library v0.1.24
 )
 
 require (
