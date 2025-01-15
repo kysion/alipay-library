@@ -3,18 +3,18 @@ package merchant
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/utility/kconv"
-	"github.com/kysion/gopay"
 )
 
 // 实名认证相关
 type sCertify struct{}
 
-func NewCertify() *sCertify {
+func NewCertify() service.ICertify {
 	return &sCertify{}
 }
 

@@ -14,7 +14,7 @@ gfcli:
   # dao生成
   gen:
     dao:
-      - link: "pgsql:user=kuaimk password=Kuaimk23db host=192.168.1.105 port=5432 dbname=kmk_struct sslmode=disable"
+      - link: "pgsql:user=kuaimk password=d3d3Lmt1YWltay5jb20= host=10.68.74.250 port=5432 dbname=kuaimkdb sslmode=disable"
 #     - link: "pgsql:user=kuaimk password=Kuaimk23db host=www.kuaimk.com port=5432 dbname=kuaimk_beta sslmode=disable"
         # link: "pgsql:user=kysion password=kysiondb host=182.43.195.225 port=15432 dbname=gf-admin sslmode=disable"
         tables: "alipay_merchant_app_config, alipay_consumer_config, alipay_third_app_config, platform_user"

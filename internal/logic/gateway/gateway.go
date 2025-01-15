@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/alipay"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/encoding/gxml"
 	"github.com/gogf/gf/v2/frame/g"
@@ -14,8 +16,6 @@ import (
 	"github.com/kysion/alipay-library/alipay_utility"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
-	"github.com/kysion/gopay"
-	"github.com/kysion/gopay/alipay"
 )
 
 var (
@@ -50,7 +50,7 @@ func (s *sGateway) GetServiceNotifyTypeHook() *base_hook.BaseHook[enum.ServiceNo
 	return &s.ServiceNotifyTypeHook
 }
 
-func NewGateway() *sGateway {
+func NewGateway() alipay_service.IGateway {
 
 	return &sGateway{}
 }

@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
@@ -10,7 +11,6 @@ import (
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/utility/kconv"
-	"github.com/kysion/gopay"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_model/pay_hook"
 )
@@ -23,7 +23,7 @@ func init() {
 	service.RegisterSubAccount(NewSubAccount())
 }
 
-func NewSubAccount() *sSubAccount {
+func NewSubAccount() service.ISubAccount {
 
 	result := &sSubAccount{}
 
@@ -96,6 +96,11 @@ func (s *sSubAccount) TradeRelationBatchQuery(ctx context.Context, appId string,
 
 	// 通过商家中的第三方应用的AppId创建客户端,，但是认证Token需要是商家的
 	client, err := aliyun.NewClient(ctx, merchantApp.ThirdAppId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	client.SetAppAuthToken(merchantApp.AppAuthToken)
 
 	// bindReq := alipay_model.TradeRelationBindReq{}
@@ -108,7 +113,7 @@ func (s *sSubAccount) TradeRelationBatchQuery(ctx context.Context, appId string,
 	})
 	// 6391922844237893    6391922844237893  out_request_no -> 6391981705789509
 
-	if res.AlipayTradeRoyaltyRelationBatchqueryResponse.ResultCode != enum.SubAccount.SubAccountBindRes.Success.Code() {
+	if res.Response.ResultCode != enum.SubAccount.SubAccountBindRes.Success.Code() {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "根据外部请求号查询分账方案失败", "分账方案")
 	}
 	ret := alipay_model.TradeRoyaltyRelationQueryRes{}

@@ -13,7 +13,7 @@ import (
 type sUserAuth struct {
 }
 
-func NewUserAuth() *sUserAuth {
+func NewUserAuth() service.IUserAuth {
 	result := &sUserAuth{}
 
 	result.injectHook()

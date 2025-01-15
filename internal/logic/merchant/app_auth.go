@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -13,7 +14,6 @@ import (
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
-	"github.com/kysion/gopay"
 )
 
 /*
@@ -23,7 +23,7 @@ import (
 type sAppAuth struct {
 }
 
-func NewAppAuth() *sAppAuth {
+func NewAppAuth() service.IAppAuth {
 	// 初始化文件内容
 
 	result := &sAppAuth{}
