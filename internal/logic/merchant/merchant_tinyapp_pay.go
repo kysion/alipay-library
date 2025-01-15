@@ -3,12 +3,12 @@ package merchant
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/alipay"
+	"github.com/go-pay/xlog"
 	"github.com/kysion/alipay-library/alipay_model"
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
-	"github.com/kysion/gopay"
-	"github.com/kysion/gopay/alipay"
-	"github.com/kysion/gopay/pkg/xlog"
 	"github.com/kysion/pay-share-library/pay_model"
 )
 
@@ -30,7 +30,7 @@ type sMerchantTinyappPay struct {
 func init() {
 	service.RegisterMerchantTinyappPay(NewMerchantTinyappPay())
 }
-func NewMerchantTinyappPay() *sMerchantTinyappPay {
+func NewMerchantTinyappPay() service.IMerchantTinyappPay {
 
 	result := &sMerchantTinyappPay{}
 

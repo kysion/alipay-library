@@ -3,14 +3,15 @@ package merchant
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/alipay"
+	"github.com/go-pay/xlog"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
+	"github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
-	"github.com/kysion/gopay"
-	"github.com/kysion/gopay/alipay"
-	"github.com/kysion/gopay/pkg/xlog"
 	"github.com/kysion/pay-share-library/pay_model"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_model/pay_hook"
@@ -20,7 +21,7 @@ type sMerchantH5Pay struct {
 	base_hook.BaseHook[pay_enum.OrderStateType, pay_hook.OrderHookFunc]
 }
 
-func NewMerchantH5Pay() *sMerchantH5Pay {
+func NewMerchantH5Pay() alipay_service.IMerchantH5Pay {
 
 	result := &sMerchantH5Pay{}
 

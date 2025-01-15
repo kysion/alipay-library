@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay/alipay"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"
@@ -17,7 +18,6 @@ import (
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/utility/kconv"
-	"github.com/kysion/gopay/alipay"
 	"github.com/kysion/pay-share-library/pay_model"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_service"
@@ -43,7 +43,7 @@ func init() {
 	service.RegisterMerchantNotify(NewMerchantNotify())
 }
 
-func NewMerchantNotify() *sMerchantNotify {
+func NewMerchantNotify() service.IMerchantNotify {
 	return &sMerchantNotify{}
 }
 
@@ -130,7 +130,7 @@ func (s *sMerchantNotify) MerchantNotifyServices(ctx context.Context) (string, e
 			info := pay_model.UpdateOrderTradeInfo{
 				PlatformOrderId: &tradeNo, // 支付宝交易凭证号
 				TradeSource:     &bmJsonStr,
-				PayParams: nil,
+				PayParams:       nil,
 			}
 			_, err := pay_service.Order().UpdateOrderTradeSource(ctx, outTradeId, &info)
 			if err != nil {

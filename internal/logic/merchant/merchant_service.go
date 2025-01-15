@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/alipay"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -19,8 +21,6 @@ import (
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/utility/kconv"
-	"github.com/kysion/gopay"
-	"github.com/kysion/gopay/alipay"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 )
 
@@ -36,7 +36,7 @@ type sMerchantService struct {
 	//PlatFormUserHook base_hook.BaseHook[alipay_enum.ConsumerAction, hook.PlatFormUserHookFunc]
 }
 
-func NewMerchantService() *sMerchantService {
+func NewMerchantService() service.IMerchantService {
 	result := &sMerchantService{}
 
 	result.injectHook()

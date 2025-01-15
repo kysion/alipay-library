@@ -13,7 +13,7 @@ import (
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
 	hook "github.com/kysion/alipay-library/alipay_model/alipay_hook"
 	"github.com/kysion/base-library/base_hook"
-	"github.com/kysion/gopay/alipay"
+	"github.com/go-pay/gopay/alipay"
 	"github.com/kysion/pay-share-library/pay_model"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_model/pay_hook"

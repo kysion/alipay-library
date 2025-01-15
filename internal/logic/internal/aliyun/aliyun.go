@@ -16,17 +16,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/crypto/xpem"
+	"github.com/go-pay/crypto/xrsa"
+	"github.com/go-pay/util"
+	"github.com/go-pay/xlog"
 	"github.com/gogf/gf/v2/encoding/gxml"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/kysion/alipay-library/alipay_model"
 	"github.com/kysion/alipay-library/alipay_service"
-	"github.com/kysion/gopay"
-	"github.com/kysion/gopay/alipay"
-	"github.com/kysion/gopay/pkg/util"
-	"github.com/kysion/gopay/pkg/xhttp"
-	"github.com/kysion/gopay/pkg/xlog"
-	"github.com/kysion/gopay/pkg/xpem"
-	"github.com/kysion/gopay/pkg/xrsa"
+
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/alipay"
+	"github.com/go-pay/gopay/pkg/xhttp"
 	"hash"
 	"io/ioutil"
 	"net/http"
@@ -239,7 +240,8 @@ func (s *AliPay) doAliPaySelf(ctx context.Context, bm gopay.BodyMap, method stri
 	httpClient := xhttp.NewClient()
 	//httpClient.SetBodySize()
 
-	res, bs, err := httpClient.Type(xhttp.TypeJSON).Post(url).SendBodyMap(bm).EndBytes(ctx) // TypeForm  .EncodeURLParams()
+	res, bs, err := httpClient.Req(xhttp.TypeJSON).Post(url).SendBodyMap(bm).EndBytes(ctx) // TypeForm  .EncodeURLParams()
+
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +293,7 @@ func (s *AliPay) checkPublicParam(bm gopay.BodyMap) {
 		Set("charset", s.Charset).
 		Set("sign_type", s.SignType).
 		Set("version", "1.0").
-		Set("timestamp", time.Now().Format(util.TimeLayout))
+		Set("timestamp", time.Now().Format(time.DateTime))
 
 	if bm.GetString("app_id") == "" && s.AppId != util.NULL {
 		bm.Set("app_id", s.AppId)

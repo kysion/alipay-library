@@ -10,6 +10,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
+	"github.com/go-pay/crypto/xpem"
+	"github.com/go-pay/crypto/xrsa"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -17,8 +19,6 @@ import (
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/alipay_utility"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
-	"github.com/kysion/gopay/pkg/xpem"
-	"github.com/kysion/gopay/pkg/xrsa"
 	"io"
 	"log"
 	"mime/multipart"
@@ -32,7 +32,7 @@ import (
 // 小程序开发管理
 type sAppVersion struct{}
 
-func NewAppVersion() *sAppVersion {
+func NewAppVersion() service.IAppVersion {
 	return &sAppVersion{}
 }
 

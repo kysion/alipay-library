@@ -2,7 +2,10 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/alipay"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/alipay-library/alipay_model"
 	enum "github.com/kysion/alipay-library/alipay_model/alipay_enum"
@@ -10,11 +13,9 @@ import (
 	service "github.com/kysion/alipay-library/alipay_service"
 	"github.com/kysion/alipay-library/alipay_utility"
 	"github.com/kysion/alipay-library/internal/logic/internal/aliyun"
-	"github.com/kysion/gopay"
-	"github.com/kysion/gopay/alipay"
-	"github.com/kysion/gopay/pkg/xlog"
 	"github.com/kysion/pay-share-library/pay_model/pay_enum"
 	"github.com/kysion/pay-share-library/pay_service"
+	"log"
 )
 
 type sPayTrade struct {
@@ -25,7 +26,7 @@ type sPayTrade struct {
 //	service.RegisterPayTrade(NewPayTrade())
 //}
 
-func NewPayTrade() *sPayTrade {
+func NewPayTrade() service.IPayTrade {
 
 	result := &sPayTrade{}
 
@@ -90,7 +91,7 @@ func (s *sPayTrade) PayTradeCreate(ctx context.Context, info *alipay_model.Trade
 
 // QueryOrderInfo 查询订单 - 当面付-alipay.trade.query(统一收单线下交易查询)
 func (s *sPayTrade) QueryOrderInfo(ctx context.Context, outTradeNo string, merchantApp *alipay_model.AlipayMerchantAppConfig) (aliRsp *alipay.TradeQueryResponse, err error) {
-	sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
+	_ = sys_service.SysLogs().InfoSimple(ctx, nil, "\n-------H5查询订单 ------- ", "sMerchantH5Pay")
 
 	if merchantApp == nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "\n应用不存在	", "sMerchantH5Pay")
@@ -111,13 +112,13 @@ func (s *sPayTrade) QueryOrderInfo(ctx context.Context, outTradeNo string, merch
 	//查询订单
 	aliRsp, err = client.TradeQuery(ctx, bm)
 	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
-		xlog.Error("err:", err)
+		_ = fmt.Errorf("err:", err)
 		return
 	}
 
 	//g.RequestFromCtx(ctx).Response.Write(aliRsp.Response.TradeNo)
 
-	xlog.Debug("订单数据:", *aliRsp)
+	log.Println("订单数据:", *aliRsp)
 
 	return aliRsp, err
 }
@@ -141,13 +142,13 @@ func (s *sPayTrade) PayTradeClose(ctx context.Context, outTradeNo string, mercha
 	//查询订单
 	aliRsp, err = client.TradeClose(ctx, bm)
 	if err != nil && aliRsp.Response.ErrorResponse.Msg != "Success" {
-		xlog.Error("err:", err)
+		_ = fmt.Errorf("err:", err)
 		return
 	}
 
 	//g.RequestFromCtx(ctx).Response.Write(aliRsp.Response.TradeNo)
 
-	xlog.Debug("订单数据:", *aliRsp)
+	fmt.Println("订单数据:", *aliRsp)
 
 	return aliRsp, err
 }
