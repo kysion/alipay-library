@@ -21,7 +21,7 @@ type (
 		// GetConsumerByUserId  根据平台用户id查询消费者信息
 		GetConsumerByUserId(ctx context.Context, userId string) (*alipay_model.AlipayConsumerConfig, error)
 		// GetConsumerByUserIdAndAppId  根据平台用户id+ AppId查询消费者信息
-		GetConsumerByUserIdAndAppId(ctx context.Context, userId, appId string) (*alipay_model.AlipayConsumerConfig, error)
+		GetConsumerByUserIdAndAppId(ctx context.Context, userId string, appId string) (*alipay_model.AlipayConsumerConfig, error)
 		// GetConsumerBySysUserId  根据用户id查询消费者信息
 		GetConsumerBySysUserId(ctx context.Context, sysUserId int64) (*alipay_model.AlipayConsumerConfig, error)
 		// CreateConsumer  创建消费者信息
@@ -89,33 +89,11 @@ type (
 )
 
 var (
-	localMerchantAppConfig IMerchantAppConfig
-	localThirdAppConfig    IThirdAppConfig
 	localConsumerConfig    IConsumerConfig
 	localGateway           IGateway
+	localMerchantAppConfig IMerchantAppConfig
+	localThirdAppConfig    IThirdAppConfig
 )
-
-func MerchantAppConfig() IMerchantAppConfig {
-	if localMerchantAppConfig == nil {
-		panic("implement not found for interface IMerchantAppConfig, forgot register?")
-	}
-	return localMerchantAppConfig
-}
-
-func RegisterMerchantAppConfig(i IMerchantAppConfig) {
-	localMerchantAppConfig = i
-}
-
-func ThirdAppConfig() IThirdAppConfig {
-	if localThirdAppConfig == nil {
-		panic("implement not found for interface IThirdAppConfig, forgot register?")
-	}
-	return localThirdAppConfig
-}
-
-func RegisterThirdAppConfig(i IThirdAppConfig) {
-	localThirdAppConfig = i
-}
 
 func ConsumerConfig() IConsumerConfig {
 	if localConsumerConfig == nil {
@@ -137,4 +115,26 @@ func Gateway() IGateway {
 
 func RegisterGateway(i IGateway) {
 	localGateway = i
+}
+
+func MerchantAppConfig() IMerchantAppConfig {
+	if localMerchantAppConfig == nil {
+		panic("implement not found for interface IMerchantAppConfig, forgot register?")
+	}
+	return localMerchantAppConfig
+}
+
+func RegisterMerchantAppConfig(i IMerchantAppConfig) {
+	localMerchantAppConfig = i
+}
+
+func ThirdAppConfig() IThirdAppConfig {
+	if localThirdAppConfig == nil {
+		panic("implement not found for interface IThirdAppConfig, forgot register?")
+	}
+	return localThirdAppConfig
+}
+
+func RegisterThirdAppConfig(i IThirdAppConfig) {
+	localThirdAppConfig = i
 }
